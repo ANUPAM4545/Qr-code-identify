@@ -64,7 +64,7 @@ export default function GuestImportPage({ params }: { params: Promise<{ eventId:
           autoMapColumns(results.meta.fields || []);
           setCurrentStep(1);
         },
-        error: (error: unknown) => toast.error(`Error parsing CSV: ${error.message}`)
+        error: (error: unknown) => toast.error(`Error parsing CSV: ${(error as Error).message || "Parse error"}`)
       });
     } else if (ext === 'xlsx' || ext === 'xls') {
       const reader = new FileReader();

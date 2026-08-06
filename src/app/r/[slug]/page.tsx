@@ -28,8 +28,8 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
         setForm(data.form);
         setLoading(false);
       })
-      .catch(err => {
-        setError(err.message);
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Failed to load registration form");
         setLoading(false);
       });
   }, [slug]);

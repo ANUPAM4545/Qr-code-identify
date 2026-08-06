@@ -39,7 +39,7 @@ export default function QRVersionsPage({ params }: { params: Promise<{ qrId: str
       queryClient.invalidateQueries({ queryKey: ["qr", event._id, qrId] });
     },
     onError: (err: unknown) => {
-      toast.error("Failed to restore", { description: err.message });
+      toast.error("Failed to restore", { description: (err as Error).message || "An error occurred" });
     }
   });
 

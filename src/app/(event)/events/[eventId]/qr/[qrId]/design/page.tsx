@@ -25,10 +25,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { QRExportService } from "@/application/services/QRExportService";
 
-// Dynamic import to avoid SSR crash
-let QRCodeStyling: unknown;
+// Dynamic import to avoid SSR crash — typed with a minimal interface
+interface QRCodeStylingInstance {
+  append: (element: HTMLElement) => void;
+  update: (options: Record<string, unknown>) => void;
+  download: (options: { name: string; extension: string }) => void;
+}
+interface QRCodeStylingConstructor {
+  new (options: Record<string, unknown>): QRCodeStylingInstance;
+}
+let QRCodeStyling: QRCodeStylingConstructor | undefined;
 if (typeof window !== "undefined") {
-  import("qr-code-styling").then((mod) => { QRCodeStyling = mod.default; });
+  import("qr-code-styling").then((mod) => { QRCodeStyling = mod.default as unknown as QRCodeStylingConstructor; });
 }
 
 const QRCanvas = ({ options, qrRef }: { options: QRCodeDesignOptions, qrRef: React.MutableRefObject<any> }) => {
@@ -43,13 +51,13 @@ const QRCanvas = ({ options, qrRef }: { options: QRCodeDesignOptions, qrRef: Rea
         height: 300,
         type: "svg",
         data: options.data || "https://identify.com",
-        ...options as any
+        ...(options as Record<string, unknown>)
       });
       qrRef.current.append(ref.current);
     } else {
       qrRef.current.update({
         data: options.data || "https://identify.com",
-        ...options as any
+        ...(options as Record<string, unknown>)
       });
     }
   }, [options, qrRef]);
@@ -134,7 +142,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
       }
     },
     onError: (err: unknown) => {
-      toast.error("Failed to save", { description: err.message });
+      toast.error("Failed to save", { description: (err as Error).message || "An error occurred" });
     }
   });
 
@@ -158,7 +166,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
 
       toast.success(`Exported as ${format.toUpperCase()}`);
     } catch (err: unknown) {
-      toast.error("Export failed", { description: err.message });
+      toast.error("Export failed", { description: (err as Error).message || "Export failed" });
     }
   };
 
@@ -176,7 +184,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
       toast.success("Saved as template");
     },
     onError: (err: unknown) => {
-      toast.error("Failed to save template", { description: err.message });
+      toast.error("Failed to save template", { description: (err as Error).message || "An error occurred" });
     }
   });
 
