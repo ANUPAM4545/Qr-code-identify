@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Settings, User, LogOut, Menu, Bell, Search, Command } from "lucide-react";
+import { LayoutDashboard, Settings, User, LogOut, Menu, Bell, Search, Command, CalendarDays, Copy, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -22,17 +22,22 @@ interface DashboardShellProps {
   };
   workspace: Workspace;
   memberships: Membership[];
+  navigation?: { name: string; href: string; icon: LucideIcon }[];
 }
 
-export function DashboardShell({ children, user, workspace }: DashboardShellProps) {
+export function DashboardShell({ children, user, workspace, navigation: customNavigation }: DashboardShellProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navigation = [
+  const defaultNavigation = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Events", href: "/events", icon: CalendarDays },
+    { name: "Templates", href: "/templates", icon: Copy },
     { name: "Workspace Settings", href: "/workspace/settings", icon: Settings },
     { name: "Profile", href: "/profile", icon: User },
   ];
+
+  const navigation = customNavigation || defaultNavigation;
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/20">

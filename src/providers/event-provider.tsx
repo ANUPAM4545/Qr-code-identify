@@ -1,25 +1,35 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState } from "react";
+import { createContext, useContext, ReactNode } from "react";
+import { 
+  Event, 
+  EventSettings, 
+  BrandingSettings, 
+  RegistrationSettings, 
+  ScannerSettings,
+  QRConfiguration,
+  GuestConfiguration,
+  Role,
+  NotificationSettings
+} from "@/domain/types";
 
-interface Event {
-  id: string;
-  name: string;
-  workspaceId: string;
+export interface EventContextState {
+  event: Event;
+  settings: EventSettings;
+  branding: BrandingSettings;
+  registration: RegistrationSettings;
+  scanner: ScannerSettings;
+  qr: QRConfiguration;
+  guest: GuestConfiguration;
+  notification: NotificationSettings;
+  role: Role;
 }
 
-interface EventContextType {
-  activeEvent: Event | null;
-  setActiveEvent: (event: Event | null) => void;
-}
+const EventContext = createContext<EventContextState | undefined>(undefined);
 
-const EventContext = createContext<EventContextType | undefined>(undefined);
-
-export function EventProvider({ children }: { children: ReactNode }) {
-  const [activeEvent, setActiveEvent] = useState<Event | null>(null);
-
+export function EventProvider({ children, value }: { children: ReactNode, value: EventContextState }) {
   return (
-    <EventContext.Provider value={{ activeEvent, setActiveEvent }}>
+    <EventContext.Provider value={value}>
       {children}
     </EventContext.Provider>
   );

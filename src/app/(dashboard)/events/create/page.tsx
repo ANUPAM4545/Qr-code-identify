@@ -1,0 +1,236 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight, Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+
+const eventSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
+  description: z.string().optional(),
+  timezone: z.string().min(1, "Timezone is required"),
+  date: z.string().min(1, "Date is required"),
+  venue: z.string().optional(),
+});
+
+type EventFormValues = z.infer<typeof eventSchema>;
+
+const STEPS = [
+  { id: "basic", title: "Basic Information" },
+  { id: "datetime", title: "Date & Time" },
+  { id: "venue", title: "Venue" },
+];
+
+export default function CreateEventPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      name: "",
+      slug: "",
+      description: "",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      date: "",
+      venue: "",
+    },
+  });
+
+  const { watch } = form;
+  const values = watch();
+
+  // Load draft logic would go here in useEffect (fetch latest draft from API)
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (values.name && values.slug && session) {
+        saveDraft(false);
+      }
+    }, 5000); // 5s debounce for auto-save
+
+    return () => clearTimeout(timer);
+  }, [values, session]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const saveDraft = async (showToast = true) => {
+    try {
+      if (showToast) setIsSaving(true);
+      // Determine workspaceId (in a real app, from context)
+      const workspaceRes = await fetch("/api/workspaces");
+      const workspaces = await workspaceRes.json();
+      const workspaceId = workspaces.data[0]?._id;
+
+      if (!workspaceId) return;
+
+      if (!draftId) {
+        // Create new draft
+        const res = await fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, workspaceId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setDraftId(data.data._id);
+          if (showToast) toast.success("Draft saved");
+        }
+      } else {
+        // Update existing draft
+        await fetch(`/api/events/${draftId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, workspaceId })
+        });
+        if (showToast) toast.success("Draft updated");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      if (showToast) setIsSaving(false);
+    }
+  };
+
+  const nextStep = async () => {
+    await saveDraft(false); // Save immediately on step transition
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(s => s + 1);
+    } else {
+      // Publish event
+      if (!draftId) await saveDraft(false);
+      if (draftId) {
+        // Publish transition
+        const workspaceRes = await fetch("/api/workspaces");
+        const workspaces = await workspaceRes.json();
+        const workspaceId = workspaces.data[0]?._id;
+
+        await fetch(`/api/events/${draftId}/action`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspaceId, action: "publish" })
+        });
+        toast.success("Event Published!");
+        router.push(`/events/${draftId}`);
+      }
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) setCurrentStep(s => s - 1);
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto py-12">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Create Event</h1>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].title}
+          </p>
+          <div className="flex items-center gap-2">
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <span className="text-xs text-muted-foreground">
+              {draftId ? "Draft saved" : "Unsaved"}
+            </span>
+          </div>
+        </div>
+        
+        {/* Progress bar */}
+        <div className="h-2 w-full bg-muted rounded-full mt-4 overflow-hidden">
+          <div 
+            className="h-full bg-foreground transition-all duration-300" 
+            style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="bg-background border border-border/50 rounded-xl p-6 md:p-8 shadow-sm">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {currentStep === 0 && (
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <Label>Event Name</Label>
+                  <Input {...form.register("name")} placeholder="e.g. Identify Annual Summit 2026" />
+                  {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Event URL Slug</Label>
+                  <Input {...form.register("slug")} placeholder="e.g. summit-2026" />
+                  {form.formState.errors.slug && <p className="text-xs text-red-500">{form.formState.errors.slug.message}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Description (Optional)</Label>
+                  <Input {...form.register("description")} placeholder="Brief overview of the event" />
+                </div>
+              </div>
+            )}
+
+            {currentStep === 1 && (
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input type="date" {...form.register("date")} />
+                  {form.formState.errors.date && <p className="text-xs text-red-500">{form.formState.errors.date.message}</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Timezone</Label>
+                  <Input {...form.register("timezone")} placeholder="e.g. America/Los_Angeles" />
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <Label>Venue Location</Label>
+                  <Input {...form.register("venue")} placeholder="e.g. Moscone Center, San Francisco" />
+                </div>
+                <p className="text-sm text-muted-foreground mt-4">
+                  You can update venue, registration settings, and branding later from the Event Dashboard.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
+          <Button variant="ghost" onClick={prevStep} disabled={currentStep === 0}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => saveDraft(true)} disabled={isSaving}>
+              <Save className="mr-2 h-4 w-4" /> Save Draft
+            </Button>
+            <Button onClick={nextStep}>
+              {currentStep === STEPS.length - 1 ? "Publish Event" : "Next Step"}
+              {currentStep < STEPS.length - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

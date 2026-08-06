@@ -66,4 +66,10 @@ export abstract class MongoRepository<T extends { _id?: string | ObjectId }> imp
     if (!result) return null;
     return { ...result, _id: result._id.toString() } as unknown as T;
   }
+
+  async deleteMany(query: Record<string, unknown>): Promise<number> {
+    const collection = await this.getCollection();
+    const result = await collection.deleteMany(query);
+    return result.deletedCount;
+  }
 }

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
-import { eventRepository } from "@/infrastructure/repositories/EventRepository";
+import { EventService } from "@/application/services/EventService";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, Calendar as CalendarIcon, Users, QrCode, ArrowRight } from "lucide-react";
@@ -19,7 +19,9 @@ export default async function DashboardPage() {
   
   if (!activeWorkspace) return null;
 
-  const events = await eventRepository.findByWorkspaceId(activeWorkspace._id as string);
+  const eventsResult = await EventService.getEvents(session.user.id, activeWorkspace._id as string, { limit: 6 });
+  const events = eventsResult.events;
+  const totalEvents = eventsResult.total;
 
   return (
     <div className="flex flex-col gap-8">
@@ -49,7 +51,7 @@ export default async function DashboardPage() {
                 <h3 className="tracking-tight text-sm font-medium">Total Events</h3>
                 <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div className="text-2xl font-bold">{events.length}</div>
+              <div className="text-2xl font-bold">{totalEvents}</div>
             </div>
             <div className="rounded-xl border border-border/50 bg-background p-6">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -77,14 +79,19 @@ export default async function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold tracking-tight">Recent Events</h2>
-              <Button variant="ghost" size="sm" className="text-muted-foreground h-8">
+              <Button variant="ghost" size="sm" className="text-muted-foreground h-8" render={<Link href="/events" />}>
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {events.map(event => (
                 <div key={event._id as string} className="rounded-xl border border-border/50 bg-background p-5 hover:border-foreground/20 transition-colors cursor-pointer group">
-                  <h3 className="font-semibold text-lg mb-1 group-hover:underline underline-offset-4">{event.name}</h3>
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-semibold text-lg group-hover:underline underline-offset-4 truncate pr-2">{event.name}</h3>
+                    <div className="text-xs px-2 py-0.5 rounded-full border border-border/50 bg-muted/50 capitalize font-medium">
+                      {event.status}
+                    </div>
+                  </div>
                   <div className="flex items-center text-sm text-muted-foreground gap-4">
                     <span>{new Date(event.date).toLocaleDateString()}</span>
                     {event.venue && <span>• {event.venue}</span>}

@@ -5,7 +5,7 @@ import { ThemeProvider } from "./theme-provider";
 import { AuthProvider } from "./auth-provider";
 import { QueryProvider } from "./query-provider";
 import { WorkspaceProvider } from "./workspace-provider";
-import { EventProvider } from "./event-provider";
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -15,12 +15,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <AuthProvider>
         <QueryProvider>
           <WorkspaceProvider>
-            <EventProvider>
-              <TooltipProvider>
-                {children}
-                <Toaster />
-              </TooltipProvider>
-            </EventProvider>
+            <TooltipProvider>
+              {children}
+              <Toaster />
+            </TooltipProvider>
           </WorkspaceProvider>
         </QueryProvider>
       </AuthProvider>

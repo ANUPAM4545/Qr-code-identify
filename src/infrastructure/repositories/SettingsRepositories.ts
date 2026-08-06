@@ -1,5 +1,5 @@
 import { MongoRepository } from "./MongoRepository";
-import { WorkspaceSettings, EventSettings, BrandingSettings, ScannerSettings, RegistrationSettings, QRConfiguration, GuestConfiguration } from "@/domain/types";
+import { WorkspaceSettings, EventSettings, BrandingSettings, ScannerSettings, RegistrationSettings, QRConfiguration, GuestConfiguration, NotificationSettings } from "@/domain/types";
 
 export class WorkspaceSettingsRepository extends MongoRepository<WorkspaceSettings> {
   constructor() { super("workspace_settings"); }
@@ -35,3 +35,8 @@ export class GuestConfigurationRepository extends MongoRepository<GuestConfigura
   constructor() { super("guest_configurations"); }
 }
 export const guestConfigurationRepository = new GuestConfigurationRepository();
+
+export class NotificationSettingsRepository extends MongoRepository<NotificationSettings> {
+  constructor() { super("notification_settings"); }
+}
+export const notificationSettingsRepository = new NotificationSettingsRepository();

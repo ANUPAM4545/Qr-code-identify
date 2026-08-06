@@ -13,7 +13,44 @@ const eventSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
   date: z.string().min(1, "Date is required"),
   venue: z.string().optional(),
+  description: z.string().optional(),
+  templateId: z.string().optional(),
 });
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(errorResponse("Unauthorized"), { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const workspaceId = searchParams.get("workspaceId");
+    
+    if (!workspaceId) {
+      return NextResponse.json(errorResponse("Workspace ID is required"), { status: 400 });
+    }
+
+    const options = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      status: searchParams.get("status") as any || undefined,
+      search: searchParams.get("search") || undefined,
+      isFavorite: searchParams.get("isFavorite") === "true",
+      page: parseInt(searchParams.get("page") || "1", 10),
+      limit: parseInt(searchParams.get("limit") || "20", 10),
+      sortBy: searchParams.get("sortBy") || "date",
+      sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "desc",
+      venue: searchParams.get("venue") || undefined,
+      owner: searchParams.get("owner") || undefined,
+      date: searchParams.get("date") || undefined,
+    };
+
+    const result = await EventService.getEvents(session.user.id, workspaceId, options);
+    return NextResponse.json(successResponse(result), { status: 200 });
+  } catch (error: unknown) {
+    return NextResponse.json(errorResponse((error as Error).message || "Internal Server Error"), { status: 400 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +77,9 @@ export async function POST(req: NextRequest) {
       validated.slug,
       validated.timezone,
       new Date(validated.date),
-      validated.venue
+      validated.venue,
+      validated.description,
+      validated.templateId
     );
 
     return NextResponse.json(successResponse(event, "Event created successfully"), { status: 201 });

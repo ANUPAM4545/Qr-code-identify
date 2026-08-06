@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export type Role = "owner" | "admin" | "manager" | "member" | "viewer";
+export type EventStatus = "draft" | "scheduled" | "published" | "live" | "paused" | "completed" | "archived" | "cancelled";
 
 export interface User {
   _id?: ObjectId | string;
@@ -29,6 +30,7 @@ export interface Membership {
   userId: string;
   workspaceId: string;
   role: Role;
+  favoriteEventIds?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,9 +40,32 @@ export interface Event {
   workspaceId: string;
   name: string;
   slug: string;
+  description?: string | null;
+  coverImage?: string | null;
+  templateId?: string | null;
+  status: EventStatus;
   venue?: string | null;
   timezone: string;
   date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface EventTemplate {
+  _id?: ObjectId | string;
+  workspaceId?: string | null; // null for system templates
+  name: string;
+  description: string;
+  category: string;
+  isSystem: boolean;
+  version: number;
+  settings?: Partial<EventSettings>;
+  branding?: Partial<BrandingSettings>;
+  registration?: Partial<RegistrationSettings>;
+  scanner?: Partial<ScannerSettings>;
+  qr?: Partial<QRConfiguration>;
+  guest?: Partial<GuestConfiguration>;
+  notification?: Partial<NotificationSettings>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -107,6 +132,16 @@ export interface GuestConfiguration {
   collectPhone: boolean;
   collectOrganization: boolean;
   customFields: string[];
+  updatedAt: Date;
+}
+
+export interface NotificationSettings {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId?: string;
+  emailAlerts: boolean;
+  dailyDigest: boolean;
+  webhookUrl?: string | null;
   updatedAt: Date;
 }
 
