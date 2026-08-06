@@ -10,8 +10,7 @@ export default function ReportsPage({ params }: { params: Promise<{ eventId: str
   const handleExport = (type: string) => {
     // In production, this would trigger ReportService job via JobQueue
     // For now we download the mock KPI export
-    // eslint-disable-next-line react-compiler/react-compiler
-    window.location.href = `/api/events/${eventId}/analytics/export?type=${type}`;
+    window.open(`/api/events/${eventId}/analytics/export?type=${type}`, "_self");
   };
 
   const reports = [

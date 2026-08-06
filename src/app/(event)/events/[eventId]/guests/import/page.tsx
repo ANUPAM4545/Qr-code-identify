@@ -78,7 +78,7 @@ export default function GuestImportPage({ params }: { params: Promise<{ eventId:
         if (data.length > 0) {
           const h = data[0] as string[];
           const rows = data.slice(1).map((row: unknown) => {
-            let obj: Record<string, unknown> = {};
+            const obj: Record<string, unknown> = {};
             h.forEach((header, i) => obj[header] = (row as unknown[])[i]);
             return obj;
           });
@@ -149,7 +149,7 @@ export default function GuestImportPage({ params }: { params: Promise<{ eventId:
         throw new Error(data.error);
       }
     } catch (e: unknown) {
-      toast.error(e.message || "Failed to import guests");
+      toast.error((e as Error).message || "Failed to import guests");
     } finally {
       setIsProcessing(false);
     }

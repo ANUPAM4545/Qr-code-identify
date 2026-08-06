@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Webhook, Plus, Trash2, Activity, AlertCircle } from "lucide-react";
@@ -16,6 +16,17 @@ export default function WebhooksPage() {
   const [newWebhook, setNewWebhook] = useState({ name: "", endpointUrl: "", events: ["guest.created", "guest.checked_in"] });
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
 
+  const fetchWebhooks = useCallback(async (wId: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/workspaces/${wId}/webhooks`);
+      const data = await res.json();
+      if (Array.isArray(data)) setWebhooks(data);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetch("/api/workspaces")
       .then(res => res.json())
@@ -25,18 +36,7 @@ export default function WebhooksPage() {
           fetchWebhooks(data[0].id);
         }
       });
-  }, []);
-
-  const fetchWebhooks = async (wId: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/workspaces/${wId}/webhooks`);
-      const data = await res.json();
-      if (Array.isArray(data)) setWebhooks(data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchWebhooks]);
 
   const createWebhook = async () => {
     if (!newWebhook.name || !newWebhook.endpointUrl || !workspaceId) return;
@@ -54,7 +54,7 @@ export default function WebhooksPage() {
       fetchWebhooks(workspaceId);
       toast.success("Webhook configured successfully");
     } catch (e: unknown) {
-      toast.error(e.message);
+      toast.error((e as Error).message || "An error occurred");
     } finally {
       setIsCreating(false);
     }

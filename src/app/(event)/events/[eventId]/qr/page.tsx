@@ -101,8 +101,8 @@ export default function QROverviewPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {recent?.map((qr: unknown) => (
-                  <div key={qr._id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                {recent?.map((qr: { _id: string; name: string; createdAt: string; scanCount: number }, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 bg-primary/10 rounded-md flex items-center justify-center">
                         <QrCode className="h-5 w-5 text-primary" />

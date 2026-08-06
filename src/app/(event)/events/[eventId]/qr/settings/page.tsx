@@ -26,7 +26,7 @@ export default function QRSettingsPage() {
       if (!res.ok) throw new Error("Failed to save settings");
       toast.success("Settings saved successfully.");
     } catch (e: unknown) {
-      toast.error(e.message);
+      toast.error((e as Error).message);
     } finally {
       setSaving(false);
     }

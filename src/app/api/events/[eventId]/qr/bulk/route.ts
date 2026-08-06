@@ -38,17 +38,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
     });
 
     if (action === "delete") {
-      await db.collection("qr_codes").deleteMany({ _id: { $in: objectIds }, workspaceId: event.workspaceId });
+      await db.collection("qr_codes").deleteMany({ _id: { $in: objectIds as unknown as ObjectId[] }, workspaceId: event.workspaceId });
       await AuditService.log(session.user.id, "QR_BULK_DELETED", { count: qrIds.length }, event.workspaceId);
     } else if (action === "archive") {
       await db.collection("qr_codes").updateMany(
-        { _id: { $in: objectIds }, workspaceId: event.workspaceId },
+        { _id: { $in: objectIds as unknown as ObjectId[] }, workspaceId: event.workspaceId },
         { $set: { status: "archived", updatedAt: new Date() } }
       );
       await AuditService.log(session.user.id, "QR_BULK_ARCHIVED", { count: qrIds.length }, event.workspaceId);
     } else if (action === "restore") {
       await db.collection("qr_codes").updateMany(
-        { _id: { $in: objectIds }, workspaceId: event.workspaceId },
+        { _id: { $in: objectIds as unknown as ObjectId[] }, workspaceId: event.workspaceId },
         { $set: { status: "draft", updatedAt: new Date() } }
       );
       await AuditService.log(session.user.id, "QR_BULK_RESTORED", { count: qrIds.length }, event.workspaceId);

@@ -180,7 +180,7 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
         await cameraService.start();
         setIsScanning(true);
       } catch (e: unknown) {
-        toast.error("Failed to start camera: " + (e?.message || String(e)));
+        toast.error("Failed to start camera: " + ((e as Error)?.message || String(e)));
       }
     }
   };
@@ -239,9 +239,9 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
                 {overlay.status === "invalid" && "Access Denied"}
                 {overlay.status === "offline_accepted" && "Queued Offline"}
               </h2>
-              {overlay.guest && (
+              {!!overlay.guest && (
                 <p className="text-xl text-gray-300">
-                  {overlay.guest.firstName} {overlay.guest.lastName}
+                  {(overlay.guest as any).firstName} {(overlay.guest as any).lastName}
                 </p>
               )}
               {overlay.reason && (
@@ -305,7 +305,7 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <p className="font-medium truncate text-gray-200">
-                    {scan.guest ? `${scan.guest.firstName} ${scan.guest.lastName}` : "Unknown Guest"}
+                    {scan.guest ? `${(scan.guest as any).firstName} ${(scan.guest as any).lastName}` : "Unknown Guest"}
                   </p>
                   <p className="text-xs text-gray-500 truncate mt-0.5">
                     {scan.reason || "Checked In"}

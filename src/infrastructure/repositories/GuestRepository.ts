@@ -35,20 +35,20 @@ export class GuestRepository extends MongoRepository<GuestDocument> {
 
     const collection = await this.getCollection();
     
-    const cursor = collection.find(filter).sort({ createdAt: -1 });
+    const cursor = collection.find(filter as unknown as import("mongodb").Filter<import("mongodb").Document>).sort({ createdAt: -1 });
     
     if (options?.skip !== undefined) cursor.skip(options.skip);
     if (options?.limit !== undefined) cursor.limit(options.limit);
     
     const data = await cursor.toArray() as unknown as GuestDocument[];
-    const total = await collection.countDocuments(filter);
+    const total = await collection.countDocuments(filter as unknown as import("mongodb").Filter<import("mongodb").Document>);
     
     return { data, total };
   }
 
   async insertMany(guests: Omit<GuestDocument, "_id">[]): Promise<string[]> {
     const collection = await this.getCollection();
-    const result = await collection.insertMany(guests as unknown as GuestDocument[]);
+    const result = await collection.insertMany(guests as unknown as import("mongodb").OptionalId<import("mongodb").Document>[]);
     return Object.values(result.insertedIds).map(id => id.toString());
   }
 

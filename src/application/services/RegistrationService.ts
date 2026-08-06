@@ -112,7 +112,7 @@ export class RegistrationService {
     workspaceId: string,
     eventId: string,
     submissionId: string,
-    form: { settings: { createGuest?: boolean }; fields: Array<{ id: string; label: string; type: string }> },
+    form: { settings: { createGuest?: boolean; generateQR?: boolean }; fields: Array<{ id: string; label: string; type: string }> },
     submission: RegistrationSubmission,
     actorId: string
   ) {

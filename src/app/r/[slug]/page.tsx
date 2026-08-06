@@ -15,7 +15,16 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [event, setEvent] = useState<Record<string, unknown> | null>(null);
-  const [form, setForm] = useState<Record<string, unknown> | null>(null);
+  const [form, setForm] = useState<{
+    fields?: import("@/domain/types").FormField[];
+    branding?: {
+      coverImage?: string | null;
+      primaryColor?: string;
+      showEventDescription?: boolean;
+      showDateLocation?: boolean;
+      successMessage?: string;
+    };
+  } | null>(null);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -85,9 +94,9 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 text-center">
         <CheckCircle2 className="w-16 h-16 text-green-500 mb-6" />
-        <h1 className="text-4xl font-bold mb-4">{form.branding?.successMessage || "Registration Complete!"}</h1>
+        <h1 className="text-4xl font-bold mb-4">{form?.branding?.successMessage || "Registration Complete!"}</h1>
         <p className="text-gray-400 max-w-md">
-          Thank you for registering for {event.name}. You will receive a confirmation email shortly.
+          Thank you for registering for {event?.name as string}. You will receive a confirmation email shortly.
         </p>
       </div>
     );
@@ -97,7 +106,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
     <div className="min-h-screen bg-muted text-foreground selection:bg-white selection:text-black pb-20">
       {/* Cover Image Placeholder */}
       <div className="w-full h-48 md:h-64 bg-gray-900 border-b border-gray-800 relative">
-        {form.branding?.coverImage && (
+        {form?.branding?.coverImage && (
           <Image src={form.branding.coverImage as string} alt="Cover" fill className="object-cover opacity-60" />
         )}
       </div>
@@ -107,14 +116,14 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
         <div className="bg-background border border-gray-800 rounded-xl shadow-2xl p-6 md:p-10">
           
           <div className="mb-8 border-b border-gray-800 pb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">{event.name}</h1>
-            {form.branding?.showDateLocation && (
+            <h1 className="text-3xl font-bold tracking-tight mb-2">{event?.name as string}</h1>
+            {form?.branding?.showDateLocation && (
               <p className="text-gray-400 text-sm mb-4">
-                {new Date(event.date).toLocaleDateString()} • {event.venue || "TBA"}
+                {new Date(event?.date as string).toLocaleDateString()} • {event?.venue as string || "TBA"}
               </p>
             )}
-            {form.branding?.showEventDescription && event.description && (
-              <p className="text-gray-300 leading-relaxed mt-4">{event.description}</p>
+            {!!(form?.branding?.showEventDescription && event?.description) && (
+              <p className="text-gray-300 leading-relaxed mt-4">{event?.description as string}</p>
             )}
           </div>
 
@@ -125,12 +134,12 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {Array.isArray(form.fields) && form.fields.map((field: import("@/domain/types").FormField) => {
+            {Array.isArray(form?.fields) && form.fields.map((field: import("@/domain/types").FormField) => {
               if (field.hidden) return null;
 
               // Very basic conditional visibility logic (demo)
-              if (field.conditionalVisibility?.conditions?.length > 0) {
-                const condition = field.conditionalVisibility.conditions[0];
+              if ((field.conditionalVisibility?.conditions?.length ?? 0) > 0) {
+                const condition = field.conditionalVisibility!.conditions[0];
                 const dependencyValue = answers[condition.fieldId];
                 if (condition.operator === "equals" && dependencyValue !== condition.value) return null;
               }
@@ -147,7 +156,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                       required={field.required}
                       readOnly={field.readOnly}
                       placeholder={field.placeholder}
-                      value={answers[field.id] || ""}
+                      value={(answers[field.id] as string) || ""}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
                       className="bg-gray-900 border-gray-800 focus:border-white"
                     />
@@ -156,14 +165,14 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                       required={field.required}
                       readOnly={field.readOnly}
                       placeholder={field.placeholder}
-                      value={answers[field.id] || ""}
+                      value={(answers[field.id] as string) || ""}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
                       className="bg-gray-900 border-gray-800 focus:border-white resize-none"
                     />
                   ) : field.type === "dropdown" ? (
                     <select 
                       required={field.required}
-                      value={answers[field.id] || ""}
+                      value={(answers[field.id] as string) || ""}
                       onChange={(e) => handleFieldChange(field.id, e.target.value)}
                       className="flex h-10 w-full rounded-md border border-gray-800 bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-not-allowed disabled:opacity-50"
                     >

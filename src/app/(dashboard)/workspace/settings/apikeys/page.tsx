@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Key, Plus, Trash2, Copy, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -22,19 +22,7 @@ export default function ApiKeysPage() {
   // Actually, we can fetch all workspaces and pick the first one since we are using client side.
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // 1. Fetch workspace ID
-    fetch("/api/workspaces")
-      .then(res => res.json())
-      .then(data => {
-        if (data.length > 0) {
-          setWorkspaceId(data[0].id);
-          fetchKeys(data[0].id);
-        }
-      });
-  }, []);
-
-  const fetchKeys = async (wId: string) => {
+  const fetchKeys = useCallback(async (wId: string) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/workspaces/${wId}/apikeys`);
@@ -45,7 +33,19 @@ export default function ApiKeysPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Fetch workspace ID then load keys
+    fetch("/api/workspaces")
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0) {
+          setWorkspaceId(data[0].id);
+          fetchKeys(data[0].id);
+        }
+      });
+  }, [fetchKeys]);
 
   const generateKey = async () => {
     if (!newKeyName || !workspaceId) return;
@@ -65,7 +65,7 @@ export default function ApiKeysPage() {
       setNewKeyName("");
       fetchKeys(workspaceId);
     } catch (e: unknown) {
-      toast.error(e.message);
+      toast.error((e as Error).message || "An error occurred");
     } finally {
       setIsGenerating(false);
     }

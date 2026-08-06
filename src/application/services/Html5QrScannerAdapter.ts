@@ -41,7 +41,7 @@ export class Html5QrScannerAdapter implements ScannerAdapter {
     
     const tryStart = async (cameraConfig: unknown) => {
       await this.scanner!.start(
-        cameraConfig,
+        cameraConfig as string | MediaTrackConstraints,
         this.config,
         (decodedText) => {
           if (this.onSuccessCb) this.onSuccessCb(decodedText);

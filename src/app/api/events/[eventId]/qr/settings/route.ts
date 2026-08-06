@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { eventRepository } from "@/infrastructure/repositories/EventRepository";
 import { RBACService } from "@/application/services/RBACService";
+import { ObjectId } from "mongodb";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
   const session = await getServerSession(authOptions);
@@ -25,12 +26,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ even
 
     const client = await (await import("@/infrastructure/db")).default;
     await client.db().collection("events").updateOne(
-      { _id: typeof event._id === 'string' ? event._id : String(event._id) },
+      { _id: new ObjectId(String(event._id)) },
       { $set: { qrSettings: updatedSettings } }
     );
 
     return NextResponse.json({ success: true, qrSettings: updatedSettings });
   } catch (err: unknown) {
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    return NextResponse.json({ error: (err as Error).message }, { status: 
+      
+      500 });
   }
 }

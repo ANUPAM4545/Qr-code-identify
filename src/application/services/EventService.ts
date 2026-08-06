@@ -81,13 +81,13 @@ export class EventService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static async updateEvent(userId: string, workspaceId: string, eventId: string, updates: unknown) {
+  static async updateEvent(userId: string, workspaceId: string, eventId: string, updates: Record<string, unknown>) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
     
     // Prevent updating status directly through updateEvent
     if (updates.status) delete updates.status;
 
-    const event = await eventRepository.update(eventId, updates);
+    const event = await eventRepository.update(eventId, updates as Partial<import("@/domain/types").Event>);
     await AuditService.log(userId, "EVENT_UPDATED", { eventId, updates }, workspaceId);
     return event;
   }
