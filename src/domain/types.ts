@@ -153,3 +153,92 @@ export interface AuditLog {
   details: unknown;
   createdAt: Date;
 }
+
+// ==========================================
+// Phase 4: QR Design Studio Types
+// ==========================================
+
+export type QRStatus = "active" | "draft" | "disabled" | "archived";
+
+export interface QRCodeDesignOptions {
+  width?: number;
+  height?: number;
+  data?: string;
+  margin?: number;
+  qrOptions?: {
+    typeNumber?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40;
+    mode?: "Numeric" | "Alphanumeric" | "Byte" | "Kanji";
+    errorCorrectionLevel?: "L" | "M" | "Q" | "H";
+  };
+  imageOptions?: {
+    hideBackgroundDots?: boolean;
+    imageSize?: number;
+    margin?: number;
+    crossOrigin?: string;
+  };
+  dotsOptions?: {
+    type?: "rounded" | "dots" | "classy" | "classy-rounded" | "square" | "extra-rounded";
+    color?: string;
+    gradient?: {
+      type: "linear" | "radial";
+      rotation?: number;
+      colorStops: Array<{ offset: number; color: string }>;
+    };
+  };
+  backgroundOptions?: {
+    color?: string;
+    gradient?: {
+      type: "linear" | "radial";
+      rotation?: number;
+      colorStops: Array<{ offset: number; color: string }>;
+    };
+  };
+  cornersSquareOptions?: {
+    type?: "dot" | "square" | "extra-rounded";
+    color?: string;
+  };
+  cornersDotOptions?: {
+    type?: "dot" | "square";
+    color?: string;
+  };
+  image?: string;
+}
+
+export interface QRCodeDocument {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId: string;
+  name: string;
+  description?: string;
+  category?: string;
+  destinationUrl?: string; // If static/dynamic
+  isDynamic: boolean;
+  status: QRStatus;
+  design: QRCodeDesignOptions;
+  scanCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface QRVersion {
+  _id?: ObjectId | string;
+  qrId: string;
+  workspaceId: string;
+  eventId: string;
+  design: QRCodeDesignOptions;
+  authorId: string;
+  changeSummary?: string;
+  createdAt: Date;
+}
+
+export interface QRTemplate {
+  _id?: ObjectId | string;
+  workspaceId?: string; // null if system template
+  name: string;
+  description?: string;
+  category?: string;
+  isSystem: boolean;
+  design: QRCodeDesignOptions;
+  createdAt: Date;
+  updatedAt: Date;
+}
