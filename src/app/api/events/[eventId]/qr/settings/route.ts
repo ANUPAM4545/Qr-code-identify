@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { eventRepository } from "@/infrastructure/repositories/EventRepository";
+import { RBACService } from "@/application/services/RBACService";
+
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { eventId } = await params;
+  const event = await eventRepository.findById(eventId);
+  if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+
+  await RBACService.requirePermission(session.user.id, event.workspaceId, "manager");
+
+  try {
+    const settings = await req.json();
+
+    // Ensure qrSettings object exists or update it
+    const updatedSettings = {
+      ...event.qrSettings,
+      ...settings
+    };
+
+    const client = await (await import("@/infrastructure/db")).default;
+    await client.db().collection("events").updateOne(
+      { _id: typeof event._id === 'string' ? event._id : String(event._id) },
+      { $set: { qrSettings: updatedSettings } }
+    );
+
+    return NextResponse.json({ success: true, qrSettings: updatedSettings });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+  }
+}

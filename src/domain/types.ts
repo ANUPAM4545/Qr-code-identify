@@ -17,10 +17,60 @@ export interface User {
 
 export interface Workspace {
   _id?: ObjectId | string;
+  id?: string;
   name: string;
   slug: string;
   logo?: string | null;
-  timezone: string;
+  timezone?: string;
+  branding?: {
+    logoUrl?: string;
+    primaryColor?: string;
+  };
+  billingTier?: 'Free' | 'Starter' | 'Professional' | 'Enterprise';
+  limits?: {
+    maxEvents: number;
+    maxGuests: number;
+    maxMembers: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ApiKey {
+  _id?: string;
+  workspaceId: string;
+  name: string;
+  prefix: string; // e.g. "idf_live_"
+  lastFour: string; // e.g. "ABCD"
+  hash: string; // bcrypt hash of the token
+  createdBy: string;
+  lastUsedAt?: Date;
+  expiresAt?: Date;
+  status: 'active' | 'revoked';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Webhook {
+  _id?: string;
+  workspaceId: string;
+  name: string;
+  endpointUrl: string;
+  secret: string; // Used to sign payloads
+  events: string[]; // e.g. ["guest.created", "registration.submitted"]
+  status: 'active' | 'failing' | 'disabled';
+  lastDelivery?: Date;
+  failureCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Integration {
+  _id?: string;
+  workspaceId: string;
+  provider: 'salesforce' | 'hubspot' | 'mailchimp' | 'slack';
+  status: 'connected' | 'disconnected';
+  credentials: Record<string, string>; // Encrypted in real life
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +89,9 @@ export interface Event {
   _id?: ObjectId | string;
   workspaceId: string;
   name: string;
-  slug: string;
+  slug: string; // Internal slug
+  uniqueSlug?: string; // Public registration slug (/r/slug)
+  vanityUrl?: string | null; // Custom domain mapping
   description?: string | null;
   coverImage?: string | null;
   templateId?: string | null;
@@ -47,6 +99,7 @@ export interface Event {
   venue?: string | null;
   timezone: string;
   date: Date;
+  qrSettings?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -251,4 +304,197 @@ export interface QRTemplate {
   design: QRCodeDesignOptions;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface QRDownload {
+  _id?: ObjectId | string;
+  qrId: string;
+  workspaceId: string;
+  eventId: string;
+  format: string;
+  resolution?: number;
+  userId: string;
+  ip?: string;
+  createdAt: Date;
+}
+
+// ==========================================
+// Phase 5: Enterprise Guest Management
+// ==========================================
+
+export type GuestStatus = 
+  | "draft"
+  | "pending"
+  | "registered"
+  | "approved"
+  | "rejected"
+  | "invited"
+  | "checked_in"
+  | "checked_out"
+  | "completed"
+  | "cancelled"
+  | "archived";
+
+export interface GuestGroup {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId: string;
+  name: string;
+  description?: string;
+  color: string;
+  capacity?: number;
+  permissions: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CheckInRecord {
+  timestamp: Date;
+  method: "manual" | "qr_scan" | "nfc" | "rfid";
+  direction: "in" | "out";
+  scannerId?: string;
+  deviceId?: string;
+  operatorId?: string;
+  location?: string;
+  status: "success" | "denied" | "flagged";
+  reason?: string;
+}
+
+export interface TimelineEvent {
+  _id?: ObjectId | string;
+  type: 
+    | "created" 
+    | "registration_submitted" 
+    | "registration_approved"
+    | "registration_rejected"
+    | "qr_generated"
+    | "qr_assigned"
+    | "invitation_sent"
+    | "badge_printed"
+    | "checked_in"
+    | "checked_out"
+    | "notes_added"
+    | "profile_updated";
+  title: string;
+  description?: string;
+  actorId?: string; // User who did this
+  metadata?: Record<string, unknown>;
+  createdAt: Date;
+}
+
+export interface GuestDocument {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId: string;
+  
+  // Profile
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  organization?: string;
+  title?: string;
+  
+  // Custom Fields (Mapped by Registration Settings)
+  customData?: Record<string, unknown>;
+  
+  // Status & Groups
+  status: GuestStatus;
+  groupIds: string[];
+  tags: string[];
+  
+  // Relationships
+  qrCodeId?: string; // Reference to Phase 4 QRCodeDocument
+  
+  // Metrics & Tracking
+  checkIns: CheckInRecord[];
+  notes?: string;
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ==========================================
+// Phase 7: Enterprise Registration & Form Builder
+// ==========================================
+
+export type FormFieldType = 
+  | "text" | "textarea" | "email" | "phone" | "number" | "date" | "time" | "url"
+  | "dropdown" | "radio" | "checkbox" | "multiselect"
+  | "address" | "country" | "state" | "city" | "fileupload" | "imageupload" | "signature"
+  | "divider" | "heading" | "paragraph" | "html" | "spacer";
+
+export interface FormFieldCondition {
+  fieldId: string;
+  operator: "equals" | "not_equals" | "contains" | "greater_than" | "less_than";
+  value: string;
+}
+
+export interface FormField {
+  id: string; // Unique ID within the form
+  type: FormFieldType;
+  label: string;
+  placeholder?: string;
+  helpText?: string;
+  description?: string;
+  required: boolean;
+  hidden: boolean;
+  readOnly: boolean;
+  defaultValue?: unknown;
+  width: "full" | "half" | "third";
+  options?: string[]; // For dropdowns, radios, etc.
+  validationRules?: Record<string, unknown>;
+  conditionalVisibility?: {
+    operator: "AND" | "OR";
+    conditions: FormFieldCondition[];
+  };
+  customCssClass?: string;
+}
+
+export interface RegistrationForm {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId: string;
+  fields: FormField[];
+  settings: {
+    openDate?: Date;
+    closeDate?: Date;
+    capacity?: number;
+    allowWaitlist: boolean;
+    autoApprove: boolean;
+    duplicateEmailPolicy: "allow" | "reject" | "update";
+    duplicatePhonePolicy: "allow" | "reject" | "update";
+    generateQR: boolean;
+    createGuest: boolean;
+  };
+  branding: {
+    coverImage?: string | null;
+    primaryColor: string;
+    showEventDescription: boolean;
+    showDateLocation: boolean;
+    successMessage?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type RegistrationStatus = "pending" | "approved" | "rejected" | "waitlisted";
+
+export interface RegistrationSubmission {
+  _id?: ObjectId | string;
+  workspaceId: string;
+  eventId: string;
+  formId: string;
+  guestId?: string; // Set once approved and provisioned
+  status: RegistrationStatus;
+  answers: Record<string, unknown>; // Keyed by field.id
+  deviceMetadata?: {
+    userAgent: string;
+    ip?: string;
+    referrer?: string;
+    utmSource?: string;
+  };
+  submittedAt: Date;
+  reviewedAt?: Date;
+  reviewedBy?: string; // Operator ID
 }

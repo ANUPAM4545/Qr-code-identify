@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { eventRepository } from "@/infrastructure/repositories/EventRepository";
 import { 
   eventSettingsRepository, 
@@ -80,7 +81,7 @@ export class EventService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static async updateEvent(userId: string, workspaceId: string, eventId: string, updates: any) {
+  static async updateEvent(userId: string, workspaceId: string, eventId: string, updates: unknown) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
     
     // Prevent updating status directly through updateEvent

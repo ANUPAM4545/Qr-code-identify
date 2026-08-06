@@ -9,6 +9,14 @@ export class EventRepository extends MongoRepository<Event> {
   async findByWorkspaceId(workspaceId: string): Promise<Event[]> {
     return this.findMany({ workspaceId });
   }
+
+  async findBySlug(workspaceId: string, slug: string): Promise<Event | null> {
+    return this.findOne({ workspaceId, slug });
+  }
+
+  async findByUniqueSlug(uniqueSlug: string): Promise<Event | null> {
+    return this.findOne({ uniqueSlug });
+  }
 }
 
 export const eventRepository = new EventRepository();

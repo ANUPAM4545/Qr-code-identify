@@ -6,12 +6,15 @@ import { AuthProvider } from "./auth-provider";
 import { QueryProvider } from "./query-provider";
 import { WorkspaceProvider } from "./workspace-provider";
 
+import { SmoothScrollProvider } from "./smooth-scroll-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" disableTransitionOnChange>
+      <SmoothScrollProvider>
+
       <AuthProvider>
         <QueryProvider>
           <WorkspaceProvider>
@@ -22,6 +25,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           </WorkspaceProvider>
         </QueryProvider>
       </AuthProvider>
+      </SmoothScrollProvider>
     </ThemeProvider>
   );
 }

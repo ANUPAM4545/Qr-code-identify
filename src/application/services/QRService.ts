@@ -224,4 +224,41 @@ export class QRService {
     await AuditService.log(userId, "QR_DELETED", { qrId }, workspaceId);
     return true;
   }
+
+  static async getTemplates(userId: string, workspaceId: string) {
+    await RBACService.requirePermission(userId, workspaceId, "viewer");
+    const client = await (await import("@/infrastructure/db")).default;
+    const templates = await client.db().collection("qr_templates")
+      .find({
+        $or: [
+          { isSystem: true },
+          { workspaceId }
+        ]
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return templates.map(t => ({ ...t, _id: t._id.toString() }));
+  }
+
+  static async logDownload(userId: string, workspaceId: string, eventId: string, qrId: string, format: string, resolution?: number, ip?: string) {
+    await RBACService.requirePermission(userId, workspaceId, "viewer");
+    const { qrDownloadRepository } = await import("@/infrastructure/repositories/QRRepositories");
+    await qrDownloadRepository.create({
+      qrId,
+      workspaceId,
+      eventId,
+      format,
+      resolution,
+      userId,
+      ip,
+      createdAt: new Date()
+    });
+    // Update analytics
+    const client = await (await import("@/infrastructure/db")).default;
+    await client.db().collection("qr_analytics").updateOne(
+      { qrId },
+      { $inc: { [`downloads.${format}`]: 1, totalDownloads: 1 } },
+      { upsert: true }
+    );
+  }
 }

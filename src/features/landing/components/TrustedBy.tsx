@@ -14,7 +14,7 @@ export function TrustedBy() {
   ];
 
   return (
-    <section className="py-20 border-y border-border/50 bg-muted/20">
+    <section className="py-20 border-y border-zinc-200 bg-white">
       <div className="container mx-auto px-6 max-w-7xl">
         <motion.div 
           initial="hidden"
@@ -23,19 +23,25 @@ export function TrustedBy() {
           variants={FADE_IN}
           className="flex flex-col items-center gap-8"
         >
-          <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest text-center">
+          <p className="text-sm font-medium text-zinc-400 uppercase tracking-widest text-center">
             Trusted by innovative teams worldwide
           </p>
           
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            {logos.map((logo) => (
-              <div key={logo.name} className="flex items-center gap-2 group cursor-pointer transition-opacity hover:opacity-100 opacity-70">
-                <div className="w-8 h-8 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-xl">
-                  {logo.icon}
+          <div className="relative w-full overflow-hidden mt-8 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            <motion.div 
+              className="flex w-fit items-center gap-16 pr-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 25 }}
+            >
+              {[...logos, ...logos, ...logos, ...logos].map((logo, i) => (
+                <div key={`${logo.name}-${i}`} className="flex items-center gap-2 group cursor-pointer transition-opacity hover:opacity-100 opacity-70 shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xl shadow-sm">
+                    {logo.icon}
+                  </div>
+                  <span className="font-semibold text-xl tracking-tight text-zinc-900 whitespace-nowrap">{logo.name}</span>
                 </div>
-                <span className="font-semibold text-xl tracking-tight text-foreground">{logo.name}</span>
-              </div>
-            ))}
+              ))}
+            </motion.div>
           </div>
         </motion.div>
       </div>

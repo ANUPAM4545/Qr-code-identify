@@ -29,8 +29,26 @@ type Step = "welcome" | "workspace" | "event";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("welcome");
-  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  // Since useSearchParams causes de-opt if not wrapped in Suspense, we use window.location.search for initial state.
+  
+  const getInitialStep = (): Step => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const stepParam = params.get("step");
+      if (stepParam === "workspace" || stepParam === "event") return stepParam as Step;
+    }
+    return "welcome";
+  };
+
+  const getInitialWorkspace = (): string | null => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("workspaceId");
+    }
+    return null;
+  };
+
+  const [step, setStep] = useState<Step>(getInitialStep);
+  const [workspaceId, setWorkspaceId] = useState<string | null>(getInitialWorkspace);
 
   const workspaceForm = useForm<z.infer<typeof workspaceSchema>>({
     resolver: zodResolver(workspaceSchema),
@@ -82,7 +100,8 @@ export default function OnboardingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create event");
       
-      router.push("/dashboard");
+      router.refresh();
+      router.push(`/events/${data.data._id}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
         eventForm.setError("root", { message: error.message });
@@ -244,10 +263,10 @@ export default function OnboardingPage() {
                 )}
 
                 <div className="flex items-center gap-4 mt-4">
-                  <Button type="button" variant="ghost" className="w-full" onClick={() => router.push("/dashboard")}>
+                  <Button type="button" variant="ghost" className="flex-1" onClick={() => router.push("/dashboard")}>
                     Skip for now
                   </Button>
-                  <Button type="submit" size="lg" className="w-full" disabled={eventForm.formState.isSubmitting}>
+                  <Button type="submit" size="lg" className="flex-1" disabled={eventForm.formState.isSubmitting}>
                     {eventForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Complete Setup
                   </Button>

@@ -32,26 +32,26 @@ export function SiteHeader() {
   return (
     <motion.header
       variants={{
-        visible: { y: 0 },
-        hidden: { y: "-100%" },
+        visible: { y: 0, opacity: 1 },
+        hidden: { y: "-100%", opacity: 0 },
       }}
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-background/60 backdrop-blur-md border-b border-border/50"
+      className="fixed top-4 inset-x-0 mx-auto z-50 flex items-center justify-between px-6 py-3 max-w-5xl bg-white/70 backdrop-blur-xl border border-zinc-200/50 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
     >
       <div className="flex items-center gap-8">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
-            <span className="text-background font-bold text-lg leading-none">I</span>
+          <div className="h-8 w-8 bg-zinc-900 rounded-lg flex items-center justify-center shadow-sm">
+            <span className="text-white font-bold text-lg leading-none">I</span>
           </div>
-          <span className="font-semibold text-lg tracking-tight">Identify</span>
+          <span className="font-semibold text-lg tracking-tight text-zinc-900">Identify</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-all hover:bg-zinc-100/50 px-3 py-1.5 rounded-full"
             >
               {link.label}
             </Link>
@@ -59,11 +59,11 @@ export function SiteHeader() {
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/login" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors px-4 py-2 hover:bg-zinc-100/50 rounded-full">
             Sign In
           </Link>
-          <Button className="rounded-full px-6">Get Started</Button>
+          <Button className="rounded-full px-6 bg-zinc-900 text-white hover:bg-zinc-800 hover:scale-105 transition-all shadow-sm">Get Started</Button>
         </div>
         <Sheet>
           <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" />}>

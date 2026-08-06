@@ -39,7 +39,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted-foreground max-w-sm mb-8">
             You don&apos;t have any events yet. Create your first event to start managing registrations, check-ins, and analytics.
           </p>
-          <Button render={<Link href="/onboarding?step=event" />}>
+          <Button render={<Link href={`/onboarding?step=event&workspaceId=${activeWorkspace._id}`} />} nativeButton={false}>
             Create Your First Event
           </Button>
         </div>
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold tracking-tight">Recent Events</h2>
-              <Button variant="ghost" size="sm" className="text-muted-foreground h-8" render={<Link href="/events" />}>
+              <Button variant="ghost" size="sm" className="text-muted-foreground h-8" render={<Link href="/events" />} nativeButton={false}>
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>

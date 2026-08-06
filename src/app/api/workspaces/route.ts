@@ -38,3 +38,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(errorResponse((error as Error).message || "Internal Server Error"), { status: 400 });
   }
 }
+
+export async function GET(_req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(errorResponse("Unauthorized"), { status: 401 });
+    }
+
+    const { membershipRepository } = await import("@/infrastructure/repositories/MembershipRepository");
+    const { workspaceRepository } = await import("@/infrastructure/repositories/WorkspaceRepository");
+
+    const memberships = await membershipRepository.findByUserId(session.user.id);
+    
+    const workspaces = [];
+    for (const m of memberships) {
+      const w = await workspaceRepository.findById(m.workspaceId);
+      // The frontend expects { id, name }
+      if (w) workspaces.push({ id: w._id, name: w.name, slug: w.slug });
+    }
+
+    return NextResponse.json(workspaces);
+  } catch (error: unknown) {
+    return NextResponse.json({ error: (error as Error).message || String(error) }, { status: 500 });
+  }
+}

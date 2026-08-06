@@ -110,7 +110,7 @@ export function EventList({ workspaceId }: EventListProps) {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button render={<Link href="/events/create" />}>
+          <Button nativeButton={false} render={<Link href="/events/create" />}>
             <Plus className="mr-2 h-4 w-4" /> Create Event
           </Button>
         </div>
@@ -126,7 +126,7 @@ export function EventList({ workspaceId }: EventListProps) {
           <Calendar className="h-10 w-10 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No events found</h2>
           <p className="text-muted-foreground mb-6">Create an event to get started.</p>
-          <Button render={<Link href="/events/create" />} variant="outline">
+          <Button nativeButton={false} render={<Link href="/events/create" />} variant="outline">
             Create Event
           </Button>
         </div>

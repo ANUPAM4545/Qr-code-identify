@@ -3,7 +3,29 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { EventService } from "@/application/services/EventService";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { eventRepository } from "@/infrastructure/repositories/EventRepository";
 
+
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(errorResponse("Unauthorized"), { status: 401 });
+    }
+
+    const { eventId } = await params;
+    const event = await eventRepository.findById(eventId);
+
+    if (!event) {
+      return NextResponse.json(errorResponse("Event not found"), { status: 404 });
+    }
+
+    return NextResponse.json(successResponse(event), { status: 200 });
+  } catch (error: unknown) {
+    return NextResponse.json(errorResponse((error as Error).message || "Internal Server Error"), { status: 400 });
+  }
+}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
   try {

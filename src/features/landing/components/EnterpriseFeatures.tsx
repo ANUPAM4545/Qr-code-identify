@@ -26,7 +26,7 @@ export function EnterpriseFeatures() {
           variants={FADE_IN}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl font-bold tracking-tight">Enterprise grade by default.</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-900">Enterprise grade by default.</h2>
         </motion.div>
 
         <motion.div 
@@ -37,14 +37,17 @@ export function EnterpriseFeatures() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12"
         >
           {features.map((feat, i) => (
-            <motion.div key={i} variants={SLIDE_UP} className="flex flex-col gap-3">
-              <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                <feat.icon className="w-5 h-5 text-foreground" />
+            <motion.div key={i} variants={SLIDE_UP} className="flex flex-col gap-4 group p-4 -m-4 rounded-2xl hover:bg-zinc-50 transition-colors cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-zinc-100 border border-zinc-200 shadow-sm flex items-center justify-center transition-all duration-500 group-hover:bg-zinc-900 group-hover:border-zinc-900 group-hover:scale-110 group-hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] relative">
+                <feat.icon className="w-6 h-6 text-zinc-900 transition-colors duration-500 group-hover:text-white relative z-10" />
+                <div className="absolute inset-0 bg-zinc-900 rounded-xl opacity-0 group-hover:opacity-20 group-hover:animate-ping transition-opacity duration-500" />
               </div>
-              <h4 className="font-semibold text-base">{feat.title}</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {feat.desc}
-              </p>
+              <div>
+                <h4 className="font-semibold text-base text-zinc-900 mb-1">{feat.title}</h4>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  {feat.desc}
+                </p>
+              </div>
             </motion.div>
           ))}
         </motion.div>

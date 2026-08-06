@@ -65,17 +65,21 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <SiteHeader />
-      <main className="flex min-h-screen flex-col overflow-hidden bg-background">
-        <HeroSection />
-        <TrustedBy />
-        <FeatureBento />
-        <ProductShowcase />
-        <Timeline />
-        <EnterpriseFeatures />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <CTA />
+      <main className="flex min-h-screen flex-col overflow-hidden bg-zinc-50 relative selection:bg-black selection:text-white">
+        <div className="absolute inset-0 z-0 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-50"></div>
+        
+        <div className="relative z-10">
+          <HeroSection />
+          <TrustedBy />
+          <FeatureBento />
+          <ProductShowcase />
+          <Timeline />
+          <EnterpriseFeatures />
+          <Testimonials />
+          <Pricing />
+          <FAQ />
+          <CTA />
+        </div>
       </main>
       <SiteFooter />
     </>

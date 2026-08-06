@@ -32,34 +32,34 @@ export function SiteFooter() {
   };
 
   return (
-    <footer className="border-t border-border/50 bg-background pt-20 pb-10">
+    <footer className="border-t border-zinc-200 bg-white pt-20 pb-10">
       <div className="container mx-auto px-6 max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 md:gap-12 mb-16">
           <div className="col-span-2 md:col-span-2 flex flex-col gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
-                <span className="text-background font-bold text-lg leading-none">I</span>
+              <div className="h-8 w-8 bg-zinc-900 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-white font-bold text-lg leading-none">I</span>
               </div>
-              <span className="font-semibold text-lg tracking-tight">Identify</span>
+              <span className="font-semibold text-lg tracking-tight text-zinc-900">Identify</span>
             </Link>
-            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+            <p className="text-sm text-zinc-500 max-w-xs leading-relaxed">
               The premium enterprise platform for event management, intelligent QR codes, secure check-ins, and analytics.
             </p>
             <div className="flex gap-4 mt-2">
               {/* Social icons placeholder */}
-              <div className="w-5 h-5 bg-muted-foreground/30 hover:bg-foreground transition-colors rounded" />
-              <div className="w-5 h-5 bg-muted-foreground/30 hover:bg-foreground transition-colors rounded" />
-              <div className="w-5 h-5 bg-muted-foreground/30 hover:bg-foreground transition-colors rounded" />
+              <div className="w-5 h-5 bg-zinc-200 hover:bg-zinc-900 transition-colors rounded" />
+              <div className="w-5 h-5 bg-zinc-200 hover:bg-zinc-900 transition-colors rounded" />
+              <div className="w-5 h-5 bg-zinc-200 hover:bg-zinc-900 transition-colors rounded" />
             </div>
           </div>
 
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category} className="flex flex-col gap-4">
-              <h4 className="font-semibold text-sm">{category}</h4>
+              <h4 className="font-semibold text-sm text-zinc-900">{category}</h4>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link.name}>
-                    <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link href={link.href} className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">
                       {link.name}
                     </Link>
                   </li>
@@ -69,13 +69,13 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-border/50">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-zinc-200">
+          <p className="text-sm text-zinc-500">
             © {new Date().getFullYear()} Identify Inc. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="flex items-center gap-2 text-sm text-zinc-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
               All systems operational
             </span>
           </div>

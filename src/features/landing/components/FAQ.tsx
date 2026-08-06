@@ -34,7 +34,7 @@ export function FAQ() {
   ];
 
   return (
-    <section className="py-24 bg-muted/10 border-t border-border/50">
+    <section className="py-24 bg-zinc-50 border-t border-zinc-200">
       <div className="container mx-auto px-6 max-w-3xl">
         <motion.div 
           initial="hidden"
@@ -43,8 +43,8 @@ export function FAQ() {
           variants={FADE_IN}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
-          <p className="text-lg text-muted-foreground">
+          <h2 className="text-3xl font-bold tracking-tight mb-4 text-zinc-900">Frequently Asked Questions</h2>
+          <p className="text-lg text-zinc-500">
             Everything you need to know about the product and billing.
           </p>
         </motion.div>
@@ -57,11 +57,11 @@ export function FAQ() {
         >
           <Accordion className="w-full">
             {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border-b-border/50">
-                <AccordionTrigger className="text-left text-base font-medium hover:no-underline hover:text-muted-foreground transition-colors">
+              <AccordionItem key={i} value={`item-${i}`} className="border-b border-zinc-200">
+                <AccordionTrigger className="text-left text-base font-medium hover:no-underline text-zinc-900 hover:text-zinc-600 transition-colors">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed">
+                <AccordionContent className="text-zinc-500 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
