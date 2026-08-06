@@ -1,0 +1,262 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+
+const workspaceSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  timezone: z.string().min(1, "Timezone is required"),
+});
+
+const eventSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  timezone: z.string().min(1, "Timezone is required"),
+  date: z.string().min(1, "Date is required"),
+  venue: z.string().optional(),
+});
+
+type Step = "welcome" | "workspace" | "event";
+
+export default function OnboardingPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("welcome");
+  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+
+  const workspaceForm = useForm<z.infer<typeof workspaceSchema>>({
+    resolver: zodResolver(workspaceSchema),
+    defaultValues: {
+      name: "",
+      slug: "",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+  });
+
+  const eventForm = useForm<z.infer<typeof eventSchema>>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: {
+      name: "",
+      slug: "",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      date: new Date().toISOString().split("T")[0],
+      venue: "",
+    },
+  });
+
+  const onWorkspaceSubmit = async (values: z.infer<typeof workspaceSchema>) => {
+    try {
+      const res = await fetch("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create workspace");
+      
+      setWorkspaceId(data.data._id);
+      setStep("event");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        workspaceForm.setError("root", { message: error.message });
+      }
+    }
+  };
+
+  const onEventSubmit = async (values: z.infer<typeof eventSchema>) => {
+    if (!workspaceId) return;
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...values, workspaceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create event");
+      
+      router.push("/dashboard");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        eventForm.setError("root", { message: error.message });
+      }
+    }
+  };
+
+  const fadeVariants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 },
+  };
+
+  return (
+    <div className="flex min-h-screen bg-muted/20 items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-background rounded-2xl border border-border/50 shadow-sm p-8 overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          {step === "welcome" && (
+            <motion.div
+              key="welcome"
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="flex flex-col items-center text-center gap-6"
+            >
+              <div className="h-16 w-16 bg-foreground rounded-xl flex items-center justify-center mb-4">
+                <span className="text-background font-bold text-3xl leading-none">I</span>
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome to Identify</h1>
+              <p className="text-muted-foreground">
+                Let&apos;s set up your enterprise event management platform. We&apos;ll start by creating your workspace.
+              </p>
+              <Button size="lg" className="w-full mt-4" onClick={() => setStep("workspace")}>
+                Get Started
+              </Button>
+            </motion.div>
+          )}
+
+          {step === "workspace" && (
+            <motion.div
+              key="workspace"
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold tracking-tight">Create Workspace</h2>
+                <p className="text-muted-foreground mt-1">Your workspace is where you manage your organization&apos;s events.</p>
+              </div>
+
+              <form onSubmit={workspaceForm.handleSubmit(onWorkspaceSubmit)} className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="ws-name">Workspace Name</Label>
+                  <Input 
+                    id="ws-name" 
+                    placeholder="Acme Corp" 
+                    {...workspaceForm.register("name")} 
+                  />
+                  {workspaceForm.formState.errors.name && (
+                    <span className="text-xs text-destructive">{workspaceForm.formState.errors.name.message}</span>
+                  )}
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="ws-slug">Workspace Slug</Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center rounded-l-md border border-r-0 border-border/50 bg-muted px-3 text-sm text-muted-foreground">
+                      identify.com/
+                    </span>
+                    <Input 
+                      id="ws-slug" 
+                      placeholder="acme-corp" 
+                      className="rounded-l-none"
+                      {...workspaceForm.register("slug")} 
+                    />
+                  </div>
+                  {workspaceForm.formState.errors.slug && (
+                    <span className="text-xs text-destructive">{workspaceForm.formState.errors.slug.message}</span>
+                  )}
+                </div>
+
+                {workspaceForm.formState.errors.root && (
+                  <div className="text-sm text-destructive font-medium p-3 bg-destructive/10 rounded-md">
+                    {workspaceForm.formState.errors.root.message}
+                  </div>
+                )}
+
+                <Button type="submit" size="lg" className="w-full mt-4" disabled={workspaceForm.formState.isSubmitting}>
+                  {workspaceForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Continue
+                </Button>
+              </form>
+            </motion.div>
+          )}
+
+          {step === "event" && (
+            <motion.div
+              key="event"
+              variants={fadeVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold tracking-tight">Create First Event</h2>
+                <p className="text-muted-foreground mt-1">Set up your first event. You can always change these details later.</p>
+              </div>
+
+              <form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="ev-name">Event Name</Label>
+                  <Input 
+                    id="ev-name" 
+                    placeholder="Annual Tech Summit 2026" 
+                    {...eventForm.register("name")} 
+                  />
+                  {eventForm.formState.errors.name && (
+                    <span className="text-xs text-destructive">{eventForm.formState.errors.name.message}</span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="ev-slug">Event Slug</Label>
+                  <Input 
+                    id="ev-slug" 
+                    placeholder="tech-summit-2026" 
+                    {...eventForm.register("slug")} 
+                  />
+                  {eventForm.formState.errors.slug && (
+                    <span className="text-xs text-destructive">{eventForm.formState.errors.slug.message}</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="ev-date">Date</Label>
+                    <Input 
+                      id="ev-date" 
+                      type="date"
+                      {...eventForm.register("date")} 
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="ev-venue">Venue</Label>
+                    <Input 
+                      id="ev-venue" 
+                      placeholder="Moscone Center"
+                      {...eventForm.register("venue")} 
+                    />
+                  </div>
+                </div>
+
+                {eventForm.formState.errors.root && (
+                  <div className="text-sm text-destructive font-medium p-3 bg-destructive/10 rounded-md">
+                    {eventForm.formState.errors.root.message}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 mt-4">
+                  <Button type="button" variant="ghost" className="w-full" onClick={() => router.push("/dashboard")}>
+                    Skip for now
+                  </Button>
+                  <Button type="submit" size="lg" className="w-full" disabled={eventForm.formState.isSubmitting}>
+                    {eventForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Complete Setup
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
