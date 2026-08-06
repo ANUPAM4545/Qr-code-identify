@@ -44,7 +44,8 @@ const QRCanvas = ({ options }: { options: QRCodeDesignOptions }) => {
 
 export default function QRDesignStudio({ params }: { params: Promise<{ qrId: string }> }) {
   const { qrId } = use(params);
-  const { event } = useEvent();
+  // useEvent() provides event context if needed later
+  useEvent();
   
   // Base State
   const [name, setName] = useState(qrId === "new" ? "Untitled QR Code" : "Loading...");
@@ -123,6 +124,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
                       variant={design.dotsOptions?.type === style ? "default" : "outline"}
                       size="sm"
                       className="text-xs capitalize"
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onClick={() => setDesign({ ...design, dotsOptions: { ...design.dotsOptions, type: style as any }})}
                     >
                       {style}

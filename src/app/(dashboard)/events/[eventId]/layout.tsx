@@ -32,7 +32,7 @@ export default async function EventLayout({
   params
 }: {
   children: React.ReactNode;
-  params: Promise<any>;
+  params: Promise<{ eventId: string }>;
 }) {
   const session = await getServerSession(authOptions);
 

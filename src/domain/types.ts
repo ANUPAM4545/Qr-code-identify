@@ -216,6 +216,16 @@ export interface QRCodeDocument {
   status: QRStatus;
   design: QRCodeDesignOptions;
   scanCount: number;
+  analytics?: {
+    uniqueScans: number;
+    scansByDevice: Record<string, number>;
+    scansByBrowser: Record<string, number>;
+    scansByCountry: Record<string, number>;
+    scansByCity: Record<string, number>;
+    scansByReferrer: Record<string, number>;
+    scansByUTM: Record<string, number>;
+    timeSeries: Array<{ date: string; count: number }>;
+  };
   createdAt: Date;
   updatedAt: Date;
 }

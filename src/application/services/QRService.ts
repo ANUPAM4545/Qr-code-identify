@@ -1,4 +1,4 @@
-import { qrCodeRepository, qrVersionRepository, qrTemplateRepository } from "@/infrastructure/repositories/QRRepositories";
+import { qrCodeRepository, qrVersionRepository } from "@/infrastructure/repositories/QRRepositories";
 import { AuditService } from "./AuditService";
 import { RBACService } from "./RBACService";
 import { QRCodeDesignOptions, QRStatus } from "@/domain/types";
