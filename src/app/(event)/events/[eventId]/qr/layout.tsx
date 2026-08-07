@@ -18,17 +18,19 @@ export default function QRStudioLayout({
   const tabs = [
     { name: "Overview", href: `/events/${eventId}/qr`, icon: LayoutDashboard },
     { name: "Library", href: `/events/${eventId}/qr/library`, icon: Library },
-    { name: "Design Studio", href: `/events/${eventId}/qr/design`, icon: Palette },
     { name: "Templates", href: `/events/${eventId}/qr/templates`, icon: LayoutTemplate },
     { name: "Downloads", href: `/events/${eventId}/qr/downloads`, icon: Download },
     { name: "Analytics", href: `/events/${eventId}/qr/analytics`, icon: BarChart },
     { name: "Settings", href: `/events/${eventId}/qr/settings`, icon: Settings },
   ];
 
+  const isDesignStudio = pathname.includes("/design");
+
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-background">
-      {/* QR Studio Header Navigation */}
-      <div className="border-b border-border bg-card/50 px-6 py-3">
+    <div className="flex flex-col bg-background h-screen">
+      {/* QR Studio Header Navigation (Hidden in Design Studio) */}
+      {!isDesignStudio && (
+        <div className="border-b border-border bg-card/50 px-6 py-3">
         <div className="flex items-center space-x-1">
           {tabs.map((tab) => {
             const isActive = pathname === tab.href || (tab.href !== `/events/${eventId}/qr` && pathname.startsWith(tab.href));
@@ -48,11 +50,12 @@ export default function QRStudioLayout({
               </Link>
             );
           })}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Main Content Area */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1">
         {children}
       </div>
     </div>

@@ -5,6 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Printer, Settings2, Download, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QRCodeSVG } from "qrcode.react";
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
+import { toast } from "sonner";
 
 export default function BadgeStudioPage({ params }: { params: Promise<{ eventId: string; guestId: string }> }) {
   const { eventId, guestId } = use(params);
@@ -20,6 +23,39 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    const badgeElement = document.getElementById("badge-preview-element");
+    if (!badgeElement) return;
+
+    try {
+      toast.loading("Generating PDF...", { id: "pdf-toast" });
+      
+      const imgData = await toPng(badgeElement, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        style: {
+          transform: "scale(1)",
+          transformOrigin: "top left"
+        }
+      });
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [101.6, 152.4] // 4x6 inches approx
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, 101.6, 152.4);
+      pdf.save(`Badge_${guest?.firstName}_${guest?.lastName}.pdf`);
+      
+      toast.success("PDF Downloaded", { id: "pdf-toast" });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to generate PDF", { id: "pdf-toast" });
+    }
   };
 
   if (isLoading || !guest) return <div className="p-8">Loading badge...</div>;
@@ -62,7 +98,7 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
           <Button className="w-full" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" /> Print Badge
           </Button>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full" onClick={handleDownloadPDF}>
             <Download className="w-4 h-4 mr-2" /> Download PDF
           </Button>
         </div>
@@ -73,6 +109,7 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
         
         {/* Actual Printable Badge Element */}
         <div 
+          id="badge-preview-element"
           className="bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col relative print:shadow-none print:rounded-none"
           style={{ width: '400px', height: '600px' }}
         >

@@ -57,14 +57,16 @@ export default function QRLibraryPage() {
   });
 
   return (
-    <div className="p-8 h-full flex flex-col space-y-6 max-w-7xl mx-auto">
+    <div className="p-8 flex flex-col space-y-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">QR Library</h1>
           <p className="text-muted-foreground mt-1">Manage all QR codes, versions, and templates.</p>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline"><Download className="w-4 h-4 mr-2" /> Export CSV</Button>
+          <Button variant="outline" onClick={() => window.location.href = `/api/events/${event._id}/qr/export`}>
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
           <Link href={`/events/${event._id}/qr/new/design`}>
             <Button><Plus className="w-4 h-4 mr-2" /> Create QR Code</Button>
           </Link>

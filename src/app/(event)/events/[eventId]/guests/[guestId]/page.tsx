@@ -20,12 +20,19 @@ export default function GuestOverviewPage({ params }: { params: Promise<{ eventI
 
   if (!guest) return null;
 
-  // Mocking timeline events for demonstration. 
-  // In production, these come from `guest.timeline` or an Audit query.
-  const mockEvents = [
+  // Build timeline events from guest data
+  const checkInEvents = (guest.checkIns || []).map((ci: any) => ({
+    type: ci.direction === "in" ? "checked_in" : "checked_out",
+    title: ci.direction === "in" ? "Checked In" : "Checked Out",
+    description: ci.location ? `Location: ${ci.location}` : undefined,
+    createdAt: ci.timestamp
+  }));
+
+  const timelineEvents = [
     { type: "created", title: "Guest Created", createdAt: guest.createdAt },
     guest.status === "approved" ? { type: "registration_approved", title: "Registration Approved", createdAt: guest.updatedAt } : null,
     guest.qrCodeId ? { type: "qr_generated", title: "Badge QR Generated", createdAt: guest.updatedAt } : null,
+    ...checkInEvents
   ].filter(Boolean) as any[];
 
   return (
@@ -34,7 +41,7 @@ export default function GuestOverviewPage({ params }: { params: Promise<{ eventI
       <div className="md:col-span-2 space-y-6">
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Timeline</h3>
-          <GuestTimeline events={mockEvents} />
+          <GuestTimeline events={timelineEvents} />
         </div>
       </div>
 

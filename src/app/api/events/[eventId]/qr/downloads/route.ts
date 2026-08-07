@@ -26,15 +26,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ even
       .toArray();
     
     // Fetch related QR details for context
-    const qrIds = [...new Set(downloads.map(d => d.qrId))];
+    const qrIds = [...new Set(downloads.filter(d => d.qrId).map(d => d.qrId))];
     const qrCodes = await Promise.all(qrIds.map(id => qrCodeRepository.findById(id)));
     const qrMap = Object.fromEntries(qrCodes.filter(Boolean).map(qr => [qr!._id!.toString(), qr]));
 
-    const enrichedDownloads = downloads.map(d => ({
-      ...d,
-      _id: d._id?.toString(),
-      qrName: qrMap[d.qrId]?.name || "Unknown QR Code"
-    }));
+    const enrichedDownloads = downloads.map(d => {
+      let itemName = "Unknown Export";
+      if (d.batchId) {
+        itemName = `Bulk Batch (${d.batchId.substring(0, 8)}...)`;
+      } else if (d.qrId) {
+        itemName = qrMap[d.qrId]?.name || "Unknown QR Code";
+      }
+
+      return {
+        ...d,
+        _id: d._id?.toString(),
+        itemName,
+      };
+    });
 
     return NextResponse.json(enrichedDownloads);
   } catch (err: unknown) {

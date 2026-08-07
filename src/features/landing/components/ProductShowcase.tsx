@@ -73,7 +73,7 @@ const features = [
   {
     id: "guest-management",
     title: "Guest Management",
-    description: "Organize thousands of attendees with powerful filtering, bulk actions, and real-time status updates from the field.",
+    description: "Organize thousands of attendees with powerful filtering, timeline tracking, and real-time PDF badge generation.",
     preview: (
       <div className="w-full h-full bg-zinc-50 p-6 flex flex-col gap-4 border border-zinc-200 rounded-xl overflow-hidden shadow-sm transition-transform hover:scale-[1.02] duration-500">
         <div className="flex justify-between items-center mb-4">

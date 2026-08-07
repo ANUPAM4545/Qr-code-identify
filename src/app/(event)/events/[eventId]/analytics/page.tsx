@@ -68,28 +68,28 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-sm font-medium text-gray-400 mb-2">Total Registrations</h3>
+        <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Registrations</h3>
           <p className="text-3xl font-bold">{kpis?.totalRegistrations?.toLocaleString() || 0}</p>
-          <div className="mt-2 text-xs text-green-400 font-medium">+12% from last week</div>
+          <div className="mt-2 text-xs text-green-600 dark:text-green-400 font-medium">+12% from last week</div>
         </div>
 
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-sm font-medium text-gray-400 mb-2">Total Guests</h3>
+        <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Guests</h3>
           <p className="text-3xl font-bold">{kpis?.totalGuests?.toLocaleString() || 0}</p>
-          <div className="mt-2 text-xs text-gray-500 font-medium">{kpis?.approvedRegistrations} Approved</div>
+          <div className="mt-2 text-xs text-muted-foreground font-medium">{kpis?.approvedRegistrations} Approved</div>
         </div>
 
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-sm font-medium text-gray-400 mb-2">Total Check-ins</h3>
+        <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Check-ins</h3>
           <p className="text-3xl font-bold">{kpis?.checkedInGuests?.toLocaleString() || 0}</p>
-          <div className="mt-2 text-xs text-blue-400 font-medium">{kpis?.attendanceRate?.toFixed(1) || 0}% Attendance Rate</div>
+          <div className="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">{kpis?.attendanceRate?.toFixed(1) || 0}% Attendance Rate</div>
         </div>
 
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-sm font-medium text-gray-400 mb-2">Total QR Scans</h3>
+        <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Total QR Scans</h3>
           <p className="text-3xl font-bold">{kpis?.totalScans?.toLocaleString() || 0}</p>
-          <div className="mt-2 text-xs text-purple-400 font-medium">Across all QR Codes</div>
+          <div className="mt-2 text-xs text-purple-600 dark:text-purple-400 font-medium">Across all QR Codes</div>
         </div>
       </div>
 
@@ -97,32 +97,32 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Line Chart */}
-        <div className="lg:col-span-2 bg-card border border-border/50 rounded-xl p-6">
+        <div className="lg:col-span-2 bg-card border border-border/50 rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-6">Attendance Timeline (Check-ins / Hour)</h3>
           {timeline.length > 0 ? (
             <LineChart 
               data={timeline} 
               height={350} 
-              series={[{ dataKey: "value", color: "#ffffff", name: "Check-ins" }]}
+              series={[{ dataKey: "value", color: "hsl(var(--primary))", name: "Check-ins" }]}
             />
           ) : (
-            <div className="h-[350px] flex items-center justify-center text-gray-500 border border-dashed border-gray-800 rounded-lg">
+            <div className="h-[350px] flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-lg">
               No check-in data available yet.
             </div>
           )}
         </div>
 
         {/* Mini Bar Chart */}
-        <div className="bg-card border border-border/50 rounded-xl p-6">
+        <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
           <h3 className="text-lg font-semibold mb-6">Recent Check-ins</h3>
           {timeline.length > 0 ? (
             <BarChart 
               data={timeline.slice(-5)} 
               height={350} 
-              series={[{ dataKey: "value", color: "#666666", name: "Check-ins" }]}
+              series={[{ dataKey: "value", color: "hsl(var(--primary))", name: "Check-ins" }]}
             />
           ) : (
-            <div className="h-[350px] flex items-center justify-center text-gray-500 border border-dashed border-gray-800 rounded-lg">
+            <div className="h-[350px] flex items-center justify-center text-muted-foreground border border-dashed border-border rounded-lg">
               No data available.
             </div>
           )}

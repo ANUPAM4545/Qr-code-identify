@@ -60,11 +60,12 @@ export function EventList({ workspaceId }: EventListProps) {
 
 
   const actionMutation = useMutation({
-    mutationFn: async ({ eventId, action }: { eventId: string, action: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: async ({ eventId, action, payload }: { eventId: string, action: string, payload?: any }) => {
       const res = await fetch(`/api/events/${eventId}/action`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId, action }),
+        body: JSON.stringify({ workspaceId, action, payload }),
       });
       if (!res.ok) throw new Error(`Failed to ${action} event`);
     },
@@ -152,7 +153,15 @@ export function EventList({ workspaceId }: EventListProps) {
                         <DropdownMenuItem onClick={() => router.push(`/events/${event._id}`)}>
                           View Dashboard
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => actionMutation.mutate({ eventId: event._id as string, action: "duplicate" })}>
+                        <DropdownMenuItem onClick={() => actionMutation.mutate({ 
+                          eventId: event._id as string, 
+                          action: "duplicate",
+                          payload: {
+                            name: `${event.name} (Copy)`,
+                            slug: `${event.slug}-copy-${Math.floor(Math.random() * 10000)}`,
+                            date: event.date
+                          }
+                        })}>
                           <Copy className="mr-2 h-4 w-4" /> Duplicate
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

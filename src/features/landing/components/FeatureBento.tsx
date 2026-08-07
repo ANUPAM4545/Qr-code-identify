@@ -37,8 +37,8 @@ export function FeatureBento() {
       )
     },
     {
-      title: "Guest Library",
-      description: "Manage VIPs, standard guests, and blocklists.",
+      title: "Guest Profiles",
+      description: "Manage attendees, view timeline history, and generate QRs.",
       icon: Users,
       className: "md:col-span-1 md:row-span-1",
       preview: (
@@ -52,8 +52,8 @@ export function FeatureBento() {
       )
     },
     {
-      title: "Scanner App",
-      description: "Offline-first check-in scanner for iOS and Android.",
+      title: "Check-in & Badges",
+      description: "Check-in guests and generate perfectly sized PDF badges on the fly.",
       icon: ScanLine,
       className: "md:col-span-1 md:row-span-2",
       preview: (

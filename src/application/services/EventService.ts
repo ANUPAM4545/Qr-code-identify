@@ -14,7 +14,7 @@ import { RBACService } from "./RBACService";
 import { EventStatus } from "@/domain/types";
 
 const VALID_TRANSITIONS: Record<EventStatus, EventStatus[]> = {
-  draft: ["scheduled", "published", "cancelled"],
+  draft: ["scheduled", "published", "cancelled", "archived"],
   scheduled: ["published", "cancelled", "draft"],
   published: ["live", "paused", "cancelled", "archived"],
   live: ["paused", "completed"],
@@ -237,6 +237,8 @@ export class EventService {
 
     if (status) {
       query.status = Array.isArray(status) ? { $in: status } : status;
+    } else {
+      query.status = { $ne: "archived" };
     }
 
     if (search) {

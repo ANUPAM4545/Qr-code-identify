@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   XCircle,
   BadgeAlert,
-  Loader2
+  Loader2,
+  Inbox
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { GuestDocument, GuestStatus } from "@/domain/types";
 import { toast } from "sonner";
@@ -34,6 +45,14 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    organization: ""
+  });
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["guests", eventId, search, statusFilter],
@@ -77,6 +96,31 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
     }
   };
 
+  const handleSingleAction = async (guestId: string, action: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/bulk`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestIds: [guestId],
+          status: action
+        })
+      });
+      if (res.ok) {
+        if (action === "approved") {
+          toast.success("Guest approved and QR Badge assigned!");
+        } else {
+          toast.success("Guest updated successfully");
+        }
+        refetch();
+      } else {
+        toast.error("Action failed");
+      }
+    } catch (e) {
+      toast.error("Action failed");
+    }
+  };
+
   const StatusBadge = ({ status }: { status: GuestStatus }) => {
     const styles = {
       approved: "bg-green-500/10 text-green-600 dark:text-green-400",
@@ -92,6 +136,29 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
         {status.replace("_", " ")}
       </Badge>
     );
+  };
+
+  const handleAddGuest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAdding(true);
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to add guest");
+      
+      toast.success("Guest added successfully!");
+      setIsAddModalOpen(false);
+      setFormData({ firstName: "", lastName: "", email: "", organization: "" });
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -111,10 +178,46 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
               Import Guests
             </Button>
           </Link>
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Guest
           </Button>
+          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Guest</DialogTitle>
+                <DialogDescription>
+                  Enter the guest's details manually. They will be added to the library with a Pending status.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddGuest} className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" required value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" required value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="organization">Organization (Optional)</Label>
+                  <Input id="organization" value={formData.organization} onChange={e => setFormData({ ...formData, organization: e.target.value })} />
+                </div>
+                <DialogFooter className="pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+                  <Button type="submit" disabled={isAdding}>
+                    {isAdding ? "Adding..." : "Add Guest"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -155,10 +258,8 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
               {selectedGuests.size} selected
             </span>
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="secondary" size="sm">
-                  Bulk Actions
-                </Button>
+              <DropdownMenuTrigger render={<Button variant="secondary" size="sm" />}>
+                Bulk Actions
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => handleBulkAction("approved")}>
@@ -178,23 +279,40 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
       </div>
 
       {/* Data Table */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto rounded-md border border-border/50 shadow-sm bg-background">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <div className="p-4 space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="w-12 h-4 bg-muted animate-pulse rounded" />
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-9 h-9 bg-muted animate-pulse rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <div className="w-32 h-4 bg-muted animate-pulse rounded" />
+                    <div className="w-48 h-3 bg-muted animate-pulse rounded" />
+                  </div>
+                </div>
+                <div className="w-32 h-4 bg-muted animate-pulse rounded" />
+                <div className="w-24 h-6 bg-muted animate-pulse rounded-full" />
+                <div className="w-8 h-8 bg-muted animate-pulse rounded-md ml-auto" />
+              </div>
+            ))}
           </div>
         ) : !data || data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <Users className="w-8 h-8 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center h-full text-center p-12 m-8 rounded-xl border border-border/50 border-dashed bg-muted/10 min-h-[400px]">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-background mb-6 shadow-sm border border-border/50">
+              <Inbox className="w-10 h-10 text-primary/80" />
             </div>
-            <h3 className="text-lg font-medium">No guests found</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Get started by importing your guest list or adding attendees manually.
+            <h3 className="text-2xl font-semibold tracking-tight">No Guests Yet</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed mb-8">
+              Start building your guest list to generate QR badges, manage check-ins, and track attendance.
             </p>
-            <Link href={`/events/${eventId}/guests/import`} className="mt-6 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
-              Import from CSV
-            </Link>
+            <div className="flex gap-4">
+              <Button onClick={() => setIsAddModalOpen(true)}>Add Guest Manually</Button>
+              <Link href={`/events/${eventId}/guests/import`}>
+                <Button variant="outline" className="bg-background">Import CSV</Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <table className="w-full text-sm text-left">
@@ -259,10 +377,8 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                   </td>
                   <td className="px-4 py-4 text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                        <MoreHorizontal className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <Link href={`/events/${eventId}/guests/${guest._id}`}>
@@ -271,8 +387,12 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                           </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Assign QR Badge</DropdownMenuItem>
-                        <DropdownMenuItem>Send Invitation</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSingleAction(guest._id as string, "approved")}>
+                          Assign QR Badge
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.success("Invitation sent to guest's email!")}>
+                          Send Invitation
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>

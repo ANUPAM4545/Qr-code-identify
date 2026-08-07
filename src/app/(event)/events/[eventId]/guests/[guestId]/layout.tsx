@@ -3,8 +3,9 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { 
   ArrowLeft,
@@ -34,15 +35,7 @@ import {
 
 const TABS = [
   { name: "Overview", href: "", icon: LayoutDashboard },
-  { name: "Profile", href: "/profile", icon: User },
-  { name: "QR", href: "/qr", icon: QrCode },
   { name: "Badge", href: "/badge", icon: CreditCard },
-  { name: "Check-ins", href: "/check-ins", icon: ScanLine },
-  { name: "Timeline", href: "/timeline", icon: Clock },
-  { name: "History", href: "/history", icon: History },
-  { name: "Analytics", href: "/analytics", icon: BarChart },
-  { name: "Notes", href: "/notes", icon: StickyNote },
-  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export default function GuestProfileLayout({ 
@@ -54,6 +47,8 @@ export default function GuestProfileLayout({
 }) {
   const { eventId, guestId } = use(params);
   const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   
   const { data: guest } = useQuery({
     queryKey: ["guest", eventId, guestId],
@@ -77,6 +72,46 @@ export default function GuestProfileLayout({
         {status.replace("_", " ")}
       </Badge>
     );
+  };
+
+  const handleStatusChange = async (status: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/${guestId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      toast.success(`Guest status updated to ${status}`);
+      queryClient.invalidateQueries({ queryKey: ["guest", eventId, guestId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/${guestId}/checkin`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to check in");
+      toast.success("Guest checked in successfully");
+      queryClient.invalidateQueries({ queryKey: ["guest", eventId, guestId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const handleGenerateQR = async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/${guestId}/qr`, { method: "POST" });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to generate QR");
+      }
+      toast.success("QR Code generated successfully");
+      queryClient.invalidateQueries({ queryKey: ["guest", eventId, guestId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   return (
@@ -115,24 +150,22 @@ export default function GuestProfileLayout({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">Check In</Button>
-              <Button variant="outline" size="sm">Generate QR</Button>
+              <Button variant="outline" size="sm" onClick={handleCheckIn}>Check In</Button>
+              <Button variant="outline" size="sm" onClick={handleGenerateQR} disabled={!!guest.qrCodeId}>Generate QR</Button>
               <Link href={`/events/${eventId}/guests/${guestId}/badge`}>
                 <Button size="sm">
                   Print Badge
                 </Button>
               </Link>
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
+                  <MoreHorizontal className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Approve</DropdownMenuItem>
-                  <DropdownMenuItem>Reject</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange("approved")}>Approve</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusChange("rejected")}>Reject</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">Archive Guest</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={() => handleStatusChange("archived")}>Archive Guest</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

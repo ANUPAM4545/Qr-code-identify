@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -29,15 +30,16 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const defaultNavigation = [
+  const defaultNavigation = useMemo(() => [
     { name: "Overview", href: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
     { name: "Events", href: "/events", icon: <CalendarDays className="h-4 w-4" /> },
     { name: "Templates", href: "/templates", icon: <Copy className="h-4 w-4" /> },
     { name: "Workspace Settings", href: "/workspace/settings", icon: <Settings className="h-4 w-4" /> },
     { name: "Profile", href: "/profile", icon: <User className="h-4 w-4" /> },
-  ];
+  ], []);
 
   const navigation = customNavigation || defaultNavigation;
+  const handleSignOut = useCallback(() => signOut(), []);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/20">
@@ -82,12 +84,20 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
                   key={item.name}
                   href={item.href}
                   title={isSidebarCollapsed ? item.name : undefined}
-                  className={`flex items-center gap-3 rounded-lg py-2 transition-all hover:text-foreground ${
-                    isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"
+                  className={`relative flex items-center gap-3 rounded-lg py-2 transition-colors ${
+                    isActive ? "text-foreground" : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
                   } ${isSidebarCollapsed ? "justify-center px-0" : "px-3"}`}
                 >
-                  <span className="shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
-                  {!isSidebarCollapsed && <span className="truncate">{item.name}</span>}
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-indicator"
+                      className="absolute inset-0 rounded-lg bg-muted border border-border/50"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 shrink-0 [&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
+                  {!isSidebarCollapsed && <span className="relative z-10 truncate font-medium">{item.name}</span>}
                 </Link>
               );
             })}
@@ -107,12 +117,12 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
             )}
           </div>
           {!isSidebarCollapsed ? (
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => signOut()}>
+            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={handleSignOut}>
               <LogOut className="mr-2 h-4 w-4 shrink-0" />
               Sign out
             </Button>
           ) : (
-            <Button variant="ghost" size="icon" className="w-full text-muted-foreground hover:text-foreground" onClick={() => signOut()} title="Sign out">
+            <Button variant="ghost" size="icon" className="w-full text-muted-foreground hover:text-foreground" onClick={handleSignOut} title="Sign out">
               <LogOut className="h-4 w-4" />
             </Button>
           )}

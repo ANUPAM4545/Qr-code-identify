@@ -144,7 +144,7 @@ export class AnalyticsService {
     const qrCodes = await db.collection("qr_codes").find({ eventId }).toArray();
     
     const totalQRs = qrCodes.length;
-    const activeQRs = qrCodes.filter(q => q.status === "active").length;
+    const activeQRs = qrCodes.filter(q => q.status === "active" || q.status === "published").length;
     const archivedQRs = qrCodes.filter(q => q.status === "archived").length;
     
     const totalScans = qrCodes.reduce((sum, q) => sum + (q.scanCount || 0), 0);

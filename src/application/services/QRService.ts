@@ -1,5 +1,6 @@
 import { qrCodeRepository, qrVersionRepository } from "@/infrastructure/repositories/QRRepositories";
 import { AuditService } from "./AuditService";
+import crypto from "crypto";
 import { RBACService } from "./RBACService";
 import { QRCodeDesignOptions, QRStatus } from "@/domain/types";
 
@@ -27,9 +28,12 @@ export class QRService {
   ) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
 
+    const shortId = crypto.randomBytes(4).toString("hex");
+
     const qr = await qrCodeRepository.create({
       workspaceId,
       eventId,
+      shortId,
       name,
       description,
       category,
@@ -200,6 +204,7 @@ export class QRService {
     const duplicated = await qrCodeRepository.create({
       workspaceId,
       eventId,
+      shortId: crypto.randomBytes(4).toString("hex"),
       name: `${original.name} (Copy)`,
       description: original.description,
       category: original.category,
@@ -260,5 +265,19 @@ export class QRService {
       { $inc: { [`downloads.${format}`]: 1, totalDownloads: 1 } },
       { upsert: true }
     );
+  }
+
+  static async logBatchDownload(userId: string, workspaceId: string, eventId: string, batchId: string, format: string, ip?: string) {
+    await RBACService.requirePermission(userId, workspaceId, "viewer");
+    const { qrDownloadRepository } = await import("@/infrastructure/repositories/QRRepositories");
+    await qrDownloadRepository.create({
+      batchId,
+      workspaceId,
+      eventId,
+      format,
+      userId,
+      ip,
+      createdAt: new Date()
+    });
   }
 }

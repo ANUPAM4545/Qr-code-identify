@@ -104,21 +104,59 @@ export interface Event {
   updatedAt: Date;
 }
 
+export type TemplateModule = 
+  | "event_settings" 
+  | "branding" 
+  | "registration_form" 
+  | "registration_settings" 
+  | "qr_config" 
+  | "scanner_config" 
+  | "guest_config" 
+  | "notification_config" 
+  | "badge_config";
+
+export type TemplateVisibility = "private" | "workspace" | "public";
+
+export interface MarketplaceMetadata {
+  publisher?: string;
+  version?: string;
+  downloads?: number;
+  rating?: number;
+  featured?: boolean;
+  verified?: boolean;
+  license?: string;
+}
+
 export interface EventTemplate {
   _id?: ObjectId | string;
-  workspaceId?: string | null; // null for system templates
+  workspaceId?: string | null; // null for official/system templates
   name: string;
   description: string;
   category: string;
-  isSystem: boolean;
-  version: number;
-  settings?: Partial<EventSettings>;
-  branding?: Partial<BrandingSettings>;
-  registration?: Partial<RegistrationSettings>;
-  scanner?: Partial<ScannerSettings>;
-  qr?: Partial<QRConfiguration>;
-  guest?: Partial<GuestConfiguration>;
-  notification?: Partial<NotificationSettings>;
+  thumbnail?: string | null;
+  coverImage?: string | null;
+  tags?: string[];
+  visibility: TemplateVisibility;
+  status: "draft" | "published" | "archived";
+  isOfficial: boolean;
+  createdBy: string;
+  updatedBy?: string;
+  favoriteCount: number;
+  usageCount: number;
+  lastUsedAt?: Date | null;
+  modules: TemplateModule[];
+  settingsSnapshot?: {
+    event?: Partial<EventSettings>;
+    branding?: Partial<BrandingSettings>;
+    registration?: Partial<RegistrationSettings>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    registrationForm?: any; // any to avoid circular referencing issues, though interfaces hoist
+    scanner?: Partial<ScannerSettings>;
+    qr?: Partial<QRConfiguration>;
+    guest?: Partial<GuestConfiguration>;
+    notification?: Partial<NotificationSettings>;
+  };
+  marketplace?: MarketplaceMetadata;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -214,6 +252,7 @@ export interface AuditLog {
 export type QRStatus = "active" | "draft" | "disabled" | "archived";
 
 export interface QRCodeDesignOptions {
+  shape?: "square" | "circle";
   width?: number;
   height?: number;
   data?: string;
@@ -257,8 +296,11 @@ export interface QRCodeDesignOptions {
   image?: string;
 }
 
+export type QRGenerationType = "single" | "bulk_sequential" | "csv_import" | "guest_badge" | "ticket_batch";
+
 export interface QRCodeDocument {
   _id?: ObjectId | string;
+  shortId: string;
   workspaceId: string;
   eventId: string;
   name: string;
@@ -281,6 +323,13 @@ export interface QRCodeDocument {
   };
   createdAt: Date;
   updatedAt: Date;
+
+  // Bulk Generation Fields
+  batchId?: string;
+  generationType?: QRGenerationType;
+  createdFromTemplate?: string;
+  sequence?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface QRVersion {
@@ -308,7 +357,8 @@ export interface QRTemplate {
 
 export interface QRDownload {
   _id?: ObjectId | string;
-  qrId: string;
+  qrId?: string;
+  batchId?: string;
   workspaceId: string;
   eventId: string;
   format: string;

@@ -11,8 +11,8 @@ import {
 
 import { ChartProps } from "./ChartAdapter";
 
-const DEFAULT_SERIES = [{ dataKey: "value", color: "#ffffff" }];
-const MONOCHROME_PALETTE = ["#ffffff", "#cccccc", "#999999", "#666666", "#333333"];
+const DEFAULT_SERIES = [{ dataKey: "value", color: "hsl(var(--primary))" }];
+const MONOCHROME_PALETTE = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--muted-foreground))", "hsl(var(--border))"];
 
 export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 300, hideLegend }: ChartProps & { type: "line" | "bar" | "area" | "donut" }) {
   
@@ -23,16 +23,16 @@ export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 
 
   const renderTooltip = () => (
     <Tooltip 
-      contentStyle={{ backgroundColor: "#000", borderColor: "#333", borderRadius: "8px", color: "#fff" }}
-      itemStyle={{ color: "#fff" }}
+      contentStyle={{ backgroundColor: "hsl(var(--popover))", borderColor: "hsl(var(--border))", borderRadius: "8px", color: "hsl(var(--popover-foreground))" }}
+      itemStyle={{ color: "hsl(var(--popover-foreground))" }}
     />
   );
 
   const renderAxes = () => (
     <>
-      <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-      <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-      <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+      <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
     </>
   );
 
@@ -45,7 +45,7 @@ export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 
             {renderTooltip()}
             {!hideLegend && <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />}
             {series.map((s, i) => (
-              <Line key={s.dataKey} type="monotone" dataKey={s.dataKey} stroke={s.color || MONOCHROME_PALETTE[i % 5]} strokeWidth={2} dot={false} activeDot={{ r: 4 }} name={s.name} />
+              <Line key={s.dataKey} type="monotone" dataKey={s.dataKey} stroke={s.color || MONOCHROME_PALETTE[i % 5]} strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--background))", strokeWidth: 2 }} activeDot={{ r: 6 }} name={s.name} />
             ))}
           </RechartsLine>
         </ResponsiveContainer>
@@ -62,7 +62,7 @@ export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 
             {renderTooltip()}
             {!hideLegend && <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />}
             {series.map((s, i) => (
-              <Bar key={s.dataKey} dataKey={s.dataKey} fill={s.color || MONOCHROME_PALETTE[i % 5]} radius={[4, 4, 0, 0]} name={s.name} />
+              <Bar key={s.dataKey} dataKey={s.dataKey} fill={s.color || MONOCHROME_PALETTE[i % 5]} radius={[4, 4, 0, 0]} name={s.name} maxBarSize={40} />
             ))}
           </RechartsBar>
         </ResponsiveContainer>

@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
 import { EventService } from "@/application/services/EventService";
+import clientPromise from "@/infrastructure/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, Calendar as CalendarIcon, Users, QrCode, ArrowRight } from "lucide-react";
@@ -22,6 +23,17 @@ export default async function DashboardPage() {
   const eventsResult = await EventService.getEvents(session.user.id, activeWorkspace._id as string, { limit: 6 });
   const events = eventsResult.events;
   const totalEvents = eventsResult.total;
+
+  const client = await clientPromise;
+  const db = client.db();
+
+  const totalGuests = await db.collection("guests").countDocuments({ workspaceId: activeWorkspace._id });
+  
+  const scanAgg = await db.collection("qr_codes").aggregate([
+    { $match: { workspaceId: activeWorkspace._id } },
+    { $group: { _id: null, total: { $sum: "$scanCount" } } }
+  ]).toArray();
+  const totalScans = scanAgg[0]?.total || 0;
 
   return (
     <div className="flex flex-col gap-8">
@@ -44,51 +56,51 @@ export default async function DashboardPage() {
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-border/50 bg-background p-6">
+        <div className="flex flex-col gap-8">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium">Total Events</h3>
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Total Events</h3>
+                <CalendarIcon className="h-5 w-5 text-blue-500" />
               </div>
-              <div className="text-2xl font-bold">{totalEvents}</div>
+              <div className="text-3xl font-bold">{totalEvents}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-background p-6">
+            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium">Total Guests</h3>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Total Guests</h3>
+                <Users className="h-5 w-5 text-indigo-500" />
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-3xl font-bold">{totalGuests}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-background p-6">
+            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium">QR Scans</h3>
-                <QrCode className="h-4 w-4 text-muted-foreground" />
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">QR Scans</h3>
+                <QrCode className="h-5 w-5 text-emerald-500" />
               </div>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-3xl font-bold">{totalScans}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-background p-6">
+            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium">Active Sessions</h3>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Active Sessions</h3>
+                <Users className="h-5 w-5 text-amber-500" />
               </div>
-              <div className="text-2xl font-bold">1</div>
+              <div className="text-3xl font-bold">1</div>
             </div>
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold tracking-tight">Recent Events</h2>
-              <Button variant="ghost" size="sm" className="text-muted-foreground h-8" render={<Link href="/events" />} nativeButton={false}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold tracking-tight">Recent Events</h2>
+              <Button variant="ghost" size="sm" className="text-muted-foreground h-8 hover:text-foreground" render={<Link href="/events" />} nativeButton={false}>
                 View All <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {events.map(event => (
-                <div key={event._id as string} className="rounded-xl border border-border/50 bg-background p-5 hover:border-foreground/20 transition-colors cursor-pointer group">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-lg group-hover:underline underline-offset-4 truncate pr-2">{event.name}</h3>
-                    <div className="text-xs px-2 py-0.5 rounded-full border border-border/50 bg-muted/50 capitalize font-medium">
+                <Link key={event._id as string} href={`/events/${event._id as string}`} className="block rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-card/80 hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg group-hover:text-primary transition-colors truncate pr-2">{event.name}</h3>
+                    <div className="text-xs px-2.5 py-1 rounded-full border border-border/50 bg-background/50 capitalize font-medium text-muted-foreground">
                       {event.status}
                     </div>
                   </div>
@@ -96,7 +108,7 @@ export default async function DashboardPage() {
                     <span>{new Date(event.date).toLocaleDateString()}</span>
                     {event.venue && <span>• {event.venue}</span>}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

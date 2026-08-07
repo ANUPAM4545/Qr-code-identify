@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,6 +32,8 @@ const STEPS = [
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const templateId = searchParams.get("templateId");
   const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -68,13 +70,18 @@ export default function CreateEventPage() {
 
   const saveDraft = async (showToast = true) => {
     try {
+      if (!values.name || !values.slug || !values.date || !values.timezone) {
+        if (showToast) toast.error("Missing required fields (Date, Timezone) to save draft");
+        return null;
+      }
+
       if (showToast) setIsSaving(true);
       // Determine workspaceId (in a real app, from context)
       const workspaceRes = await fetch("/api/workspaces");
       const workspaces = await workspaceRes.json();
-      const workspaceId = workspaces.data[0]?._id;
+      const workspaceId = workspaces[0]?.id;
 
-      if (!workspaceId) return;
+      if (!workspaceId) return null;
 
       if (!draftId) {
         // Create new draft
@@ -87,43 +94,103 @@ export default function CreateEventPage() {
         if (data.success) {
           setDraftId(data.data._id);
           if (showToast) toast.success("Draft saved");
+          return data.data._id;
+        } else {
+          if (showToast) toast.error(data.error || "Failed to save draft");
+          return null;
         }
       } else {
         // Update existing draft
-        await fetch(`/api/events/${draftId}`, {
+        const res = await fetch(`/api/events/${draftId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...values, workspaceId })
         });
-        if (showToast) toast.success("Draft updated");
+        const data = await res.json();
+        if (data.success) {
+          if (showToast) toast.success("Draft updated");
+          return draftId;
+        } else {
+          if (showToast) toast.error(data.error || "Failed to update draft");
+          return null;
+        }
       }
     } catch (e) {
       console.error(e);
+      if (showToast) toast.error("An error occurred while saving draft");
+      return null;
     } finally {
       if (showToast) setIsSaving(false);
     }
   };
 
   const nextStep = async () => {
-    await saveDraft(false); // Save immediately on step transition
+    let fieldsToValidate: string[] = [];
+    if (currentStep === 0) fieldsToValidate = ['name', 'slug'];
+    if (currentStep === 1) fieldsToValidate = ['date', 'timezone'];
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isValid = await form.trigger(fieldsToValidate as any);
+    if (!isValid) return;
+
     if (currentStep < STEPS.length - 1) {
+      if (!templateId) await saveDraft(false); // Only save draft if not using a template
       setCurrentStep(s => s + 1);
     } else {
-      // Publish event
-      if (!draftId) await saveDraft(false);
-      if (draftId) {
-        // Publish transition
+      // Publish event or Create from Template
+      try {
         const workspaceRes = await fetch("/api/workspaces");
         const workspaces = await workspaceRes.json();
-        const workspaceId = workspaces.data[0]?._id;
+        const workspaceId = workspaces[0]?.id;
 
-        await fetch(`/api/events/${draftId}/action`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ workspaceId, action: "publish" })
-        });
-        toast.success("Event Published!");
-        router.push(`/events/${draftId}`);
+        if (templateId) {
+          // Create from template
+          const res = await fetch(`/api/templates/${templateId}/action`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              workspaceId, 
+              action: "use",
+              payload: {
+                eventData: {
+                  ...values,
+                  date: new Date(values.date)
+                }
+              }
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            toast.success("Event created from template!");
+            router.push(`/events/${data.data._id}`);
+          } else {
+            toast.error(data.error || "Failed to create event from template");
+          }
+        } else {
+          // Standard publish
+          const savedId = await saveDraft(false);
+          const finalDraftId = savedId || draftId;
+
+          if (!finalDraftId) {
+            toast.error("Failed to save event. Please check required fields.");
+            return;
+          }
+
+          const res = await fetch(`/api/events/${finalDraftId}/action`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspaceId, action: "publish" })
+          });
+          const data = await res.json();
+          if (data.success) {
+            toast.success("Event Published!");
+            router.push(`/events/${finalDraftId}`);
+          } else {
+            toast.error(data.error || "Failed to publish event");
+          }
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
   };

@@ -65,7 +65,19 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid payload. Expected 'guestIds' array and 'status'." }, { status: 400 });
     }
 
-    const count = await guestRepository.updateManyStatus(guestIds, status);
+    let count = 0;
+    if (status === "approved") {
+      for (const guestId of guestIds) {
+        try {
+          await GuestService.approveGuest(event.workspaceId, eventId, session.user.id, guestId);
+          count++;
+        } catch (e) {
+          console.error(`Failed to approve guest ${guestId}`, e);
+        }
+      }
+    } else {
+      count = await guestRepository.updateManyStatus(guestIds, status);
+    }
 
     return NextResponse.json({ success: true, count });
   } catch (error: unknown) {
