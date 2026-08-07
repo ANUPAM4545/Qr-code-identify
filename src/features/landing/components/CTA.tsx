@@ -8,7 +8,7 @@ import { FADE_IN, SLIDE_UP } from "../utils/animations";
 export function CTA() {
   return (
     <section className="py-32 relative overflow-hidden bg-white border-t border-zinc-200">
-      <div className="container mx-auto px-6 max-w-5xl text-center">
+      <div className="container mx-auto px-6 max-w-7xl text-center">
         <motion.div 
           initial="hidden"
           whileInView="visible"

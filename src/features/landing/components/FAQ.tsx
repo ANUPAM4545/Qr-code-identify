@@ -34,40 +34,43 @@ export function FAQ() {
   ];
 
   return (
-    <section className="py-24 bg-zinc-50 border-t border-zinc-200">
-      <div className="container mx-auto px-6 max-w-3xl">
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={FADE_IN}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl font-bold tracking-tight mb-4 text-zinc-900">Frequently Asked Questions</h2>
-          <p className="text-lg text-zinc-500">
-            Everything you need to know about the product and billing.
-          </p>
-        </motion.div>
+    <section className="py-24 bg-zinc-50 border-t border-zinc-200" id="faq">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={FADE_IN}
+            className="lg:col-span-5"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-zinc-900">Frequently Asked Questions</h2>
+            <p className="text-lg text-zinc-500 max-w-md">
+              Everything you need to know about the product and billing. Have more questions? Reach out to our team.
+            </p>
+          </motion.div>
 
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={SLIDE_UP}
-        >
-          <Accordion className="w-full">
-            {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border-b border-zinc-200">
-                <AccordionTrigger className="text-left text-base font-medium hover:no-underline text-zinc-900 hover:text-zinc-600 transition-colors">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-zinc-500 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </motion.div>
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={SLIDE_UP}
+            className="lg:col-span-7"
+          >
+            <Accordion className="w-full space-y-4">
+              {faqs.map((faq, i) => (
+                <AccordionItem key={i} value={`item-${i}`} className="border border-zinc-200/60 bg-white px-6 rounded-2xl shadow-sm hover:shadow-md hover:border-zinc-300 transition-all duration-300">
+                  <AccordionTrigger className="text-left text-base md:text-lg font-semibold hover:no-underline text-zinc-900 hover:text-zinc-700 py-6 transition-colors">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-zinc-500 text-base leading-relaxed pb-6">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -24,6 +24,16 @@ import {
 import { OfflineQueueService } from "@/application/services/OfflineQueueService";
 import { toast } from "sonner";
 
+const ResultIcon = ({ status }: { status: string }) => {
+  switch (status) {
+    case "success": return <CheckCircle2 className="w-16 h-16 text-green-500 mb-4 mx-auto" />;
+    case "duplicate": return <Clock className="w-16 h-16 text-yellow-500 mb-4 mx-auto" />;
+    case "warning": return <AlertTriangle className="w-16 h-16 text-orange-500 mb-4 mx-auto" />;
+    case "offline_accepted": return <WifiOff className="w-16 h-16 text-blue-500 mb-4 mx-auto" />;
+    default: return <XCircle className="w-16 h-16 text-red-500 mb-4 mx-auto" />;
+  }
+};
+
 export default function ScannerTerminalPage({ params }: { params: Promise<{ eventId: string }> }) {
   const { eventId } = use(params);
   
@@ -196,16 +206,6 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
     const currentIndex = cameras.findIndex(c => c.id === cameraService.getSettings().defaultCameraId);
     const nextIndex = (currentIndex + 1) % cameras.length;
     await cameraService.switchCamera(cameras[nextIndex].id);
-  };
-
-  const ResultIcon = ({ status }: { status: string }) => {
-    switch (status) {
-      case "success": return <CheckCircle2 className="w-16 h-16 text-green-500 mb-4 mx-auto" />;
-      case "duplicate": return <Clock className="w-16 h-16 text-yellow-500 mb-4 mx-auto" />;
-      case "warning": return <AlertTriangle className="w-16 h-16 text-orange-500 mb-4 mx-auto" />;
-      case "offline_accepted": return <WifiOff className="w-16 h-16 text-blue-500 mb-4 mx-auto" />;
-      default: return <XCircle className="w-16 h-16 text-red-500 mb-4 mx-auto" />;
-    }
   };
 
   return (
