@@ -80,7 +80,7 @@ export class EventService {
     return event;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   static async updateEvent(userId: string, workspaceId: string, eventId: string, updates: Record<string, unknown>) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
     
@@ -162,7 +162,7 @@ export class EventService {
     ]);
 
     // 3. Clone settings (stripping _id and updating eventId)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const cloneDoc = (docs: any[]) => {
       if (!docs.length) return {};
       const doc = { ...docs[0] };
@@ -173,19 +173,19 @@ export class EventService {
     };
 
     await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       eventSettings.length ? eventSettingsRepository.create(cloneDoc(eventSettings) as any) : eventSettingsRepository.create({ eventId: newEventId, workspaceId, isPublic: false }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       scannerSettings.length ? scannerSettingsRepository.create(cloneDoc(scannerSettings) as any) : scannerSettingsRepository.create({ eventId: newEventId, workspaceId, offlineEnabled: true, autoSync: true }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       registrationSettings.length ? registrationSettingsRepository.create(cloneDoc(registrationSettings) as any) : registrationSettingsRepository.create({ eventId: newEventId, workspaceId, requireApproval: false, allowWaitlist: false }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       brandingSettings.length ? brandingSettingsRepository.create(cloneDoc(brandingSettings) as any) : brandingSettingsRepository.create({ eventId: newEventId, workspaceId, primaryColor: "#000000" }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       qrConfig.length ? qrConfigurationRepository.create(cloneDoc(qrConfig) as any) : qrConfigurationRepository.create({ eventId: newEventId, workspaceId, style: "squares", fgColor: "#000000", bgColor: "#ffffff" }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       guestConfig.length ? guestConfigurationRepository.create(cloneDoc(guestConfig) as any) : guestConfigurationRepository.create({ eventId: newEventId, workspaceId, collectPhone: false, collectOrganization: false, customFields: [] }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       notificationSettingsRepository.create(cloneDoc(await notificationSettingsRepository.findMany({ eventId })) as any || { eventId: newEventId, workspaceId, emailAlerts: true, dailyDigest: true, webhookUrl: null })
     ]);
 
@@ -232,7 +232,7 @@ export class EventService {
       date,
     } = options;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const query: Record<string, any> = { workspaceId };
 
     if (status) {

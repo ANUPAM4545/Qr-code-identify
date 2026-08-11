@@ -60,7 +60,6 @@ export function PreviewPanel({ design, destination, qrRef }: PreviewPanelProps) 
         <div className="flex gap-2 pointer-events-auto bg-background/80 backdrop-blur rounded-lg p-1 border shadow-sm">
           <Button variant={bgMode === "light" ? "secondary" : "ghost"} size="icon" className="w-8 h-8" onClick={() => setBgMode("light")}><Sun className="w-4 h-4" /></Button>
           <Button variant={bgMode === "dark" ? "secondary" : "ghost"} size="icon" className="w-8 h-8" onClick={() => setBgMode("dark")}><Moon className="w-4 h-4" /></Button>
-          <Button variant={bgMode === "transparent" ? "secondary" : "ghost"} size="icon" className="w-8 h-8" onClick={() => setBgMode("transparent")}><Grid className="w-4 h-4" /></Button>
         </div>
       </div>
 

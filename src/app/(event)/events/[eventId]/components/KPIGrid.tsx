@@ -33,27 +33,7 @@ export function KPIGrid({ eventId }: { eventId: string }) {
   const { kpis } = data;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {/* Registrations Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
-        <div className="flex flex-row items-center justify-between pb-2">
-          <h3 className="tracking-tight text-sm font-medium text-zinc-600">Registrations</h3>
-          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center">
-            <Users className="h-4 w-4 text-zinc-900" />
-          </div>
-        </div>
-        <div>
-          <div className="text-3xl font-bold text-zinc-900">{kpis.registrations.value}</div>
-          <div className="flex items-center mt-2 text-xs text-zinc-500">
-            {kpis.registrations.pending > 0 ? (
-              <span className="text-zinc-900 font-medium mr-1">{kpis.registrations.pending} pending</span>
-            ) : (
-              <span className="text-zinc-900 font-medium mr-1">All approved</span>
-            )}
-            {" approval"}
-          </div>
-        </div>
-      </div>
+    <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
 
       {/* Guests Card */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">

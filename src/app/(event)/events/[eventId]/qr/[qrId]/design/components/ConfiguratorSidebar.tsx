@@ -25,6 +25,44 @@ interface ConfiguratorSidebarProps {
   setBulkOptions?: (options: any) => void;
 }
 
+const applyImageShape = (base64: string, shape: "square" | "circle" | "diamond" | undefined): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (!shape || shape === "square") return resolve(base64);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const size = Math.min(img.width, img.height);
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return resolve(base64);
+
+      ctx.clearRect(0, 0, size, size);
+      
+      ctx.beginPath();
+      if (shape === "circle") {
+        ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+      } else if (shape === "diamond") {
+        ctx.moveTo(size/2, 0);
+        ctx.lineTo(size, size/2);
+        ctx.lineTo(size/2, size);
+        ctx.lineTo(0, size/2);
+      }
+      ctx.closePath();
+      ctx.clip();
+
+      const scale = Math.max(size / img.width, size / img.height);
+      const x = (size - img.width * scale) / 2;
+      const y = (size - img.height * scale) / 2;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = reject;
+    img.src = base64;
+  });
+};
+
 export function ConfiguratorSidebar({
   name, setName, destination, setDestination, design, setDesign, isNew, onExport,
   generationMode = "single", setGenerationMode, bulkOptions, setBulkOptions
@@ -98,27 +136,8 @@ export function ConfiguratorSidebar({
                     <Label>Quantity</Label>
                     <Input type="number" min={1} max={10000} value={bulkOptions.quantity} onChange={e => setBulkOptions({ ...bulkOptions, quantity: parseInt(e.target.value) || 1 })} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Prefix</Label>
-                      <Input value={bulkOptions.prefix} onChange={e => setBulkOptions({ ...bulkOptions, prefix: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Padding (zeros)</Label>
-                      <Input type="number" min={1} max={10} value={bulkOptions.padding} onChange={e => setBulkOptions({ ...bulkOptions, padding: parseInt(e.target.value) || 4 })} />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Start Number</Label>
-                    <Input type="number" min={1} value={bulkOptions.startNumber} onChange={e => setBulkOptions({ ...bulkOptions, startNumber: parseInt(e.target.value) || 1 })} />
-                  </div>
-                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md flex items-center justify-between">
-                    <span>Preview:</span>
-                    <span className="font-mono text-primary font-medium">
-                      {bulkOptions.prefix}{String(bulkOptions.startNumber).padStart(bulkOptions.padding, "0")} 
-                      ... 
-                      {bulkOptions.prefix}{String(bulkOptions.startNumber + bulkOptions.quantity - 1).padStart(bulkOptions.padding, "0")}
-                    </span>
+                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md flex items-center justify-center text-center">
+                    Generating {bulkOptions.quantity} unique QR codes with random 12-character alphanumeric IDs (e.g. X845AVLMR78V).
                   </div>
                 </div>
               )}
@@ -301,7 +320,12 @@ export function ConfiguratorSidebar({
                         const reader = new FileReader();
                         reader.onload = (event) => {
                           if (event.target?.result) {
-                            updateDesign("image", event.target.result.toString());
+                            const resultStr = event.target.result.toString();
+                            setDesign(prev => ({ ...prev, originalImage: resultStr }));
+                            const shape = design.imageOptions?.logoShape || "square";
+                            applyImageShape(resultStr, shape).then(masked => {
+                              updateDesign("image", masked);
+                            });
                           }
                         };
                         reader.readAsDataURL(file);
@@ -313,12 +337,43 @@ export function ConfiguratorSidebar({
                 {design.image && (
                   <Button 
                     variant="destructive" 
-                    onClick={() => updateDesign("image", undefined)}
+                    onClick={() => {
+                      updateDesign("image", undefined);
+                      setDesign(prev => ({ ...prev, originalImage: undefined }));
+                    }}
                   >
                     Remove
                   </Button>
                 )}
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Logo Shape</Label>
+              <Select 
+                value={design.imageOptions?.logoShape || "square"}
+                onValueChange={(val) => {
+                  const shape = val as "square" | "circle" | "diamond";
+                  updateNested("imageOptions", "logoShape", shape);
+                  if (design.originalImage) {
+                    applyImageShape(design.originalImage, shape).then(masked => {
+                      updateDesign("image", masked);
+                    });
+                  } else if (design.image) {
+                     applyImageShape(design.image, shape).then(masked => {
+                        updateDesign("image", masked);
+                     });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="square">Square</SelectItem>
+                  <SelectItem value="circle">Circle</SelectItem>
+                  <SelectItem value="diamond">Diamond</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

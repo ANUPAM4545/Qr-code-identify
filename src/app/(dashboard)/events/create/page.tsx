@@ -52,7 +52,7 @@ export default function CreateEventPage() {
   });
 
   const { watch } = form;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const values = watch();
 
   // Load draft logic would go here in useEffect (fetch latest draft from API)

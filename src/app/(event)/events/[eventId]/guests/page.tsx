@@ -258,8 +258,8 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
               {selectedGuests.size} selected
             </span>
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button variant="secondary" size="sm" />}>
-                Bulk Actions
+              <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3 text-xs font-medium focus-visible:outline-none">
+                More Actions
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => handleBulkAction("approved")}>
@@ -377,7 +377,7 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                   </td>
                   <td className="px-4 py-4 text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 p-0">
                         <MoreHorizontal className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

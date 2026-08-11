@@ -267,7 +267,9 @@ export interface QRCodeDesignOptions {
     imageSize?: number;
     margin?: number;
     crossOrigin?: string;
+    logoShape?: "square" | "circle" | "diamond";
   };
+  originalImage?: string;
   dotsOptions?: {
     type?: "rounded" | "dots" | "classy" | "classy-rounded" | "square" | "extra-rounded";
     color?: string;

@@ -140,31 +140,32 @@ export class DashboardService {
     const event = await eventRepository.findById(eventId);
     if (!event) throw new Error("Event not found");
 
-    const [totalGuests, checkedInGuests, qrsAssigned, submissions] = await Promise.all([
+    const [totalGuests, checkedInGuests, qrsAssigned, submissions, eventSettings] = await Promise.all([
       db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" } }),
       db.collection("guests").countDocuments({ eventId, "checkIns.direction": "in" }),
-      db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" }, qrCodeUrl: { $exists: true, $ne: null } }),
+      db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" }, qrCodeId: { $exists: true, $ne: null } }),
       db.collection("registration_submissions").aggregate([
         { $match: { eventId } },
         { $group: { _id: "$status", count: { $sum: 1 } } }
-      ]).toArray()
+      ]).toArray(),
+      db.collection("event_settings").findOne({ eventId })
     ]);
 
     const funnelMap: Record<string, number> = { pending: 0, approved: 0, rejected: 0, waitlisted: 0 };
     submissions.forEach(r => { funnelMap[r._id] = r.count; });
     const totalSubmissions = Object.values(funnelMap).reduce((a, b) => a + b, 0);
 
-    const capacity = 0; // if event.settings.maxCapacity exists we could use it
+    const capacity = eventSettings?.maxCapacity || 0;
 
     return {
       registration: {
         total: totalSubmissions,
-        approved: funnelMap.approved,
-        pending: funnelMap.pending
+        approved: funnelMap.approved || 0,
+        pending: funnelMap.pending || 0
       },
       capacity: {
         used: totalGuests,
-        max: capacity || "Unlimited"
+        max: capacity > 0 ? capacity : "Unlimited"
       },
       checkIns: {
         total: totalGuests,

@@ -26,12 +26,12 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#0B0F19] border border-slate-800 rounded-xl shadow-2xl shadow-indigo-500/10 w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-background border border-border shadow-lg w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200 rounded-xl">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800/60">
-          <h2 className="text-xl font-bold text-white tracking-tight">Download Options</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white hover:bg-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-border/50">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Download Options</h2>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground hover:text-foreground hover:bg-muted">
             <X className="w-5 h-5" />
           </Button>
         </div>
@@ -41,26 +41,26 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
           <div className="grid grid-cols-2 gap-8">
             {/* Format Column */}
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">1. FORMAT</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">1. FORMAT</Label>
               <div className="space-y-2">
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("pdf_a4")}
-                  className={`w-full justify-start h-10 ${format === "pdf_a4" ? "bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-600 hover:text-white" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}`}
+                  className={`w-full justify-start h-10 ${format === "pdf_a4" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
                 >
                   A4 PDF Document
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("pdf_sticker")}
-                  className={`w-full justify-start h-10 ${format === "pdf_sticker" ? "bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-600 hover:text-white" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}`}
+                  className={`w-full justify-start h-10 ${format === "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
                 >
                   12"x18" Sticker Sheet (96)
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("zip")}
-                  className={`w-full justify-start h-10 ${format === "zip" ? "bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-600 hover:text-white" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"}`}
+                  className={`w-full justify-start h-10 ${format === "zip" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
                 >
                   ZIP Archive
                 </Button>
@@ -69,23 +69,23 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
 
             {/* Filter Column */}
             <div className="space-y-3">
-              <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">2. FILTER</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">2. FILTER</Label>
               <div className="space-y-4">
                 <Select value={filter} onValueChange={v => setFilter(v || "all")}>
-                  <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-10 text-slate-300">
+                  <SelectTrigger className="w-full bg-background border-input h-10 text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="all">All Codes</SelectItem>
                     <SelectItem value="published">Published Only</SelectItem>
                   </SelectContent>
                 </Select>
                 
                 <Select value={shapeFilter} onValueChange={v => setShapeFilter(v || "all")}>
-                  <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-10 text-slate-300">
+                  <SelectTrigger className="w-full bg-background border-input h-10 text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="all">All Shapes</SelectItem>
                   </SelectContent>
                 </Select>
@@ -96,7 +96,7 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
           {/* PDF Layout */}
           {format.startsWith("pdf") && (
             <div className="space-y-3 pt-2">
-              <Label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">3. PDF LAYOUT (PER PAGE)</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3. PDF LAYOUT (PER PAGE)</Label>
               <div className="grid grid-cols-3 gap-2">
                 {pdfLayoutOptions.map((layout) => (
                   <Button
@@ -104,7 +104,7 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
                     variant="outline"
                     onClick={() => setPdfLayout(layout)}
                     disabled={format === "pdf_sticker"} // Sticker layout usually has fixed per-page
-                    className={`h-9 ${pdfLayout === layout && format !== "pdf_sticker" ? "bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-600 hover:text-white" : "bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800"} ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`h-9 ${pdfLayout === layout && format !== "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"} ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {layout}
                   </Button>
@@ -117,7 +117,7 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
         {/* Footer */}
         <div className="p-6 pt-2">
           <Button 
-            className="w-full h-12 text-md font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-indigo-900/20"
+            className="w-full h-12 text-md font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleDownload}
             disabled={isDownloading}
           >

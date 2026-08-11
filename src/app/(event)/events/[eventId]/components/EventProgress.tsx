@@ -39,7 +39,7 @@ export function EventProgress({ eventId }: { eventId: string }) {
           <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
             <div 
               className="h-full bg-zinc-900 rounded-full transition-all" 
-              style={{ width: `${capacity.max !== "Unlimited" ? capacityPct : 100}%` }}
+              style={{ width: `${capacity.max !== "Unlimited" ? capacityPct : 0}%` }}
             />
           </div>
         </div>

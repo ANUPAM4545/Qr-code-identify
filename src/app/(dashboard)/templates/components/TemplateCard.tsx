@@ -102,10 +102,10 @@ export const TemplateCard = React.memo(function TemplateCard({ template, onActio
           </div>
           
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger render={
+              <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            }>
+              <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onAction('use', template._id as string)}>

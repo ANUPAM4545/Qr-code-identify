@@ -3,9 +3,7 @@
 import { useEvent } from "@/providers/event-provider";
 import { EventHero } from "./components/EventHero";
 import { KPIGrid } from "./components/KPIGrid";
-import { RegistrationFunnel } from "./components/RegistrationFunnel";
 import { EventProgress } from "./components/EventProgress";
-import { PendingActions } from "./components/PendingActions";
 import { ActivityFeed } from "./components/ActivityFeed";
 import { TeamActivity } from "./components/TeamActivity";
 import { EventHealth } from "./components/EventHealth";
@@ -25,16 +23,14 @@ export default function EventDashboardPage() {
       {/* Main Content Grid (12-column responsive layout) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column: Funnel, Progress, Activity (8 cols) */}
+        {/* Left Column: Progress, Activity (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <RegistrationFunnel eventId={eventId} />
           <EventProgress eventId={eventId} />
           <ActivityFeed eventId={eventId} />
         </div>
 
-        {/* Right Column: Pending Actions, Team, Health (4 cols) */}
+        {/* Right Column: Team, Health (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <PendingActions eventId={eventId} />
           <EventHealth eventId={eventId} />
           <TeamActivity eventId={eventId} />
         </div>

@@ -32,10 +32,19 @@ export class BulkGenerationService {
     // NOTE: For very large batches (e.g. 1000+), this should ideally be pushed to a queue.
     // For now, we process it synchronously in a batch.
 
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
     for (let i = 0; i < quantity; i++) {
-      const currentNum = startNumber + i;
-      const sequence = `${prefix}${currentNum.toString().padStart(padding, "0")}`;
-      const shortId = crypto.randomBytes(4).toString("hex");
+      // Generate a 12-character random alphanumeric ID
+      let randomId = '';
+      const bytes = crypto.randomBytes(12);
+      for (let j = 0; j < 12; j++) {
+        randomId += chars[bytes[j] % chars.length];
+      }
+      
+      const sequence = randomId;
+      const shortId = randomId.substring(0, 8); // Use first 8 characters as shortId for URL payload
+      
       // CRITICAL: The QR payload MUST include the unique ID, otherwise all QRs in the batch will be optically identical!
       const payloadUrl = destinationUrlBase ? `${destinationUrlBase}?id=${shortId}` : `${process.env.NEXT_PUBLIC_APP_URL || "https://identify.com"}/scan?id=${shortId}`;
 

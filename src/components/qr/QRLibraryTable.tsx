@@ -28,6 +28,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { QRCodeDocument } from "@/domain/types";
@@ -135,25 +136,27 @@ export function QRLibraryTable({
           const qr = row.original;
           return (
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+              <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem render={<Link href={`/events/${eventId}/qr/${qr._id}/design`} />}>
-                  <Eye className="mr-2 h-4 w-4" /> Open Studio
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDuplicate(qr._id as string)}>
-                  <Copy className="mr-2 h-4 w-4" /> Duplicate
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href={`/events/${eventId}/qr/${qr._id}/downloads`} />}>
-                  <Download className="mr-2 h-4 w-4" /> Downloads
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onClick={() => onDelete(qr._id as string)}>
-                  <Trash className="mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuItem render={<Link href={`/events/${eventId}/qr/${qr._id}/design`} />}>
+                    <Eye className="mr-2 h-4 w-4" /> Open Studio
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDuplicate(qr._id as string)}>
+                    <Copy className="mr-2 h-4 w-4" /> Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem render={<Link href={`/events/${eventId}/qr/${qr._id}/downloads`} />}>
+                    <Download className="mr-2 h-4 w-4" /> Downloads
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive" onClick={() => onDelete(qr._id as string)}>
+                    <Trash className="mr-2 h-4 w-4" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           );

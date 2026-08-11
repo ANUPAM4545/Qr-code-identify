@@ -8,6 +8,7 @@ import { Shield, MoreVertical, Mail } from "lucide-react";
 import { InviteMemberModal } from "./components/InviteMemberModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { MemberActions } from "./components/MemberActions";
 
 export default async function TeamSettingsPage() {
   const session = await getServerSession(authOptions);
@@ -85,10 +86,12 @@ export default async function TeamSettingsPage() {
                       {m.role === 'owner' && <Shield className="w-3.5 h-3.5 text-zinc-900" />}
                       {m.role}
                     </span>
-                    
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
+                    <MemberActions 
+                      membershipId={m._id as string} 
+                      workspaceId={activeWorkspace._id as string}
+                      currentRole={m.role}
+                      isCurrentUser={isCurrentUser}
+                    />
                   </div>
                 </div>
               );

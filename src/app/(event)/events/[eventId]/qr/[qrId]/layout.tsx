@@ -27,12 +27,6 @@ export default function QRDetailsLayout({
   const tabs = [
     { name: "Overview", href: `/events/${eventId}/qr/${qrId}`, icon: LayoutDashboard },
     { name: "Design", href: `/events/${eventId}/qr/${qrId}/design`, icon: Palette },
-    { name: "Analytics", href: `/events/${eventId}/qr/${qrId}/analytics`, icon: BarChart },
-    { name: "History", href: `/events/${eventId}/qr/${qrId}/history`, icon: History },
-    { name: "Versions", href: `/events/${eventId}/qr/${qrId}/versions`, icon: Layers },
-    { name: "Downloads", href: `/events/${eventId}/qr/${qrId}/downloads`, icon: Download },
-    { name: "Timeline", href: `/events/${eventId}/qr/${qrId}/timeline`, icon: Clock },
-    { name: "Settings", href: `/events/${eventId}/qr/${qrId}/settings`, icon: Settings },
   ];
 
   return (

@@ -1,72 +1,109 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export function useHistory<T>(initialState: T) {
-  const [state, setState] = useState<T>(initialState);
-  const [history, setHistory] = useState<T[]>([initialState]);
-  const [pointer, setPointer] = useState<number>(0);
+  const [state, setState] = useState<{
+    past: T[];
+    present: T;
+    future: T[];
+  }>({
+    past: [],
+    present: initialState,
+    future: [],
+  });
+
+  const lastPushTime = useRef<number>(0);
 
   const set = useCallback((value: T | ((prev: T) => T)) => {
-    setState((prev) => {
-      const nextState = typeof value === 'function' ? (value as (prev: T) => T)(prev) : value;
+    setState((curr) => {
+      const nextPresent = typeof value === 'function' ? (value as (prev: T) => T)(curr.present) : value;
       
-      if (JSON.stringify(prev) === JSON.stringify(nextState)) return prev;
+      if (JSON.stringify(curr.present) === JSON.stringify(nextPresent)) {
+        return curr;
+      }
 
-      setHistory((prevHistory) => {
-        const newHistory = prevHistory.slice(0, pointer + 1);
-        return [...newHistory, nextState];
-      });
-      setPointer((p) => p + 1);
-      
-      return nextState;
+      const now = Date.now();
+      // If the last history push was less than 500ms ago, group the change
+      // by just updating the present state and NOT pushing the intermediate state to past.
+      if (now - lastPushTime.current < 500) {
+        lastPushTime.current = now; // keep extending the window while dragging
+        return {
+          ...curr,
+          present: nextPresent,
+        };
+      }
+
+      // Otherwise, it's a new distinct change. Push current to past.
+      lastPushTime.current = now;
+      return {
+        past: [...curr.past, curr.present],
+        present: nextPresent,
+        future: [],
+      };
     });
-  }, [pointer]);
+  }, []);
 
   const undo = useCallback(() => {
-    if (pointer > 0) {
-      setPointer((p) => p - 1);
-      setState(history[pointer - 1]);
-    }
-  }, [history, pointer]);
+    setState((curr) => {
+      if (curr.past.length === 0) return curr;
+      
+      const previous = curr.past[curr.past.length - 1];
+      const newPast = curr.past.slice(0, curr.past.length - 1);
+      
+      return {
+        past: newPast,
+        present: previous,
+        future: [curr.present, ...curr.future],
+      };
+    });
+  }, []);
 
   const redo = useCallback(() => {
-    if (pointer < history.length - 1) {
-      setPointer((p) => p + 1);
-      setState(history[pointer + 1]);
-    }
-  }, [history, pointer]);
+    setState((curr) => {
+      if (curr.future.length === 0) return curr;
+      
+      const next = curr.future[0];
+      const newFuture = curr.future.slice(1);
+      
+      return {
+        past: [...curr.past, curr.present],
+        present: next,
+        future: newFuture,
+      };
+    });
+  }, []);
 
-  const reset = useCallback((toState: T = initialState) => {
-    setState(toState);
-    setHistory([toState]);
-    setPointer(0);
+  const reset = useCallback((toState?: T) => {
+    setState({
+      past: [],
+      present: toState !== undefined ? toState : initialState,
+      future: [],
+    });
+    lastPushTime.current = 0;
   }, [initialState]);
 
   const replace = useCallback((value: T | ((prev: T) => T)) => {
-    setState(value);
+    setState((curr) => {
+      const nextPresent = typeof value === 'function' ? (value as (prev: T) => T)(curr.present) : value;
+      return {
+        ...curr,
+        present: nextPresent,
+      };
+    });
   }, []);
 
   const commit = useCallback(() => {
-    setState((curr) => {
-      setHistory((prevHistory) => {
-        const last = prevHistory[pointer];
-        if (JSON.stringify(last) === JSON.stringify(curr)) return prevHistory;
-        const newHistory = prevHistory.slice(0, pointer + 1);
-        return [...newHistory, curr];
-      });
-      setPointer((p) => p + 1);
-      return curr;
-    });
-  }, [pointer]);
+    // No-op for compatibility
+  }, []);
 
   return {
-    state,
+    state: state.present,
     set,
     replace,
     commit,
     undo,
     redo,
     reset,
-    canUndo: pointer > 0,
-    canRedo: pointer < history.length - 1,
+    canUndo: state.past.length > 0,
+    canRedo: state.future.length > 0,
   };
 }
