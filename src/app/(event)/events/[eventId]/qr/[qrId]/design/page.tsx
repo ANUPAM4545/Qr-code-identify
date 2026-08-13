@@ -11,9 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QRExportService } from "@/application/services/QRExportService";
 
 // Custom Hooks & Components
@@ -30,14 +32,20 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
   const { event } = useEvent();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const templateId = searchParams.get("templateId");
   
   const qrRef = useRef<any>(null);
   const isNew = qrId === "new";
 
-  // Name and Destination (not debounced for history as they are text inputs, 
-  // but to keep it simple we'll keep them in standard state for now)
+  // Name and Destination
   const { state: name, set: setName, replace: replaceName } = useHistory(isNew ? "Untitled QR Code" : "Loading...");
   const { state: destination, set: setDestination, replace: replaceDestination } = useHistory("https://identify.com");
+  
+  // Save Template States
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [templateDesc, setTemplateDesc] = useState("");
   
   const [generationMode, setGenerationMode] = useState<"single" | "bulk">("single");
   const [bulkOptions, setBulkOptions] = useState({ quantity: 10, prefix: "QR-", startNumber: 1, padding: 4 });
@@ -65,14 +73,30 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
     enabled: !isNew
   });
 
+  const { data: templates } = useQuery({
+    queryKey: ["qr-templates", event._id],
+    queryFn: async () => {
+      const res = await fetch(`/api/events/${event._id}/qr/templates`);
+      if (!res.ok) throw new Error("Failed to fetch templates");
+      return res.json();
+    },
+    enabled: isNew && !!templateId
+  });
+
   useEffect(() => {
     if (existingQR) {
       // Initialize without adding to history stack
       replaceName(existingQR.name);
       replaceDestination(existingQR.destinationUrl || existingQR.design.data || "https://identify.com");
       replaceDesign(existingQR.design);
+    } else if (isNew && templateId && templates) {
+      const template = templates.find((t: any) => t._id === templateId);
+      if (template && template.design) {
+        replaceDesign(template.design);
+        replaceName(`Copy of ${template.name}`);
+      }
     }
-  }, [existingQR, replaceName, replaceDestination, replaceDesign]);
+  }, [existingQR, templates, templateId, isNew, replaceName, replaceDestination, replaceDesign]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -108,6 +132,33 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
     },
     onError: (err: unknown) => {
       toast.error("Failed to save", { description: (err as Error).message || "An error occurred" });
+    }
+  });
+
+  const saveTemplateMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        name: templateName || "My Custom Template",
+        description: templateDesc || "Saved from QR Studio",
+        design: design
+      };
+      const res = await fetch(`/api/events/${event._id}/qr/templates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("Failed to save template");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qr-templates", event._id] });
+      toast.success("Design saved to Templates Gallery!");
+      setIsTemplateModalOpen(false);
+      setTemplateName("");
+      setTemplateDesc("");
+    },
+    onError: (err: any) => {
+      toast.error(err.message);
     }
   });
 
@@ -150,24 +201,6 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
       toast.error("Export failed", { description: (err as Error).message || "Export failed" });
     }
   };
-
-  const saveTemplateMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/events/${event._id}/qr/templates`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name || "Custom Template", description: "Saved from studio", design })
-      });
-      if (!res.ok) throw new Error("Failed to save template");
-      return res.json();
-    },
-    onSuccess: () => {
-      toast.success("Saved as template");
-    },
-    onError: (err: unknown) => {
-      toast.error("Failed to save template", { description: (err as Error).message || "An error occurred" });
-    }
-  });
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] w-full bg-background overflow-hidden">
@@ -230,6 +263,10 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
                     <Save className="w-4 h-4 mr-2" />
                     Save Draft
                   </Button>
+                  <Button variant="outline" size="sm" onClick={() => setIsTemplateModalOpen(true)}>
+                    <Layout className="w-4 h-4 mr-2" />
+                    Save as Template
+                  </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger render={
                       <Button size="sm" variant="default" disabled={saveMutation.isPending}>
@@ -272,6 +309,40 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
           qrRef={qrRef} 
         />
       </div>
+
+      {/* Save Template Modal */}
+      <Dialog open={isTemplateModalOpen} onOpenChange={setIsTemplateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save to Templates Gallery</DialogTitle>
+            <DialogDescription>Save this QR code design to reuse in future campaigns.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Template Name</label>
+              <Input 
+                value={templateName} 
+                onChange={e => setTemplateName(e.target.value)} 
+                placeholder="e.g., VIP Summit Design" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description (Optional)</label>
+              <Input 
+                value={templateDesc} 
+                onChange={e => setTemplateDesc(e.target.value)} 
+                placeholder="Dark theme with gold logo" 
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTemplateModalOpen(false)}>Cancel</Button>
+            <Button onClick={() => saveTemplateMutation.mutate()} disabled={saveTemplateMutation.isPending || !templateName.trim()}>
+              {saveTemplateMutation.isPending ? "Saving..." : "Save Template"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

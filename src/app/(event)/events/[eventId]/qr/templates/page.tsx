@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QRTemplate } from "@/domain/types";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function QRTemplatesPage() {
   const { event } = useEvent();
@@ -49,9 +50,19 @@ export default function QRTemplatesPage() {
           {templates?.map((template) => (
             <Card key={template._id as string} className="flex flex-col overflow-hidden hover:border-primary/50 transition-colors">
               <div className="h-32 bg-muted/50 flex items-center justify-center border-b">
-                {/* Visual placeholder for the template */}
-                <div className="w-20 h-20 bg-background rounded border shadow-sm flex items-center justify-center p-2">
-                   <div className="w-full h-full bg-primary/20 rounded-sm"></div>
+                <div className="w-24 h-24 bg-background rounded-xl border shadow-sm flex items-center justify-center p-2">
+                   <QRCodeSVG 
+                     value="https://identify.app"
+                     size={80}
+                     fgColor={template.design?.dotsOptions?.color || template.design?.cornersSquareOptions?.color || "#000000"}
+                     bgColor={template.design?.backgroundOptions?.color === "transparent" ? "transparent" : (template.design?.backgroundOptions?.color || "#ffffff")}
+                     imageSettings={template.design?.image ? {
+                       src: template.design.image,
+                       height: 20,
+                       width: 20,
+                       excavate: true
+                     } : undefined}
+                   />
                 </div>
               </div>
               <CardHeader className="py-4 flex-1">

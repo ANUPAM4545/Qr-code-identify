@@ -15,6 +15,9 @@ export default function EventSettingsPage() {
   const router = useRouter();
   const [name, setName] = useState(event.name || "");
   const [slug, setSlug] = useState(event.slug || "");
+  const [date, setDate] = useState(event.date ? new Date(event.date).toISOString().split('T')[0] : "");
+  const [endDate, setEndDate] = useState(event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : "");
+  const [venue, setVenue] = useState(event.venue || "");
   const [description, setDescription] = useState(event.description || "");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
@@ -23,7 +26,7 @@ export default function EventSettingsPage() {
     const res = await fetch(`/api/events/${event._id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workspaceId: event.workspaceId, name, slug, description })
+      body: JSON.stringify({ workspaceId: event.workspaceId, name, slug, date: new Date(date), endDate: new Date(endDate), venue, description })
     });
     if (res.ok) {
       toast.success("Settings saved");
@@ -91,6 +94,37 @@ export default function EventSettingsPage() {
             <div className="flex flex-col gap-3">
               <Label htmlFor="name" className="text-sm font-semibold text-foreground/80">Event Name</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="h-12 text-lg px-4 bg-muted/30 border-border/50 rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="slug" className="text-sm font-semibold text-foreground/80">Event Slug</Label>
+              <div className="flex">
+                <span className="inline-flex items-center rounded-l-xl border border-r-0 border-border/50 bg-muted/30 px-4 text-sm text-muted-foreground h-12">
+                  identify.com/
+                </span>
+                <Input 
+                  id="slug" 
+                  value={slug} 
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))} 
+                  className="h-12 text-lg px-4 bg-muted/30 border-border/50 rounded-l-none rounded-r-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="date" className="text-sm font-semibold text-foreground/80">Start Date</Label>
+                <Input type="date" id="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 px-4 bg-muted/30 border-border/50 rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor="endDate" className="text-sm font-semibold text-foreground/80">End Date</Label>
+                <Input type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-12 px-4 bg-muted/30 border-border/50 rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="venue" className="text-sm font-semibold text-foreground/80">Venue Location</Label>
+              <Input id="venue" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. Moscone Center, San Francisco" className="h-12 px-4 bg-muted/30 border-border/50 rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" />
             </div>
 
             <div className="flex flex-col gap-3">

@@ -38,14 +38,47 @@ export function ActivityFeed({ eventId }: { eventId: string }) {
     return Activity;
   };
 
+  const formatDetails = (action: string, details: any) => {
+    if (!details) return null;
+    try {
+      if (action === "EVENT_UPDATED" && details.updates) {
+        const keys = Object.keys(details.updates).filter(k => k !== 'workspaceId');
+        if (keys.length > 0) return `Updated fields: ${keys.join(", ")}`;
+      }
+      if (action === "EVENT_CREATED" && details.name) {
+        return `Created event: ${details.name}`;
+      }
+      if (action === "EVENT_STATUS_CHANGED" && details.newStatus) {
+        return `Changed status to ${details.newStatus}`;
+      }
+      if (action === "FAVORITE_ADDED") {
+        return "Added to favorites";
+      }
+      if (action === "FAVORITE_REMOVED") {
+        return "Removed from favorites";
+      }
+      
+      const stringified = Object.entries(details)
+        .filter(([k]) => k !== 'workspaceId' && k !== 'eventId' && k !== 'id')
+        .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+        .join(', ');
+      
+      return stringified.length > 60 ? stringified.substring(0, 60) + '...' : stringified;
+    } catch (e) {
+      return null;
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col">
       <div className="p-6 pb-4 border-b border-zinc-100 flex items-center justify-between">
         <h3 className="text-lg font-semibold tracking-tight text-zinc-900">Recent Activity</h3>
       </div>
       <div className="p-6 flex-1 flex flex-col gap-6 overflow-y-auto max-h-[400px]">
-        {data.map((item: { id: string; action: string; target: string; timestamp: string }, idx: number) => {
+        {data.map((item: { id: string; action: string; target: string; timestamp: string; details?: any }, idx: number) => {
           const Icon = getIcon(item.action);
+          const detailText = formatDetails(item.action, item.details);
+          
           return (
             <div key={item.id} className="flex items-start gap-4 relative">
               {idx !== data.length - 1 && (
@@ -60,9 +93,14 @@ export function ActivityFeed({ eventId }: { eventId: string }) {
                 <p className="text-sm text-zinc-800">
                   <span className="font-medium text-zinc-900">User</span>
                   {" "} {item.action.toLowerCase().replace(/_/g, ' ')} {" "}
-                  <span className="font-medium text-zinc-900">{item.target}</span>
+                  {item.target && <span className="font-medium text-zinc-900">{item.target}</span>}
                 </p>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                {detailText && (
+                  <p className="text-sm text-zinc-600 mt-1 bg-zinc-50 border border-zinc-100 px-3 py-1.5 rounded-md inline-block break-all max-w-full">
+                    {detailText}
+                  </p>
+                )}
+                <p className="text-xs text-zinc-500 mt-1">
                   {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
                 </p>
               </div>

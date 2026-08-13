@@ -211,7 +211,7 @@ export class TemplateService {
     userId: string,
     workspaceId: string,
     templateId: string,
-    eventData: { name: string, slug: string, timezone: string, date: Date, venue?: string }
+    eventData: { name: string, slug: string, endDate: Date, date: Date, venue?: string }
   ) {
     const template = await this.getTemplateById(userId, workspaceId, templateId);
     
@@ -224,7 +224,7 @@ export class TemplateService {
       workspaceId,
       eventData.name,
       eventData.slug,
-      eventData.timezone,
+      eventData.endDate,
       eventData.date,
       eventData.venue,
       template.description,

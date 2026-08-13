@@ -106,41 +106,8 @@ export function ConfiguratorSidebar({
               </div>
             </div>
 
-            {/* Generation Subsection */}
+            {/* Size and Margins */}
             <div className="space-y-4 pt-4 border-t border-border">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Generation</h4>
-              
-              <div className="space-y-2">
-                <Label>Generation Mode</Label>
-                <div className="grid grid-cols-2 gap-2 bg-muted/50 p-1 rounded-lg">
-                  <Button 
-                    variant={generationMode === "single" ? "secondary" : "ghost"} 
-                    className="h-8 text-xs shadow-none"
-                    onClick={() => setGenerationMode?.("single")}
-                  >
-                    Single QR
-                  </Button>
-                  <Button 
-                    variant={generationMode === "bulk" ? "secondary" : "ghost"} 
-                    className={`h-8 text-xs shadow-none ${generationMode !== "bulk" ? "text-muted-foreground" : ""}`}
-                    onClick={() => setGenerationMode?.("bulk")}
-                  >
-                    Bulk Sequential
-                  </Button>
-                </div>
-              </div>
-
-              {generationMode === "bulk" && bulkOptions && setBulkOptions && (
-                <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border">
-                  <div className="space-y-2">
-                    <Label>Quantity</Label>
-                    <Input type="number" min={1} max={10000} value={bulkOptions.quantity} onChange={e => setBulkOptions({ ...bulkOptions, quantity: parseInt(e.target.value) || 1 })} />
-                  </div>
-                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md flex items-center justify-center text-center">
-                    Generating {bulkOptions.quantity} unique QR codes with random 12-character alphanumeric IDs (e.g. X845AVLMR78V).
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -155,20 +122,6 @@ export function ConfiguratorSidebar({
                   <Label>Margin (px)</Label>
                   <Input type="number" value={design.margin || 10} onChange={e => updateDesign("margin", parseInt(e.target.value))} />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Error Correction</Label>
-                <select 
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  value={design.qrOptions?.errorCorrectionLevel || "Q"}
-                  onChange={e => updateNested("qrOptions", "errorCorrectionLevel", e.target.value)}
-                >
-                  <option value="L">Low (7%)</option>
-                  <option value="M">Medium (15%)</option>
-                  <option value="Q">Quartile (25%)</option>
-                  <option value="H">High (30%)</option>
-                </select>
               </div>
             </div>
 
@@ -382,16 +335,22 @@ export function ConfiguratorSidebar({
                   type="number"
                   step="0.1"
                   max="0.5"
-                  value={design.imageOptions?.imageSize || 0.4}
-                  onChange={e => updateNested("imageOptions", "imageSize", parseFloat(e.target.value))}
+                  value={design.imageOptions?.imageSize ?? 0.4}
+                  onChange={e => {
+                    const val = parseFloat(e.target.value);
+                    updateNested("imageOptions", "imageSize", isNaN(val) ? '' : val);
+                  }}
                 />
               </div>
               <div className="space-y-2">
                 <Label>Padding</Label>
                 <Input 
                   type="number"
-                  value={design.imageOptions?.margin || 0}
-                  onChange={e => updateNested("imageOptions", "margin", parseInt(e.target.value))}
+                  value={design.imageOptions?.margin ?? 0}
+                  onChange={e => {
+                    const val = parseInt(e.target.value);
+                    updateNested("imageOptions", "margin", isNaN(val) ? '' : val);
+                  }}
                 />
               </div>
             </div>
@@ -405,44 +364,54 @@ export function ConfiguratorSidebar({
             </div>
           </AccordionContent>
         </AccordionItem>
-        
-        {/* Advanced */}
-        <AccordionItem value="advanced" className="border-b-0 border-t">
-          <AccordionTrigger className="px-4 hover:bg-muted/50 data-[state=open]:bg-muted/20">
-            <div className="flex items-center"><Settings className="w-4 h-4 mr-2" /> Advanced</div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-2 space-y-4">
-            <div className="space-y-2">
-              <Label>Error Correction Level</Label>
-              <Select 
-                value={design.qrOptions?.errorCorrectionLevel || "Q"} 
-                onValueChange={(v: any) => updateNested("qrOptions", "errorCorrectionLevel", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="L">Low (7%)</SelectItem>
-                  <SelectItem value="M">Medium (15%)</SelectItem>
-                  <SelectItem value="Q">Quartile (25%)</SelectItem>
-                  <SelectItem value="H">High (30%)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+
 
         {/* Export */}
         <AccordionItem value="export" className="border-b-0 border-t">
           <AccordionTrigger className="px-4 hover:bg-muted/50 data-[state=open]:bg-muted/20">
             <div className="flex items-center"><Download className="w-4 h-4 mr-2" /> Export</div>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-2 space-y-4">
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="w-full" onClick={() => onExport("png")}>PNG</Button>
-              <Button variant="outline" className="w-full" onClick={() => onExport("svg")}>SVG</Button>
-              <Button variant="outline" className="w-full" onClick={() => onExport("jpeg")}>JPEG</Button>
-              <Button variant="outline" className="w-full" onClick={() => onExport("webp")}>WEBP</Button>
+          <AccordionContent className="px-4 pb-4 pt-2 space-y-6">
+            <div className="space-y-4">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Generation Mode</h4>
+              <div className="grid grid-cols-2 gap-2 bg-muted/50 p-1 rounded-lg">
+                <Button 
+                  variant={generationMode === "single" ? "secondary" : "ghost"} 
+                  className="h-8 text-xs shadow-none"
+                  onClick={() => setGenerationMode?.("single")}
+                >
+                  Single QR
+                </Button>
+                <Button 
+                  variant={generationMode === "bulk" ? "secondary" : "ghost"} 
+                  className={`h-8 text-xs shadow-none ${generationMode !== "bulk" ? "text-muted-foreground" : ""}`}
+                  onClick={() => setGenerationMode?.("bulk")}
+                >
+                  Bulk Sequential
+                </Button>
+              </div>
+
+              {generationMode === "bulk" && bulkOptions && setBulkOptions && (
+                <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border">
+                  <div className="space-y-2">
+                    <Label>Quantity</Label>
+                    <Input type="number" min={1} max={10000} value={bulkOptions.quantity} onChange={e => setBulkOptions({ ...bulkOptions, quantity: parseInt(e.target.value) || 1 })} />
+                  </div>
+                  <div className="text-xs text-muted-foreground p-2 bg-muted rounded-md flex items-center justify-center text-center">
+                    Generating {bulkOptions.quantity} unique QR codes with random 12-character alphanumeric IDs (e.g. X845AVLMR78V).
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-border">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Export Format</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="w-full" onClick={() => onExport("png")}>PNG</Button>
+                <Button variant="outline" className="w-full" onClick={() => onExport("svg")}>SVG</Button>
+                <Button variant="outline" className="w-full" onClick={() => onExport("jpeg")}>JPEG</Button>
+                <Button variant="outline" className="w-full" onClick={() => onExport("webp")}>WEBP</Button>
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>

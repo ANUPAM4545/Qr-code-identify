@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Printer, Settings2, Download, RefreshCw } from "lucide-react";
+import { Printer, Settings2, Download, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QRCodeSVG } from "qrcode.react";
 import { toPng } from "html-to-image";
@@ -11,6 +11,9 @@ import { toast } from "sonner";
 
 export default function BadgeStudioPage({ params }: { params: Promise<{ eventId: string; guestId: string }> }) {
   const { eventId, guestId } = use(params);
+  const [badgeTemplate, setBadgeTemplate] = useState("Standard Attendee");
+  const [isSending, setIsSending] = useState(false);
+  const [customMessage, setCustomMessage] = useState("");
 
   const { data: guest, isLoading } = useQuery({
     queryKey: ["guest", eventId, guestId],
@@ -36,6 +39,7 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
+        fontEmbedCSS: '',
         style: {
           transform: "scale(1)",
           transformOrigin: "top left"
@@ -58,12 +62,104 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
     }
   };
 
+  const handleSendInvitation = async () => {
+    const badgeElement = document.getElementById("badge-preview-element");
+    if (!badgeElement) return;
+
+    try {
+      setIsSending(true);
+      toast.loading("Generating PDF & sending invitation...", { id: "send-toast" });
+      
+      const imgData = await toPng(badgeElement, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        fontEmbedCSS: '',
+        style: {
+          transform: "scale(1)",
+          transformOrigin: "top left"
+        }
+      });
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [101.6, 152.4] // 4x6 inches approx
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, 101.6, 152.4);
+      const pdfDataUri = pdf.output("datauristring");
+
+      const res = await fetch(`/api/events/${eventId}/guests/notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestIds: [guestId],
+          attachment: pdfDataUri,
+          customMessage: customMessage
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send");
+
+      toast.success("Invitation sent successfully with badge attached!", { id: "send-toast" });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to send invitation", { id: "send-toast" });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   if (isLoading || !guest) return <div className="p-8">Loading badge...</div>;
 
   // The QR payload (can be URL or JSON)
   const qrData = guest.qrCodeId 
     ? `https://identify.app/q/${guest.qrCodeId}` 
     : JSON.stringify({ g: guestId });
+
+  const getThemeStyles = () => {
+    switch (badgeTemplate) {
+      case "VIP Access":
+        return {
+          top: "bg-gradient-to-br from-amber-300 via-yellow-500 to-orange-500 text-black shadow-inner",
+          bottom: "bg-gradient-to-r from-yellow-600 to-amber-700 text-white",
+          bg: "bg-gradient-to-b from-amber-50 to-white",
+          text: "text-amber-950",
+          qrBorder: "border-amber-200 shadow-amber-100/50",
+          accent: "text-amber-700"
+        };
+      case "Speaker":
+        return {
+          top: "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 text-white shadow-inner",
+          bottom: "bg-gradient-to-r from-violet-700 to-fuchsia-700 text-white",
+          bg: "bg-gradient-to-b from-fuchsia-50 to-white",
+          text: "text-slate-900",
+          qrBorder: "border-fuchsia-200 shadow-fuchsia-100/50",
+          accent: "text-fuchsia-600"
+        };
+      case "Staff / Volunteer":
+        return {
+          top: "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-inner",
+          bottom: "bg-gradient-to-r from-emerald-700 to-teal-800 text-white",
+          bg: "bg-gradient-to-b from-emerald-50 to-white",
+          text: "text-slate-900",
+          qrBorder: "border-emerald-200 shadow-emerald-100/50",
+          accent: "text-emerald-600"
+        };
+      default: // Standard Attendee
+        return {
+          top: "bg-slate-900 text-white",
+          bottom: "bg-slate-800 text-white",
+          bg: "bg-white",
+          text: "text-slate-900",
+          qrBorder: "border-slate-100 shadow-slate-100/50",
+          accent: "text-slate-500"
+        };
+    }
+  };
+
+  const theme = getThemeStyles();
 
   return (
     <div className="h-full flex">
@@ -77,7 +173,11 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
         <div className="mt-8 space-y-6 flex-1">
           <div className="space-y-3">
             <label className="text-sm font-medium">Template</label>
-            <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm">
+            <select 
+              value={badgeTemplate}
+              onChange={(e) => setBadgeTemplate(e.target.value)}
+              className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
+            >
               <option>Standard Attendee</option>
               <option>VIP Access</option>
               <option>Speaker</option>
@@ -92,6 +192,16 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
               <option>A4 Sheet (6 per page)</option>
             </select>
           </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Email Message</label>
+            <textarea 
+              value={customMessage}
+              onChange={(e) => setCustomMessage(e.target.value)}
+              placeholder="Optional custom message..."
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm min-h-[80px]"
+            />
+          </div>
         </div>
 
         <div className="pt-6 border-t border-border space-y-3">
@@ -100,6 +210,9 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
           </Button>
           <Button variant="outline" className="w-full" onClick={handleDownloadPDF}>
             <Download className="w-4 h-4 mr-2" /> Download PDF
+          </Button>
+          <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleSendInvitation} disabled={isSending}>
+            <Send className="w-4 h-4 mr-2" /> {isSending ? "Sending..." : "Send Invitation"}
           </Button>
         </div>
       </div>
@@ -110,42 +223,43 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
         {/* Actual Printable Badge Element */}
         <div 
           id="badge-preview-element"
-          className="bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col relative print:shadow-none print:rounded-none"
+          className="bg-white shadow-2xl shadow-black/10 rounded-[2rem] overflow-hidden flex flex-col relative print:shadow-none print:rounded-none ring-1 ring-black/5"
           style={{ width: '400px', height: '600px' }}
         >
           {/* Top Branding Banner */}
-          <div className="h-32 bg-primary flex items-center justify-center p-6 text-primary-foreground">
+          <div className={`h-36 flex items-center justify-center p-6 ${theme.top}`}>
             {/* Event Logo Placeholder */}
-            <div className="text-2xl font-black tracking-tighter uppercase opacity-90">
-              IDENTIFY 2026
+            <div className="text-3xl font-black tracking-tighter uppercase opacity-95 flex flex-col items-center">
+              <span>IDENTIFY</span>
+              <span className="text-sm font-bold tracking-[0.3em] opacity-80 mt-1">2026</span>
             </div>
           </div>
 
           {/* Attendee Details */}
-          <div className="flex-1 flex flex-col items-center pt-10 px-8 text-center bg-white text-black">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 leading-tight">
+          <div className={`flex-1 flex flex-col items-center pt-10 px-8 text-center ${theme.bg}`}>
+            <h1 className={`text-4xl font-bold tracking-tight leading-tight ${theme.text}`}>
               {guest.firstName}
               <br />
               {guest.lastName}
             </h1>
             
             {guest.organization && (
-              <p className="text-xl text-gray-500 mt-4 font-medium uppercase tracking-widest">
+              <p className={`text-xl mt-4 font-bold uppercase tracking-widest ${theme.accent}`}>
                 {guest.organization}
               </p>
             )}
             
             {guest.title && (
-              <p className="text-gray-400 mt-1">
+              <p className="text-slate-500 mt-2 font-medium">
                 {guest.title}
               </p>
             )}
 
             {/* Dynamic QR Code */}
-            <div className="mt-auto mb-10 p-4 bg-white rounded-xl border-2 border-gray-100 shadow-sm">
+            <div className={`mt-auto mb-10 p-5 bg-white rounded-2xl border shadow-lg ${theme.qrBorder}`}>
               <QRCodeSVG 
                 value={qrData} 
-                size={140}
+                size={160}
                 level="H"
                 includeMargin={false}
               />
@@ -153,8 +267,10 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
           </div>
 
           {/* Bottom Group/Ticket Banner */}
-          <div className="h-16 bg-gray-900 flex items-center justify-center text-white text-lg font-bold tracking-widest uppercase">
-            {guest.status === "approved" ? "General Admission" : "Pending"}
+          <div className={`h-16 flex items-center justify-center text-lg font-bold tracking-[0.2em] uppercase ${theme.bottom}`}>
+            {guest.status !== "approved" ? "Pending" : 
+              (badgeTemplate === "Standard Attendee" ? "General Admission" : badgeTemplate)
+            }
           </div>
         </div>
 

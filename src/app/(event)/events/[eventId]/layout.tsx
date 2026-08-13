@@ -21,7 +21,9 @@ import {
   QrCode, 
   Users, 
   ScanLine, 
-  BarChart
+  BarChart,
+  ClipboardList,
+  Bell
 } from "lucide-react";
 
 export default async function EventLayout({
@@ -90,9 +92,11 @@ export default async function EventLayout({
   const eventNavigation = [
     { name: "← Back to Events", href: "/events", icon: <LayoutDashboard /> },
     { name: "Dashboard", href: `/events/${eventId}`, icon: <LayoutDashboard /> },
+    { name: "Registration", href: `/events/${eventId}/registration`, icon: <ClipboardList /> },
     { name: "QR Studio", href: `/events/${eventId}/qr`, icon: <QrCode /> },
     { name: "Guests", href: `/events/${eventId}/guests`, icon: <Users /> },
     { name: "Scanner", href: `/events/${eventId}/scanner`, icon: <ScanLine /> },
+    { name: "Notifications", href: `/events/${eventId}/notifications`, icon: <Bell /> },
     { name: "Analytics", href: `/events/${eventId}/analytics`, icon: <BarChart /> },
     { name: "Settings", href: `/events/${eventId}/settings`, icon: <Settings /> },
   ];

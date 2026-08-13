@@ -17,11 +17,12 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
   const [filter, setFilter] = useState("all");
   const [shapeFilter, setShapeFilter] = useState("all");
   const [pdfLayout, setPdfLayout] = useState(32);
+  const [imageFormat, setImageFormat] = useState<"png" | "jpeg" | "svg">("png");
 
   const pdfLayoutOptions = [8, 20, 24, 28, 30, 32];
 
   const handleDownload = () => {
-    onDownload({ format, filter, shapeFilter, pdfLayout });
+    onDownload({ format, filter, shapeFilter, pdfLayout, imageFormat });
   };
 
   return (
@@ -38,7 +39,7 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
 
         <div className="p-6 space-y-8">
           
-          <div className="grid grid-cols-2 gap-8">
+          <div className="space-y-8">
             {/* Format Column */}
             <div className="space-y-3">
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">1. FORMAT</Label>
@@ -46,49 +47,24 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("pdf_a4")}
-                  className={`w-full justify-start h-10 ${format === "pdf_a4" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                  className={`w-full justify-start h-10 ${format === "pdf_a4" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
                 >
                   A4 PDF Document
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("pdf_sticker")}
-                  className={`w-full justify-start h-10 ${format === "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                  className={`w-full justify-start h-10 ${format === "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
                 >
-                  12"x18" Sticker Sheet (96)
+                  Large Sticker Sheet
                 </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => setFormat("zip")}
-                  className={`w-full justify-start h-10 ${format === "zip" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"}`}
+                  className={`w-full justify-start h-10 ${format === "zip" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
                 >
                   ZIP Archive
                 </Button>
-              </div>
-            </div>
-
-            {/* Filter Column */}
-            <div className="space-y-3">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">2. FILTER</Label>
-              <div className="space-y-4">
-                <Select value={filter} onValueChange={v => setFilter(v || "all")}>
-                  <SelectTrigger className="w-full bg-background border-input h-10 text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="all">All Codes</SelectItem>
-                    <SelectItem value="published">Published Only</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={shapeFilter} onValueChange={v => setShapeFilter(v || "all")}>
-                  <SelectTrigger className="w-full bg-background border-input h-10 text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="all">All Shapes</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </div>
@@ -96,7 +72,7 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
           {/* PDF Layout */}
           {format.startsWith("pdf") && (
             <div className="space-y-3 pt-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">3. PDF LAYOUT (PER PAGE)</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">2. PDF LAYOUT (PER PAGE)</Label>
               <div className="grid grid-cols-3 gap-2">
                 {pdfLayoutOptions.map((layout) => (
                   <Button
@@ -104,12 +80,29 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
                     variant="outline"
                     onClick={() => setPdfLayout(layout)}
                     disabled={format === "pdf_sticker"} // Sticker layout usually has fixed per-page
-                    className={`h-9 ${pdfLayout === layout && format !== "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "bg-background border-input text-foreground hover:bg-accent hover:text-accent-foreground"} ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`h-9 ${pdfLayout === layout && format !== "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"} ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {layout}
                   </Button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* ZIP Image Format */}
+          {format === "zip" && (
+            <div className="space-y-3 pt-2">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">2. IMAGE FORMAT</Label>
+              <Select value={imageFormat} onValueChange={(v: any) => setImageFormat(v || "png")}>
+                <SelectTrigger className="w-full bg-background border-input h-10 text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border text-popover-foreground">
+                  <SelectItem value="png">PNG Format</SelectItem>
+                  <SelectItem value="jpeg">JPEG Format</SelectItem>
+                  <SelectItem value="svg">SVG Format</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>

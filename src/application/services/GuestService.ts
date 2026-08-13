@@ -105,7 +105,7 @@ export class GuestService {
     const guest = await guestRepository.findById(guestId);
     if (!guest) throw new Error("Guest not found");
 
-    if (guest.status === "approved") return; // Idempotent
+    if (guest.status === "approved" && (!generateQR || guest.qrCodeId)) return; // Idempotent
 
     const updatePayload: Partial<GuestDocument> = {
       status: "approved",

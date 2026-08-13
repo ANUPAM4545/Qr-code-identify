@@ -25,10 +25,7 @@ export function EventHealth({ eventId }: { eventId: string }) {
   const checkItems = [
     { key: 'registration', label: 'Registration Configured' },
     { key: 'qr', label: 'QR Design Configured' },
-    { key: 'scanner', label: 'Scanner Ready' },
-    { key: 'branding', label: 'Branding Complete' },
-    { key: 'guests', label: 'Guests Imported' },
-    { key: 'notifications', label: 'Notifications Configured' }
+    { key: 'guests', label: 'Guests Imported' }
   ];
 
   return (

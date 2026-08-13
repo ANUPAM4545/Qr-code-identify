@@ -97,7 +97,7 @@ export interface Event {
   templateId?: string | null;
   status: EventStatus;
   venue?: string | null;
-  timezone: string;
+  endDate: Date;
   date: Date;
   qrSettings?: Record<string, unknown>;
   createdAt: Date;

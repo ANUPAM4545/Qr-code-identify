@@ -43,7 +43,7 @@ export class EventService {
     workspaceId: string, 
     name: string, 
     slug: string, 
-    timezone: string, 
+    endDate: Date, 
     date: Date, 
     venue?: string,
     description?: string,
@@ -58,7 +58,7 @@ export class EventService {
       description: description || null,
       templateId: templateId || null,
       status: "draft",
-      timezone,
+      endDate,
       date,
       venue: venue || null,
     });
@@ -136,7 +136,7 @@ export class EventService {
       description: originalEvent.description,
       templateId: originalEvent.templateId,
       status: "draft",
-      timezone: originalEvent.timezone,
+      endDate: originalEvent.endDate,
       date: newDate,
       venue: originalEvent.venue,
     });

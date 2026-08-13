@@ -47,6 +47,7 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isNotifying, setIsNotifying] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -94,6 +95,59 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
     } catch (e) {
       toast.error("Bulk action failed");
     }
+  };
+
+  const handleNotifyAction = async (guestIds: string[]) => {
+    if (guestIds.length === 0) return;
+    setIsNotifying(true);
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestIds })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Successfully sent invitations to ${data.count} guests`);
+        setSelectedGuests(new Set());
+        refetch();
+      } else {
+        toast.error(data.error || "Failed to send notifications");
+      }
+    } catch (e) {
+      toast.error("Failed to send notifications");
+    } finally {
+      setIsNotifying(false);
+    }
+  };
+
+  const handleExportSelected = () => {
+    if (!data) return;
+    const selected = data.filter(g => selectedGuests.has(g._id as string));
+    if (selected.length === 0) return;
+
+    const headers = ["First Name", "Last Name", "Email", "Organization", "Status", "Ticket Type", "Created At"];
+    const csvContent = [
+      headers.join(","),
+      ...selected.map(g => [
+        `"${g.firstName}"`,
+        `"${g.lastName}"`,
+        `"${g.email}"`,
+        `"${g.organization || ""}"`,
+        `"${g.status}"`,
+        `"${g.ticketType || "General"}"`,
+        `"${new Date(g.createdAt).toLocaleString()}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `guests_export_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSingleAction = async (guestId: string, action: string) => {
@@ -262,14 +316,22 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                 More Actions
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleBulkAction("approved")}>
+                <DropdownMenuItem onSelect={() => handleBulkAction("approved")}>
                   <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" /> Approve All
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("rejected")}>
+                <DropdownMenuItem onSelect={() => handleBulkAction("rejected")}>
                   <XCircle className="w-4 h-4 mr-2 text-red-500" /> Reject All
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => {
+                  e.preventDefault();
+                  handleNotifyAction(Array.from(selectedGuests));
+                }} disabled={isNotifying}>
+                  {isNotifying ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Inbox className="w-4 h-4 mr-2" />}
+                  Send Invitations & Badges
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => handleExportSelected()}>
                   <Download className="w-4 h-4 mr-2" /> Export Selected
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -390,8 +452,8 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                         <DropdownMenuItem onClick={() => handleSingleAction(guest._id as string, "approved")}>
                           Assign QR Badge
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast.success("Invitation sent to guest's email!")}>
-                          Send Invitation
+                        <DropdownMenuItem onClick={() => handleNotifyAction([guest._id as string])} disabled={isNotifying}>
+                          Send Invitation & Badge
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

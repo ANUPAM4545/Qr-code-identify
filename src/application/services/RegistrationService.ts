@@ -173,4 +173,23 @@ export class RegistrationService {
       workspaceId
     );
   }
+  static async waitlistSubmission(
+    workspaceId: string,
+    eventId: string,
+    submissionId: string,
+    actorId: string
+  ): Promise<void> {
+    await registrationSubmissionRepository.update(submissionId, {
+      status: "waitlisted",
+      reviewedAt: new Date(),
+      reviewedBy: actorId
+    });
+
+    await AuditService.log(
+      actorId,
+      "REGISTRATION_WAITLISTED",
+      { eventId, submissionId },
+      workspaceId
+    );
+  }
 }

@@ -46,6 +46,13 @@ export class GuestRepository extends MongoRepository<GuestDocument> {
     return { data, total };
   }
 
+  async findByIds(ids: string[]): Promise<GuestDocument[]> {
+    const collection = await this.getCollection();
+    const objectIds = ids.map(id => new ObjectId(id));
+    const results = await collection.find({ _id: { $in: objectIds } }).toArray();
+    return results.map(r => ({ ...r, _id: r._id.toString() })) as unknown as GuestDocument[];
+  }
+
   async insertMany(guests: Omit<GuestDocument, "_id">[]): Promise<string[]> {
     const collection = await this.getCollection();
     const result = await collection.insertMany(guests as unknown as import("mongodb").OptionalId<import("mongodb").Document>[]);

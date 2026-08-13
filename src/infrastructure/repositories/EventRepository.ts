@@ -14,8 +14,13 @@ export class EventRepository extends MongoRepository<Event> {
     return this.findOne({ workspaceId, slug });
   }
 
-  async findByUniqueSlug(uniqueSlug: string): Promise<Event | null> {
-    return this.findOne({ uniqueSlug });
+  async findByUniqueSlug(slugOrUniqueSlug: string): Promise<Event | null> {
+    return this.findOne({ 
+      $or: [
+        { uniqueSlug: slugOrUniqueSlug },
+        { slug: slugOrUniqueSlug }
+      ]
+    });
   }
 }
 

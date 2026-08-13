@@ -5,7 +5,6 @@ import { EventHero } from "./components/EventHero";
 import { KPIGrid } from "./components/KPIGrid";
 import { EventProgress } from "./components/EventProgress";
 import { ActivityFeed } from "./components/ActivityFeed";
-import { TeamActivity } from "./components/TeamActivity";
 import { EventHealth } from "./components/EventHealth";
 
 export default function EventDashboardPage() {
@@ -29,10 +28,9 @@ export default function EventDashboardPage() {
           <ActivityFeed eventId={eventId} />
         </div>
 
-        {/* Right Column: Team, Health (4 cols) */}
+        {/* Right Column: Health (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           <EventHealth eventId={eventId} />
-          <TeamActivity eventId={eventId} />
         </div>
         
       </div>

@@ -114,12 +114,9 @@ export class DashboardService {
     ]);
 
     const checks = {
-      branding: !!event.coverImage,
       qr: !!hasQRs,
       guests: !!hasGuests,
-      registration: !!hasRegistrations,
-      scanner: true, // Placeholder until scanner configuration is defined
-      notifications: false // Placeholder until email templates are defined
+      registration: !!hasRegistrations
     };
 
     const totalChecks = Object.keys(checks).length;

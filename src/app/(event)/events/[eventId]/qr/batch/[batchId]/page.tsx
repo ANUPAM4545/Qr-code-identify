@@ -81,31 +81,7 @@ export default function BatchGalleryPage({ params }: { params: Promise<{ batchId
               />
             </div>
             
-            <Select value={statusFilter} onValueChange={v => setStatusFilter(v || "all")}>
-              <SelectTrigger className="w-[130px] bg-background border-input h-10 text-sm">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border text-popover-foreground">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
 
-            <Select value={sortOrder} onValueChange={v => setSortOrder(v || "newest")}>
-              <SelectTrigger className="w-[130px] bg-background border-input h-10 text-sm">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border text-popover-foreground">
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white w-10 p-0 shadow-lg shadow-indigo-900/20">
-              <Search className="w-4 h-4" />
-            </Button>
-            
             <Button 
               variant="outline" 
               className="bg-background hover:bg-muted border-input text-foreground"
@@ -131,7 +107,8 @@ export default function BatchGalleryPage({ params }: { params: Promise<{ batchId
               await BatchDownloadEngine.generate({
                 qrs: toDownload,
                 format: options.format,
-                pdfLayout: options.pdfLayout
+                pdfLayout: options.pdfLayout,
+                imageFormat: options.imageFormat
               });
             
               // Fire and forget logging
@@ -159,14 +136,9 @@ export default function BatchGalleryPage({ params }: { params: Promise<{ batchId
           {filteredQRs.map((qr: any) => (
             <div key={qr._id} className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-colors flex flex-col group shadow-sm">
               <div className="aspect-square bg-white p-4 flex items-center justify-center relative overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center relative z-10 pointer-events-none transform scale-75 origin-center">
+                <div className="w-full h-full flex items-center justify-center relative z-10 pointer-events-none [&>div]:!min-w-0 [&>div]:!min-h-0 [&>div]:!w-full [&>div]:!h-full [&_svg]:!w-full [&_svg]:!h-auto [&_svg]:!max-w-full [&_svg]:!max-h-full [&_canvas]:!w-full [&_canvas]:!h-auto [&_canvas]:!max-w-full [&_canvas]:!max-h-full">
                   <QRCanvas options={qr.design} qrRef={{ current: null }} />
                 </div>
-                {qr.status === "published" && (
-                  <div className="absolute bottom-2 right-2 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded uppercase shadow-sm z-20">
-                    NEW
-                  </div>
-                )}
               </div>
               <div className="p-3 text-center flex flex-col justify-center flex-1 bg-muted/50 group-hover:bg-muted transition-colors border-t border-border/50">
                 <p className="text-[11px] font-mono font-medium text-muted-foreground tracking-wider">

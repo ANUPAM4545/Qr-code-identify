@@ -43,6 +43,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ev
 
     const { eventId } = await params;
 
+    if (updates.date) updates.date = new Date(updates.date);
+    if (updates.endDate) updates.endDate = new Date(updates.endDate);
+
     // Direct status updates are handled by /action endpoints usually, but if provided, use updateStatus
     if (updates.status) {
       const result = await EventService.updateStatus(session.user.id, workspaceId, eventId, updates.status);

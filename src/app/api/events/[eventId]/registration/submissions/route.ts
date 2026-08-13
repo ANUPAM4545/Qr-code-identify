@@ -22,7 +22,30 @@ export async function GET(
 
     const submissions = await registrationSubmissionRepository.findByEventId(eventId);
     
-    return NextResponse.json(submissions);
+    // Fetch associated guests to get qrCodeId
+    const { guestRepository } = await import("@/infrastructure/repositories/GuestRepository");
+    const { ObjectId } = await import("mongodb");
+    const guestIds = submissions.map(s => s.guestId ? s.guestId.toString() : undefined).filter(Boolean) as string[];
+    
+    let guestMap: Record<string, string> = {}; // guestId -> qrCodeId
+    if (guestIds.length > 0) {
+      const guests = await guestRepository.findByIds(guestIds);
+      
+      guestMap = guests.reduce((acc: Record<string, string>, guest: import("@/domain/types").GuestDocument) => {
+        if (guest.qrCodeId) {
+          acc[guest._id!.toString()] = guest.qrCodeId;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+    }
+
+    const populatedSubmissions = submissions.map(sub => ({
+      ...sub,
+      guestId: sub.guestId ? sub.guestId.toString() : undefined,
+      qrCodeId: sub.guestId ? guestMap[sub.guestId.toString()] : undefined
+    }));
+    
+    return NextResponse.json(populatedSubmissions);
   } catch (error: unknown) {
     return NextResponse.json({ error: (error as Error).message || String(error) }, { status: 500 });
   }

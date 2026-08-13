@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +20,7 @@ const workspaceSchema = z.object({
 const eventSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
-  timezone: z.string().min(1, "Timezone is required"),
+  endDate: z.string().min(1, "End Date is required"),
   date: z.string().min(1, "Date is required"),
   venue: z.string().optional(),
 });
@@ -64,11 +64,27 @@ export default function OnboardingPage() {
     defaultValues: {
       name: "",
       slug: "",
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      endDate: new Date().toISOString().split("T")[0],
       date: new Date().toISOString().split("T")[0],
       venue: "",
     },
   });
+
+  const workspaceName = workspaceForm.watch("name");
+  useEffect(() => {
+    if (workspaceName && !workspaceForm.formState.dirtyFields.slug) {
+      const slug = workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      workspaceForm.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [workspaceName, workspaceForm]);
+
+  const eventName = eventForm.watch("name");
+  useEffect(() => {
+    if (eventName && !eventForm.formState.dirtyFields.slug) {
+      const slug = eventName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      eventForm.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [eventName, eventForm]);
 
   const onWorkspaceSubmit = async (values: z.infer<typeof workspaceSchema>) => {
     try {
@@ -178,6 +194,10 @@ export default function OnboardingPage() {
                       placeholder="acme-corp" 
                       className="rounded-l-none"
                       {...workspaceForm.register("slug")} 
+                      onChange={(e) => {
+                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                        workspaceForm.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
+                      }}
                     />
                   </div>
                   {workspaceForm.formState.errors.slug && (
@@ -231,6 +251,10 @@ export default function OnboardingPage() {
                     id="ev-slug" 
                     placeholder="tech-summit-2026" 
                     {...eventForm.register("slug")} 
+                    onChange={(e) => {
+                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                      eventForm.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
+                    }}
                   />
                   {eventForm.formState.errors.slug && (
                     <span className="text-xs text-destructive">{eventForm.formState.errors.slug.message}</span>
@@ -247,13 +271,22 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="ev-venue">Venue</Label>
+                    <Label htmlFor="ev-end-date">End Date</Label>
                     <Input 
-                      id="ev-venue" 
-                      placeholder="Moscone Center"
-                      {...eventForm.register("venue")} 
+                      id="ev-end-date" 
+                      type="date"
+                      {...eventForm.register("endDate")} 
                     />
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="ev-venue">Venue (Optional)</Label>
+                  <Input 
+                    id="ev-venue" 
+                    placeholder="Moscone Center"
+                    {...eventForm.register("venue")} 
+                  />
                 </div>
 
                 {eventForm.formState.errors.root && (

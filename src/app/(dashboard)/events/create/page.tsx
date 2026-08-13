@@ -17,7 +17,7 @@ const eventSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
   description: z.string().optional(),
-  timezone: z.string().min(1, "Timezone is required"),
+  endDate: z.string().min(1, "End Date is required"),
   date: z.string().min(1, "Date is required"),
   venue: z.string().optional(),
 });
@@ -45,7 +45,7 @@ export default function CreateEventPage() {
       name: "",
       slug: "",
       description: "",
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      endDate: new Date().toISOString().split("T")[0],
       date: "",
       venue: "",
     },
@@ -54,6 +54,14 @@ export default function CreateEventPage() {
   const { watch } = form;
    
   const values = watch();
+  
+  const eventName = watch("name");
+  useEffect(() => {
+    if (eventName && !form.formState.dirtyFields.slug) {
+      const slug = eventName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      form.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [eventName, form]);
 
   // Load draft logic would go here in useEffect (fetch latest draft from API)
 
@@ -70,8 +78,8 @@ export default function CreateEventPage() {
 
   const saveDraft = async (showToast = true) => {
     try {
-      if (!values.name || !values.slug || !values.date || !values.timezone) {
-        if (showToast) toast.error("Missing required fields (Date, Timezone) to save draft");
+      if (!values.name || !values.slug || !values.date || !values.endDate) {
+        if (showToast) toast.error("Missing required fields (Date, End Date) to save draft");
         return null;
       }
 
@@ -127,7 +135,7 @@ export default function CreateEventPage() {
   const nextStep = async () => {
     let fieldsToValidate: string[] = [];
     if (currentStep === 0) fieldsToValidate = ['name', 'slug'];
-    if (currentStep === 1) fieldsToValidate = ['date', 'timezone'];
+    if (currentStep === 1) fieldsToValidate = ['date', 'endDate'];
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isValid = await form.trigger(fieldsToValidate as any);
@@ -243,7 +251,14 @@ export default function CreateEventPage() {
                 
                 <div className="space-y-2">
                   <Label>Event URL Slug</Label>
-                  <Input {...form.register("slug")} placeholder="e.g. summit-2026" />
+                  <Input 
+                    {...form.register("slug")} 
+                    placeholder="e.g. summit-2026" 
+                    onChange={(e) => {
+                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                      form.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
+                    }}
+                  />
                   {form.formState.errors.slug && <p className="text-xs text-red-500">{form.formState.errors.slug.message}</p>}
                 </div>
                 
@@ -263,8 +278,8 @@ export default function CreateEventPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>Timezone</Label>
-                  <Input {...form.register("timezone")} placeholder="e.g. America/Los_Angeles" />
+                  <Label>End Date</Label>
+                  <Input type="date" {...form.register("endDate")} />
                 </div>
               </div>
             )}

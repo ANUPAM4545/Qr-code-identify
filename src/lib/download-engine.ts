@@ -7,11 +7,12 @@ export interface DownloadBatchOptions {
   qrs: any[]; // Array of QR documents
   format: "pdf_a4" | "pdf_sticker" | "zip";
   pdfLayout?: number; // 8, 20, 24, 28, 30, 32
+  imageFormat?: "png" | "jpeg" | "svg";
 }
 
 export const BatchDownloadEngine = {
   async generate(options: DownloadBatchOptions) {
-    const { qrs, format, pdfLayout = 32 } = options;
+    const { qrs, format, pdfLayout = 32, imageFormat = "png" } = options;
 
     if (qrs.length === 0) throw new Error("No QR codes to download.");
 
@@ -29,10 +30,10 @@ export const BatchDownloadEngine = {
         height: 1000,
       });
 
-      const blob = await qrCode.getRawData("png") as Blob;
+      const blob = await qrCode.getRawData(imageFormat as any) as Blob;
       if (blob) {
         qrBlobs.push({
-          name: `${qr.sequence || qr.shortId}.png`,
+          name: `${qr.sequence || qr.shortId}.${imageFormat}`,
           blob
         });
       }
