@@ -126,7 +126,7 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
     const selected = data.filter(g => selectedGuests.has(g._id as string));
     if (selected.length === 0) return;
 
-    const headers = ["First Name", "Last Name", "Email", "Organization", "Status", "Ticket Type", "Created At"];
+    const headers = ["First Name", "Last Name", "Email", "Organization", "Status", "Created At"];
     const csvContent = [
       headers.join(","),
       ...selected.map(g => [
@@ -135,7 +135,6 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
         `"${g.email}"`,
         `"${g.organization || ""}"`,
         `"${g.status}"`,
-        `"${g.ticketType || "General"}"`,
         `"${new Date(g.createdAt).toLocaleString()}"`
       ].join(","))
     ].join("\n");
