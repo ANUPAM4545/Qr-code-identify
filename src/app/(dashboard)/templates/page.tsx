@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { authOptions } from "@/lib/auth";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
 import { TemplatesClient } from "./components/TemplatesClient";
@@ -16,7 +17,18 @@ export default async function TemplatesPage() {
     redirect("/onboarding");
   }
 
-  const workspaceId = memberships[0].workspaceId;
+  const cookieStore = await cookies();
+  const savedWorkspaceId = cookieStore.get('active-workspace-id')?.value;
+  
+  let activeMembership = memberships[0];
+  if (savedWorkspaceId) {
+    const found = memberships.find(m => m.workspaceId === savedWorkspaceId);
+    if (found) {
+      activeMembership = found;
+    }
+  }
+
+  const workspaceId = activeMembership.workspaceId;
 
   return <TemplatesClient workspaceId={workspaceId} />;
 }

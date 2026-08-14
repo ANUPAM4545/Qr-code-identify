@@ -164,4 +164,37 @@ export class WorkspaceService {
 
     return true;
   }
+
+  static async deleteWorkspace(userId: string, workspaceId: string) {
+    // 1. Verify user is owner
+    const memberships = await membershipRepository.findMany({ workspaceId, userId, role: "owner" });
+    if (memberships.length === 0) {
+      throw new Error("Only workspace owners can delete a workspace.");
+    }
+
+    // 2. Delete workspace and all its cascading dependencies
+    // In a production app, you might want to do a soft delete or a background job.
+    // For now, we'll do a hard delete of the core items.
+    
+    // Delete memberships
+    const allMemberships = await membershipRepository.findMany({ workspaceId });
+    for (const member of allMemberships) {
+      await membershipRepository.delete(member._id as string);
+    }
+
+    // Delete invites
+    const invites = await inviteRepository.findMany({ workspaceId });
+    for (const invite of invites) {
+      await inviteRepository.delete(invite._id as string);
+    }
+
+    // Delete workspace
+    await workspaceRepository.delete(workspaceId);
+
+    // Audit Log
+    await AuditService.log(userId, "WORKSPACE_DELETED", { workspaceId }, workspaceId);
+
+    return true;
+  }
 }
+

@@ -77,10 +77,14 @@ export default function CreateEventPage() {
       }
 
       if (showToast) setIsSaving(true);
-      // Determine workspaceId (in a real app, from context)
-      const workspaceRes = await fetch("/api/workspaces");
-      const workspaces = await workspaceRes.json();
-      const workspaceId = workspaces[0]?.id;
+      // Determine workspaceId from cookie
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return null;
+      };
+      const workspaceId = getCookie("active-workspace-id");
 
       if (!workspaceId) return null;
 
@@ -140,9 +144,13 @@ export default function CreateEventPage() {
     } else {
       // Publish event or Create from Template
       try {
-        const workspaceRes = await fetch("/api/workspaces");
-        const workspaces = await workspaceRes.json();
-        const workspaceId = workspaces[0]?.id;
+        const getCookie = (name: string) => {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+          return null;
+        };
+        const workspaceId = getCookie("active-workspace-id");
 
         if (templateId) {
           // Create from template

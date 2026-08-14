@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { authOptions } from "@/lib/auth";
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
@@ -11,7 +12,18 @@ export default async function EventsPage() {
   const memberships = await membershipRepository.findByUserId(session.user.id);
   if (memberships.length === 0) return null;
 
-  const activeWorkspace = await workspaceRepository.findById(memberships[0].workspaceId);
+  const cookieStore = await cookies();
+  const savedWorkspaceId = cookieStore.get('active-workspace-id')?.value;
+  
+  let activeMembership = memberships[0];
+  if (savedWorkspaceId) {
+    const found = memberships.find(m => m.workspaceId === savedWorkspaceId);
+    if (found) {
+      activeMembership = found;
+    }
+  }
+
+  const activeWorkspace = await workspaceRepository.findById(activeMembership.workspaceId);
   if (!activeWorkspace) return null;
 
   return (

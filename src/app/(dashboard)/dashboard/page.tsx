@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { authOptions } from "@/lib/auth";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
@@ -18,7 +19,17 @@ export default async function DashboardPage() {
   const memberships = await membershipRepository.findByUserId(session.user.id);
   if (memberships.length === 0) return null;
 
-  const activeMembership = memberships[0];
+  const cookieStore = await cookies();
+  const savedWorkspaceId = cookieStore.get('active-workspace-id')?.value;
+  
+  let activeMembership = memberships[0];
+  if (savedWorkspaceId) {
+    const found = memberships.find(m => m.workspaceId === savedWorkspaceId);
+    if (found) {
+      activeMembership = found;
+    }
+  }
+
   const activeWorkspace = await workspaceRepository.findById(activeMembership.workspaceId);
   
   if (!activeWorkspace) return null;
@@ -57,7 +68,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted-foreground max-w-sm mb-8">
             You don&apos;t have any events yet. Create your first event to start managing registrations, check-ins, and analytics.
           </p>
-          <Button render={<Link href={`/onboarding?step=event&workspaceId=${activeWorkspace._id}`} />} nativeButton={false}>
+          <Button render={<Link href="/events/create" />} nativeButton={false}>
             Create Your First Event
           </Button>
         </div>

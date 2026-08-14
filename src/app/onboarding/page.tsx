@@ -17,38 +17,19 @@ const workspaceSchema = z.object({
   timezone: z.string().min(1, "Timezone is required"),
 });
 
-const eventSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
-  endDate: z.string().min(1, "End Date is required"),
-  date: z.string().min(1, "Date is required"),
-  venue: z.string().optional(),
-});
-
-type Step = "welcome" | "workspace" | "event";
-
 export default function OnboardingPage() {
   const router = useRouter();
-  // Since useSearchParams causes de-opt if not wrapped in Suspense, we use window.location.search for initial state.
   
-  const getInitialStep = (): Step => {
+  const getInitialStep = (): "welcome" | "workspace" => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const stepParam = params.get("step");
-      if (stepParam === "workspace" || stepParam === "event") return stepParam as Step;
+      if (stepParam === "workspace") return "workspace";
     }
     return "welcome";
   };
 
-  const getInitialWorkspace = (): string | null => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search).get("workspaceId");
-    }
-    return null;
-  };
-
-  const [step, setStep] = useState<Step>(getInitialStep);
-  const [workspaceId, setWorkspaceId] = useState<string | null>(getInitialWorkspace);
+  const [step, setStep] = useState<"welcome" | "workspace">(getInitialStep);
 
   const workspaceForm = useForm<z.infer<typeof workspaceSchema>>({
     resolver: zodResolver(workspaceSchema),
@@ -56,17 +37,6 @@ export default function OnboardingPage() {
       name: "",
       slug: "",
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    },
-  });
-
-  const eventForm = useForm<z.infer<typeof eventSchema>>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      endDate: new Date().toISOString().split("T")[0],
-      date: new Date().toISOString().split("T")[0],
-      venue: "",
     },
   });
 
@@ -78,14 +48,6 @@ export default function OnboardingPage() {
     }
   }, [workspaceName, workspaceForm]);
 
-  const eventName = eventForm.watch("name");
-  useEffect(() => {
-    if (eventName && !eventForm.formState.dirtyFields.slug) {
-      const slug = eventName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-      eventForm.setValue("slug", slug, { shouldValidate: true });
-    }
-  }, [eventName, eventForm]);
-
   const onWorkspaceSubmit = async (values: z.infer<typeof workspaceSchema>) => {
     try {
       const res = await fetch("/api/workspaces", {
@@ -96,31 +58,13 @@ export default function OnboardingPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create workspace");
       
-      setWorkspaceId(data.data._id);
-      setStep("event");
+      document.cookie = `active-workspace-id=${data.data._id}; path=/; max-age=31536000`; // 1 year
+      
+      router.refresh();
+      router.push("/dashboard");
     } catch (error: unknown) {
       if (error instanceof Error) {
         workspaceForm.setError("root", { message: error.message });
-      }
-    }
-  };
-
-  const onEventSubmit = async (values: z.infer<typeof eventSchema>) => {
-    if (!workspaceId) return;
-    try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, workspaceId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to create event");
-      
-      router.refresh();
-      router.push(`/events/${data.data._id}`);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        eventForm.setError("root", { message: error.message });
       }
     }
   };
@@ -215,95 +159,6 @@ export default function OnboardingPage() {
                   {workspaceForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Continue
                 </Button>
-              </form>
-            </motion.div>
-          )}
-
-          {step === "event" && (
-            <motion.div
-              key="event"
-              variants={fadeVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold tracking-tight">Create First Event</h2>
-                <p className="text-muted-foreground mt-1">Set up your first event. You can always change these details later.</p>
-              </div>
-
-              <form onSubmit={eventForm.handleSubmit(onEventSubmit)} className="flex flex-col gap-5">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="ev-name">Event Name</Label>
-                  <Input 
-                    id="ev-name" 
-                    placeholder="Annual Tech Summit 2026" 
-                    {...eventForm.register("name")} 
-                  />
-                  {eventForm.formState.errors.name && (
-                    <span className="text-xs text-destructive">{eventForm.formState.errors.name.message}</span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="ev-slug">Event Slug</Label>
-                  <Input 
-                    id="ev-slug" 
-                    placeholder="tech-summit-2026" 
-                    {...eventForm.register("slug")} 
-                    onChange={(e) => {
-                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
-                      eventForm.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
-                    }}
-                  />
-                  {eventForm.formState.errors.slug && (
-                    <span className="text-xs text-destructive">{eventForm.formState.errors.slug.message}</span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="ev-date">Date</Label>
-                    <Input 
-                      id="ev-date" 
-                      type="date"
-                      {...eventForm.register("date")} 
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="ev-end-date">End Date</Label>
-                    <Input 
-                      id="ev-end-date" 
-                      type="date"
-                      {...eventForm.register("endDate")} 
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="ev-venue">Venue (Optional)</Label>
-                  <Input 
-                    id="ev-venue" 
-                    placeholder="Moscone Center"
-                    {...eventForm.register("venue")} 
-                  />
-                </div>
-
-                {eventForm.formState.errors.root && (
-                  <div className="text-sm text-destructive font-medium p-3 bg-destructive/10 rounded-md">
-                    {eventForm.formState.errors.root.message}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-4 mt-4">
-                  <Button type="button" variant="ghost" className="flex-1" onClick={() => router.push("/dashboard")}>
-                    Skip for now
-                  </Button>
-                  <Button type="submit" size="lg" className="flex-1" disabled={eventForm.formState.isSubmitting}>
-                    {eventForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Complete Setup
-                  </Button>
-                </div>
               </form>
             </motion.div>
           )}

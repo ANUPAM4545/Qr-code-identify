@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { cookies } from "next/headers";
 import { authOptions } from "@/lib/auth";
 import { membershipRepository } from "@/infrastructure/repositories/MembershipRepository";
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
@@ -9,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { format } from "date-fns";
 import { GeneralSettingsForm } from "./components/GeneralSettingsForm";
+import { DeleteWorkspaceButton } from "@/components/dashboard/DeleteWorkspaceButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function WorkspaceSettingsPage() {
   const session = await getServerSession(authOptions);
@@ -17,7 +21,17 @@ export default async function WorkspaceSettingsPage() {
   const userMemberships = await membershipRepository.findByUserId(session.user.id);
   if (userMemberships.length === 0) return null;
 
-  const activeMembership = userMemberships[0];
+  const cookieStore = await cookies();
+  const savedWorkspaceId = cookieStore.get('active-workspace-id')?.value;
+  
+  let activeMembership = userMemberships[0];
+  if (savedWorkspaceId) {
+    const found = userMemberships.find(m => m.workspaceId === savedWorkspaceId);
+    if (found) {
+      activeMembership = found;
+    }
+  }
+
   const activeWorkspace = await workspaceRepository.findById(activeMembership.workspaceId);
   if (!activeWorkspace) return null;
 
@@ -111,9 +125,7 @@ export default async function WorkspaceSettingsPage() {
             </div>
             
             <div className="pt-2 border-t border-red-200/60">
-              <Button variant="destructive" className="w-full justify-center h-10 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-sm">
-                Delete Workspace
-              </Button>
+              <DeleteWorkspaceButton workspaceId={activeWorkspace._id as string} />
             </div>
           </section>
 
