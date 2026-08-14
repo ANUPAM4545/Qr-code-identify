@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Printer, Settings2, Download, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -122,39 +123,73 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
     switch (badgeTemplate) {
       case "VIP Access":
         return {
-          top: "bg-gradient-to-br from-amber-300 via-yellow-500 to-orange-500 text-black shadow-inner",
-          bottom: "bg-gradient-to-r from-yellow-600 to-amber-700 text-white",
-          bg: "bg-gradient-to-b from-amber-50 to-white",
-          text: "text-amber-950",
-          qrBorder: "border-amber-200 shadow-amber-100/50",
-          accent: "text-amber-700"
+          top: "bg-zinc-950 text-amber-400 border-b-2 border-amber-500/50",
+          bottom: "bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-zinc-950 font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-amber-200 bg-white shadow-2xl shadow-amber-900/10 ring-1 ring-amber-500/20",
+          accent: "text-amber-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-200/40 via-zinc-50 to-zinc-50"
         };
       case "Speaker":
         return {
-          top: "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 text-white shadow-inner",
-          bottom: "bg-gradient-to-r from-violet-700 to-fuchsia-700 text-white",
-          bg: "bg-gradient-to-b from-fuchsia-50 to-white",
-          text: "text-slate-900",
-          qrBorder: "border-fuchsia-200 shadow-fuchsia-100/50",
-          accent: "text-fuchsia-600"
+          top: "bg-zinc-950 text-fuchsia-400 border-b-2 border-fuchsia-500/50",
+          bottom: "bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-fuchsia-200 bg-white shadow-2xl shadow-fuchsia-900/10 ring-1 ring-fuchsia-500/20",
+          accent: "text-fuchsia-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-fuchsia-200/40 via-zinc-50 to-zinc-50"
         };
       case "Staff / Volunteer":
         return {
-          top: "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-inner",
-          bottom: "bg-gradient-to-r from-emerald-700 to-teal-800 text-white",
-          bg: "bg-gradient-to-b from-emerald-50 to-white",
-          text: "text-slate-900",
-          qrBorder: "border-emerald-200 shadow-emerald-100/50",
-          accent: "text-emerald-600"
+          top: "bg-zinc-950 text-emerald-400 border-b-2 border-emerald-500/50",
+          bottom: "bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-emerald-200 bg-white shadow-2xl shadow-emerald-900/10 ring-1 ring-emerald-500/20",
+          accent: "text-emerald-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-200/40 via-zinc-50 to-zinc-50"
+        };
+      case "Press / Media":
+        return {
+          top: "bg-zinc-950 text-blue-400 border-b-2 border-blue-500/50",
+          bottom: "bg-gradient-to-r from-blue-500 via-sky-500 to-blue-600 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-blue-200 bg-white shadow-2xl shadow-blue-900/10 ring-1 ring-blue-500/20",
+          accent: "text-blue-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-200/40 via-zinc-50 to-zinc-50"
+        };
+      case "Exhibitor":
+        return {
+          top: "bg-zinc-950 text-orange-400 border-b-2 border-orange-500/50",
+          bottom: "bg-gradient-to-r from-orange-500 via-red-500 to-rose-600 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-orange-200 bg-white shadow-2xl shadow-orange-900/10 ring-1 ring-orange-500/20",
+          accent: "text-orange-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-orange-200/40 via-zinc-50 to-zinc-50"
+        };
+      case "Sponsor":
+        return {
+          top: "bg-zinc-950 text-rose-400 border-b-2 border-rose-500/50",
+          bottom: "bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-rose-200 bg-white shadow-2xl shadow-rose-900/10 ring-1 ring-rose-500/20",
+          accent: "text-rose-600 font-black tracking-widest uppercase",
+          pattern: "bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-rose-200/40 via-zinc-50 to-zinc-50"
         };
       default: // Standard Attendee
         return {
-          top: "bg-slate-900 text-white",
-          bottom: "bg-slate-800 text-white",
-          bg: "bg-white",
-          text: "text-slate-900",
-          qrBorder: "border-slate-100 shadow-slate-100/50",
-          accent: "text-slate-500"
+          top: "bg-zinc-950 text-white border-b-2 border-zinc-800",
+          bottom: "bg-zinc-900 text-white font-black",
+          bg: "bg-zinc-50",
+          text: "text-zinc-950",
+          qrBorder: "border-zinc-200 bg-white shadow-2xl shadow-zinc-900/5 ring-1 ring-zinc-900/5",
+          accent: "text-zinc-500 font-bold tracking-widest uppercase",
+          pattern: "bg-zinc-50"
         };
     }
   };
@@ -182,6 +217,9 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
               <option>VIP Access</option>
               <option>Speaker</option>
               <option>Staff / Volunteer</option>
+              <option>Press / Media</option>
+              <option>Exhibitor</option>
+              <option>Sponsor</option>
             </select>
           </div>
 
@@ -218,61 +256,88 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
       </div>
 
       {/* Live Preview Area */}
-      <div className="flex-1 bg-muted/20 p-12 overflow-auto flex items-center justify-center print:p-0 print:bg-white">
+      <div className="flex-1 bg-muted/20 p-12 overflow-auto flex items-center justify-center print:p-0 print:bg-white perspective-[2000px]">
         
-        {/* Actual Printable Badge Element */}
-        <div 
-          id="badge-preview-element"
-          className="bg-white shadow-2xl shadow-black/10 rounded-[2rem] overflow-hidden flex flex-col relative print:shadow-none print:rounded-none ring-1 ring-black/5"
-          style={{ width: '400px', height: '600px' }}
+        {/* Floating Animation Wrapper */}
+        <motion.div
+          animate={{ 
+            y: [-15, 15, -15],
+            rotateX: [2, -2, 2],
+            rotateY: [-2, 2, -2]
+          }}
+          transition={{ 
+            duration: 8, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+          className="print:!transform-none"
         >
+          {/* Actual Printable Badge Element */}
+          <div 
+            id="badge-preview-element"
+            className="bg-white shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden flex flex-col relative print:shadow-none print:rounded-none ring-1 ring-black/5"
+            style={{ width: '400px', height: '600px' }}
+          >
           {/* Top Branding Banner */}
-          <div className={`h-36 flex items-center justify-center p-6 ${theme.top}`}>
-            {/* Event Logo Placeholder */}
-            <div className="text-3xl font-black tracking-tighter uppercase opacity-95 flex flex-col items-center">
-              <span>IDENTIFY</span>
-              <span className="text-sm font-bold tracking-[0.3em] opacity-80 mt-1">2026</span>
+          <div className={`h-28 flex items-center justify-center p-6 relative overflow-hidden ${theme.top}`}>
+            {/* Ambient light glow inside banner */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 blur-[40px] rounded-full pointer-events-none" />
+            <div className="text-3xl font-black tracking-tighter uppercase flex flex-col items-center relative z-10">
+              <span className="drop-shadow-md">IDENTIFY</span>
+              <span className="text-[10px] font-bold tracking-[0.4em] opacity-80 mt-1">2026</span>
             </div>
           </div>
 
           {/* Attendee Details */}
-          <div className={`flex-1 flex flex-col items-center pt-10 px-8 text-center ${theme.bg}`}>
-            <h1 className={`text-4xl font-bold tracking-tight leading-tight ${theme.text}`}>
+          <div className={`flex-1 flex flex-col items-center pt-8 px-6 text-center relative overflow-hidden ${theme.bg} ${theme.pattern}`}>
+            <h1 className={`text-4xl font-black tracking-tight leading-[1.1] relative z-10 ${theme.text}`}>
               {guest.firstName}
               <br />
               {guest.lastName}
             </h1>
             
             {guest.organization && (
-              <p className={`text-xl mt-4 font-bold uppercase tracking-widest ${theme.accent}`}>
+              <p className={`text-lg mt-4 relative z-10 ${theme.accent}`}>
                 {guest.organization}
               </p>
             )}
             
             {guest.title && (
-              <p className="text-slate-500 mt-2 font-medium">
+              <p className="text-zinc-500 mt-1 font-medium relative z-10">
                 {guest.title}
               </p>
             )}
 
             {/* Dynamic QR Code */}
-            <div className={`mt-auto mb-10 p-5 bg-white rounded-2xl border shadow-lg ${theme.qrBorder}`}>
+            <div className={`mt-auto mb-6 p-4 rounded-3xl border relative z-10 flex flex-col items-center justify-center ${theme.qrBorder}`}>
               <QRCodeSVG 
                 value={qrData} 
-                size={160}
+                size={140}
                 level="H"
                 includeMargin={false}
               />
+              <div className="mt-3 text-[10px] font-mono tracking-widest text-zinc-400 uppercase">
+                ID: {guestId.substring(0, 8)}
+              </div>
             </div>
           </div>
 
-          {/* Bottom Group/Ticket Banner */}
-          <div className={`h-16 flex items-center justify-center text-lg font-bold tracking-[0.2em] uppercase ${theme.bottom}`}>
-            {guest.status !== "approved" ? "Pending" : 
-              (badgeTemplate === "Standard Attendee" ? "General Admission" : badgeTemplate)
-            }
+          {/* Bottom Sleek Footer */}
+          <div className={`h-12 w-full flex items-center justify-between px-8 text-[10px] font-black tracking-widest uppercase relative overflow-hidden ${theme.bottom}`}>
+            <div className="flex gap-[2px] items-center opacity-50">
+               <div className="w-0.5 h-4 bg-current" />
+               <div className="w-1 h-4 bg-current" />
+               <div className="w-0.5 h-4 bg-current" />
+               <div className="w-2 h-4 bg-current" />
+               <div className="w-0.5 h-4 bg-current" />
+               <div className="w-1 h-4 bg-current ml-1" />
+               <div className="w-1.5 h-4 bg-current" />
+               <div className="w-0.5 h-4 bg-current" />
+            </div>
+            <span className="opacity-80">IDENTIFY.COM</span>
           </div>
         </div>
+        </motion.div>
 
       </div>
 

@@ -24,7 +24,7 @@ export class AnalyticsService {
     });
     
     // Total QR Scans
-    const totalScansAgg = await db.collection("qrcodes").aggregate([
+    const totalScansAgg = await db.collection("qr_codes").aggregate([
       { $match: { eventId } },
       { $group: { _id: null, total: { $sum: "$scanCount" } } }
     ]).toArray();
@@ -56,7 +56,7 @@ export class AnalyticsService {
       { 
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d %H:00", date: "$checkIns.timestamp" }
+            $dateToString: { format: "%Y-%m-%dT%H:%M:00Z", date: "$checkIns.timestamp" }
           },
           count: { $sum: 1 }
         }

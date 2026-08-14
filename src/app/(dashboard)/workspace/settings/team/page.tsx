@@ -4,8 +4,9 @@ import { membershipRepository } from "@/infrastructure/repositories/MembershipRe
 import { workspaceRepository } from "@/infrastructure/repositories/WorkspaceRepository";
 import { userRepository } from "@/infrastructure/repositories/UserRepository";
 import { Button } from "@/components/ui/button";
-import { Shield, MoreVertical, Mail } from "lucide-react";
+import { Shield, MoreVertical } from "lucide-react";
 import { InviteMemberModal } from "./components/InviteMemberModal";
+import { PendingInvitationsList } from "./components/PendingInvitationsList";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MemberActions } from "./components/MemberActions";
@@ -24,12 +25,26 @@ export default async function TeamSettingsPage() {
   
   // Fetch user details for all members
   const memberDetails = await Promise.all(allMemberships.map(async (m) => {
-    const user = await userRepository.findById(m.userId);
+    let user = await userRepository.findById(m.userId);
+    
+    // Fallback to session data if the current user's DB record is missing
+    if (!user && m.userId === session.user?.id) {
+      user = {
+        _id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+      } as any;
+    }
+    
     return {
       membership: m,
       user
     };
   }));
+
+  const currentUserMembership = allMemberships.find(m => m.userId === session.user?.id);
+  const currentUserRole = currentUserMembership?.role || 'member';
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-10 pb-12">
@@ -40,7 +55,9 @@ export default async function TeamSettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Team Management</h1>
           <p className="text-muted-foreground mt-1">Manage who has access to this workspace and their roles.</p>
         </div>
-        <InviteMemberModal />
+        {['owner', 'admin'].includes(currentUserRole) && (
+          <InviteMemberModal workspaceId={activeWorkspace._id as string} />
+        )}
       </div>
 
       <div className="flex flex-col gap-10">
@@ -51,7 +68,7 @@ export default async function TeamSettingsPage() {
               <p className="text-sm text-muted-foreground mt-1">Users currently in the workspace.</p>
             </div>
             <Badge variant="secondary" className="bg-zinc-200/50 text-zinc-700 font-medium px-2 py-0.5 border-none">
-              {allMemberships.length} Members
+              {allMemberships.length} Collaborators
             </Badge>
           </div>
           
@@ -90,6 +107,7 @@ export default async function TeamSettingsPage() {
                       membershipId={m._id as string} 
                       workspaceId={activeWorkspace._id as string}
                       currentRole={m.role}
+                      currentUserRole={currentUserRole}
                       isCurrentUser={isCurrentUser}
                     />
                   </div>
@@ -99,23 +117,10 @@ export default async function TeamSettingsPage() {
           </div>
         </section>
 
-        {/* Pending Invites Section - Mock for now as actual invites logic is out of scope for the quick fix */}
-        <section className="flex flex-col gap-0 rounded-2xl border border-zinc-200 border-dashed bg-white shadow-sm overflow-hidden opacity-70">
-          <div className="flex items-center justify-between p-6 border-b border-zinc-100 border-dashed">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight text-muted-foreground">Pending Invitations</h2>
-              <p className="text-sm text-muted-foreground mt-1">Invites that have not been accepted yet.</p>
-            </div>
-          </div>
-          
-          <div className="p-10 flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
-              <Mail className="w-5 h-5 text-zinc-400" />
-            </div>
-            <p className="text-sm font-medium text-zinc-600 mb-1">No pending invitations</p>
-            <p className="text-xs text-muted-foreground max-w-sm">When you invite team members, they will appear here until they accept the invitation.</p>
-          </div>
-        </section>
+        <PendingInvitationsList 
+          workspaceId={activeWorkspace._id as string} 
+          currentUserRole={currentUserRole} 
+        />
       </div>
     </div>
   );

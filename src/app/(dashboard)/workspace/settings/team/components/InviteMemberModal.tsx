@@ -1,5 +1,7 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { UserPlus } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -17,10 +19,36 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-export function InviteMemberModal() {
+export function InviteMemberModal({ workspaceId }: { workspaceId: string }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  const inviteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/workspaces/${workspaceId}/invites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to send invitation");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success(`Invitation sent to ${email}`);
+      queryClient.invalidateQueries({ queryKey: ['workspace-invites', workspaceId] });
+      setEmail("");
+      setRole("member");
+      setIsOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,24 +56,14 @@ export function InviteMemberModal() {
       toast.error("Please enter an email address");
       return;
     }
-
-    setIsLoading(true);
-    // Simulate API call for now since backend invite logic isn't fully wired for the sprint yet
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success(`Invitation sent to ${email}`);
-      // Usually here we would also close the modal, but Shadcn Base UI handles it via open state.
-      // For simplicity, we just reset the form.
-      setEmail("");
-      setRole("member");
-    }, 1000);
+    inviteMutation.mutate();
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className={buttonVariants({ variant: "default", className: "h-9" })}>
         <UserPlus className="w-4 h-4 mr-2" />
-        Invite Member
+        Invite
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -84,8 +102,8 @@ export function InviteMemberModal() {
             <DialogClose className={buttonVariants({ variant: "outline" })}>
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send Invite"}
+            <Button type="submit" disabled={inviteMutation.isPending}>
+              {inviteMutation.isPending ? "Sending..." : "Send Invite"}
             </Button>
           </DialogFooter>
         </form>

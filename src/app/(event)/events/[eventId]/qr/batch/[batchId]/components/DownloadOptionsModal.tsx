@@ -45,23 +45,23 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
               <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">1. FORMAT</Label>
               <div className="space-y-2">
                 <Button 
-                  variant="outline" 
+                  variant={format === "pdf_a4" ? "default" : "outline"} 
                   onClick={() => setFormat("pdf_a4")}
-                  className={`w-full justify-start h-10 ${format === "pdf_a4" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
+                  className="w-full justify-start h-10"
                 >
                   A4 PDF Document
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={format === "pdf_sticker" ? "default" : "outline"} 
                   onClick={() => setFormat("pdf_sticker")}
-                  className={`w-full justify-start h-10 ${format === "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
+                  className="w-full justify-start h-10"
                 >
                   Large Sticker Sheet
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={format === "zip" ? "default" : "outline"}
                   onClick={() => setFormat("zip")}
-                  className={`w-full justify-start h-10 ${format === "zip" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"}`}
+                  className="w-full justify-start h-10"
                 >
                   ZIP Archive
                 </Button>
@@ -77,10 +77,10 @@ export function DownloadOptionsModal({ onClose, onDownload, isDownloading }: Dow
                 {pdfLayoutOptions.map((layout) => (
                   <Button
                     key={layout}
-                    variant="outline"
+                    variant={pdfLayout === layout && format !== "pdf_sticker" ? "default" : "outline"}
                     onClick={() => setPdfLayout(layout)}
                     disabled={format === "pdf_sticker"} // Sticker layout usually has fixed per-page
-                    className={`h-9 ${pdfLayout === layout && format !== "pdf_sticker" ? "bg-primary border-primary text-primary-foreground hover:bg-primary/90" : "hover:!bg-transparent hover:!text-foreground"} ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`h-9 ${format === "pdf_sticker" ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {layout}
                   </Button>

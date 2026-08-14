@@ -3,17 +3,18 @@
 import { useDashboardProgress } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
 
 export function EventProgress({ eventId }: { eventId: string }) {
   const { data, isLoading, error } = useDashboardProgress(eventId);
 
   if (isLoading) {
-    return <Skeleton className="h-48 w-full rounded-2xl" />;
+    return <Skeleton className="h-[300px] w-full rounded-2xl" />;
   }
 
   if (error || !data) {
     return (
-      <div className="h-48 rounded-2xl border border-zinc-200 bg-white flex items-center justify-center text-zinc-500">
+      <div className="h-[300px] rounded-2xl border border-zinc-200 bg-white flex items-center justify-center text-zinc-500">
         <AlertCircle className="h-5 w-5 mr-2 text-zinc-400" />
         Failed to load progress
       </div>
@@ -23,54 +24,61 @@ export function EventProgress({ eventId }: { eventId: string }) {
   const { capacity, checkIns, qrs } = data;
   const capacityPct = capacity.max !== "Unlimited" && capacity.max > 0 ? Math.round((capacity.used / capacity.max) * 100) : 0;
 
+  const chartData = [
+    { 
+      name: 'Capacity', 
+      value: capacity.max !== "Unlimited" ? capacityPct : 100,
+      actualValue: capacity.max !== "Unlimited" ? `${capacityPct}%` : 'Unlimited',
+      detail: `${capacity.used} / ${capacity.max}`
+    },
+    { 
+      name: 'Check-ins', 
+      value: checkIns.rate,
+      actualValue: `${checkIns.rate}%`,
+      detail: `${checkIns.checkedIn} / ${checkIns.total}`
+    },
+    { 
+      name: 'QR Assigned', 
+      value: qrs.rate,
+      actualValue: `${qrs.rate}%`,
+      detail: `${qrs.assigned} / ${qrs.total}`
+    }
+  ];
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white border border-zinc-200 shadow-sm rounded-lg p-3 text-sm">
+          <p className="font-medium text-zinc-900 mb-1">{label}</p>
+          <p className="text-zinc-600">Progress: <span className="font-medium text-zinc-900">{data.actualValue}</span></p>
+          <p className="text-zinc-500 text-xs mt-1">{data.detail}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between min-h-[300px]">
       <h3 className="text-lg font-semibold tracking-tight text-zinc-900 mb-6">Operational Progress</h3>
       
-      <div className="flex flex-col gap-5 flex-1 justify-center">
-        {/* Capacity */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-zinc-700">Capacity</span>
-            <span className="text-zinc-500">
-              {capacity.used} / {capacity.max} <span className="font-medium text-zinc-900 ml-1">{capacity.max !== "Unlimited" ? `${capacityPct}%` : ""}</span>
-            </span>
-          </div>
-          <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-zinc-900 rounded-full transition-all" 
-              style={{ width: `${capacity.max !== "Unlimited" ? capacityPct : 0}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Check-ins */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-zinc-700">Check-ins</span>
-            <span className="font-medium text-zinc-900">{checkIns.rate}%</span>
-          </div>
-          <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-zinc-900 rounded-full transition-all" 
-              style={{ width: `${checkIns.rate}%` }}
-            />
-          </div>
-        </div>
-
-        {/* QR Assigned */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-zinc-700">QR Assigned</span>
-            <span className="font-medium text-zinc-900">{qrs.rate}%</span>
-          </div>
-          <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-zinc-900 rounded-full transition-all" 
-              style={{ width: `${qrs.rate}%` }}
-            />
-          </div>
-        </div>
+      <div className="flex-1 w-full h-full min-h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e4e4e7" />
+            <XAxis type="number" domain={[0, 100]} hide />
+            <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#3f3f46', fontSize: 13 }} width={100} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f4f4f5' }} />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+              {
+                chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.name === 'Capacity' && capacity.max === 'Unlimited' ? '#a1a1aa' : '#18181b'} />
+                ))
+              }
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

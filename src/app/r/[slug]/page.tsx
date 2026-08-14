@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, ChevronRight, Calendar, MapPin } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function PublicRegistrationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -143,62 +144,147 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
 
   if (success) {
     return (
-      <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-4 text-center">
-        <div className="bg-card border border-border/50 shadow-xl rounded-2xl p-10 max-w-lg w-full flex flex-col items-center">
-          <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-            <CheckCircle2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-4">{form?.branding?.successMessage || "Registration Complete"}</h1>
-          <p className="text-muted-foreground mb-8">
-            Thank you for registering for <span className="font-medium text-foreground">{event?.name as string}</span>. We&apos;ve received your information.
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 text-center relative overflow-hidden">
+        {/* Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="bg-white/5 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-[2.5rem] p-12 max-w-lg w-full flex flex-col items-center relative z-10"
+        >
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-8 border border-emerald-500/30"
+          >
+            <CheckCircle2 className="w-10 h-10" />
+          </motion.div>
+          <h1 className="text-3xl font-black tracking-tight mb-4 text-white">{form?.branding?.successMessage || "Registration Complete"}</h1>
+          <p className="text-zinc-400 mb-10 text-lg">
+            Thank you for registering for <span className="text-white font-medium">{event?.name as string}</span>. We've received your information securely.
           </p>
-          <Button variant="outline" className="w-full" onClick={() => window.location.reload()}>
+          <Button variant="outline" className="w-full h-14 rounded-2xl bg-white/5 border-white/10 text-white hover:bg-white/10 text-base font-semibold" onClick={() => window.location.reload()}>
             Register Another Guest
           </Button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 selection:bg-primary/20 pb-20">
-      {/* Cover Image */}
-      <div className="w-full h-48 md:h-64 bg-zinc-900 border-b border-border/50 relative overflow-hidden">
-        {form?.branding?.coverImage ? (
-          <Image src={form.branding.coverImage as string} alt="Cover" fill className="object-cover opacity-80" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950" />
-        )}
+    <div className="min-h-screen bg-[#050505] text-white selection:bg-emerald-500/30 pb-20 relative overflow-x-hidden">
+      
+      {/* Background White/Black Tech Grid Pattern */}
+      <div 
+        className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: 'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+      />
+
+      {/* Dynamic Ambient Background Elements (Animated) */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div 
+          animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-orange-500/10 blur-[140px] rounded-full mix-blend-screen" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[20%] -right-[10%] w-[50%] h-[70%] bg-white/5 blur-[120px] rounded-full mix-blend-screen" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-amber-500/10 blur-[130px] rounded-full mix-blend-screen" 
+        />
       </div>
 
-      <div className="max-w-2xl mx-auto -mt-20 relative z-10 px-4 sm:px-6">
-        {/* Form Card */}
-        <div className="bg-card border border-border/50 rounded-2xl shadow-xl overflow-hidden">
-          
-          <div className="p-8 md:p-10 border-b border-border/50 bg-card">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-card-foreground">{event?.name as string}</h1>
+      {/* Cover Image Area */}
+      <div className="w-full h-72 md:h-96 relative overflow-hidden z-10 border-b border-white/5">
+        {form?.branding?.coverImage ? (
+          <Image src={form.branding.coverImage as string} alt="Cover" fill className="object-cover opacity-60 mix-blend-overlay" />
+        ) : (
+          <div className="absolute inset-0 bg-white opacity-80" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]" />
+      </div>
+
+      <div className="max-w-2xl mx-auto -mt-16 relative z-20 px-4 sm:px-6">
+        
+        {/* Continuous Floating Wrapper */}
+        <motion.div
+          animate={{ y: [-4, 4, -4] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {/* Animated Form Card Container */}
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden ring-1 ring-white/5"
+          >
+          {/* Header Section */}
+          <div className="p-8 md:p-12 border-b border-white/5 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-[50px] rounded-full pointer-events-none" />
+            
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white relative z-10"
+            >
+              {event?.name as string}
+            </motion.h1>
+            
             {form?.branding?.showDateLocation !== false && (
-              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground font-medium">
-                {event?.date ? <span>{new Date(event.date as string).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}</span> : null}
-                {event?.date && event?.venue ? <span>•</span> : null}
-                {event?.venue ? <span>{event.venue as string}</span> : null}
-              </div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-zinc-400 font-medium relative z-10"
+              >
+                {!!event?.date && (
+                  <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+                    <Calendar className="w-4 h-4 text-emerald-400" />
+                    <span>{new Date(event.date as string).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </div>
+                )}
+                {!!event?.venue && (
+                  <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+                    <MapPin className="w-4 h-4 text-blue-400" />
+                    <span>{event.venue as string}</span>
+                  </div>
+                )}
+              </motion.div>
             )}
+            
             {!!(form?.branding?.showEventDescription !== false && event?.description) && (
-              <p className="text-muted-foreground mt-5 leading-relaxed">{event?.description as string}</p>
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-zinc-400 mt-6 leading-relaxed relative z-10"
+              >
+                {event?.description as string}
+              </motion.p>
             )}
           </div>
 
-          <div className="p-8 md:p-10">
+          {/* Form Section */}
+          <div className="p-8 md:p-12">
             {error && (
-              <div className="mb-8 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm font-medium">
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-medium flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                 {error}
-              </div>
+              </motion.div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="flex flex-wrap -mx-3">
-                {Array.isArray(form?.fields) && form.fields.map((field: import("@/domain/types").FormField) => {
+                {Array.isArray(form?.fields) && form.fields.map((field: import("@/domain/types").FormField, index: number) => {
                   if (field.hidden) return null;
 
                   if ((field.conditionalVisibility?.conditions?.length ?? 0) > 0) {
@@ -210,9 +296,15 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                   const isHalf = field.width === "half";
 
                   return (
-                    <div key={field.id} className={`px-3 mb-6 w-full ${isHalf ? "md:w-1/2" : ""}`}>
-                      <label className="text-sm font-semibold text-foreground mb-2 block">
-                        {field.label} {field.required && <span className="text-destructive">*</span>}
+                    <motion.div 
+                      key={field.id} 
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + (index * 0.05), duration: 0.4 }}
+                      className={`px-3 mb-8 w-full ${isHalf ? "md:w-1/2" : ""}`}
+                    >
+                      <label className="text-xs font-bold tracking-widest uppercase text-zinc-400 mb-3 block">
+                        {field.label} {field.required && <span className="text-emerald-500">*</span>}
                       </label>
                       
                       {field.type === "text" || field.type === "email" || field.type === "phone" ? (
@@ -223,7 +315,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           placeholder={field.placeholder}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`bg-background h-11 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5 transition-all focus:bg-white/10 focus-visible:ring-1 focus-visible:ring-emerald-500 placeholder:text-zinc-600 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         />
                       ) : field.type === "textarea" ? (
                         <Textarea 
@@ -232,44 +324,64 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           placeholder={field.placeholder}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`bg-background resize-y min-h-[60px] ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`bg-white/5 border-white/10 text-white min-h-[100px] rounded-2xl p-5 transition-all focus:bg-white/10 focus-visible:ring-1 focus-visible:ring-emerald-500 placeholder:text-zinc-600 resize-y ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         />
                       ) : field.type === "dropdown" ? (
                         <select 
                           required={field.required}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`w-full bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5 transition-all focus:bg-white/10 focus:ring-1 focus:ring-emerald-500 appearance-none ${fieldErrors[field.id] ? "border-red-500 focus:ring-red-500" : ""}`}
                         >
-                          <option value="" disabled>Select an option</option>
+                          <option value="" disabled className="text-zinc-900">Select an option</option>
                           {field.options?.map((opt: string) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                            <option key={opt} value={opt} className="text-zinc-900">{opt}</option>
                           ))}
                         </select>
                       ) : (
-                        <div className="text-sm text-muted-foreground italic">Unsupported field type: {field.type}</div>
+                        <div className="text-sm text-zinc-500 italic">Unsupported field type: {field.type}</div>
                       )}
                       
-                      {fieldErrors[field.id] && (
-                        <p className="text-xs text-red-500 mt-2 font-medium">{fieldErrors[field.id]}</p>
+                      {!!fieldErrors[field.id] && (
+                        <p className="text-xs text-red-400 mt-3 font-medium flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-red-400" /> {fieldErrors[field.id] as string}
+                        </p>
                       )}
-                      {field.description && !fieldErrors[field.id] && <p className="text-xs text-muted-foreground mt-2">{field.description}</p>}
-                    </div>
+                      {!!field.description && !fieldErrors[field.id] && <p className="text-xs text-zinc-500 mt-3">{field.description}</p>}
+                    </motion.div>
                   );
                 })}
               </div>
 
-              <div className="pt-4 border-t border-border/50">
-                <Button type="submit" size="lg" className="w-full text-base font-semibold h-12" disabled={submitting}>
-                  {submitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Complete Registration"}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="pt-6 border-t border-white/10"
+              >
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full text-base font-bold h-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-colors shadow-[0_0_40px_rgba(255,255,255,0.1)] group" 
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      Complete Registration
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  )}
                 </Button>
-              </div>
+              </motion.div>
             </form>
           </div>
-        </div>
+        </motion.div>
+        </motion.div>
         
-        <div className="mt-8 text-center text-sm text-muted-foreground pb-8">
-          Powered by <span className="font-semibold text-foreground">Identify</span>
+        <div className="mt-12 text-center text-xs font-medium text-zinc-600 pb-12 flex justify-center items-center gap-1">
+          Powered by <span className="text-zinc-400 font-bold">IDENTIFY</span>
         </div>
       </div>
     </div>

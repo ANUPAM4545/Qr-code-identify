@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Workspace, Membership } from "@/domain/types";
 import Image from "next/image";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -21,11 +22,12 @@ interface DashboardShellProps {
     image?: string | null;
   };
   workspace: Workspace;
+  workspaces?: Workspace[];
   memberships: Membership[];
   navigation?: { name: string; href: string; icon: React.ReactNode }[];
 }
 
-export function DashboardShell({ children, user, workspace, navigation: customNavigation }: DashboardShellProps) {
+export function DashboardShell({ children, user, workspace, workspaces = [], navigation: customNavigation }: DashboardShellProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -44,7 +46,7 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/20">
       {/* Sidebar (Desktop) */}
-      <aside className={`fixed inset-y-0 left-0 z-10 hidden flex-col border-r border-border/50 bg-background sm:flex transition-all duration-300 ${isSidebarCollapsed ? "w-16" : "w-64"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-10 hidden flex-col border-r border-border/50 bg-background sm:flex transition-all duration-300 print:hidden ${isSidebarCollapsed ? "w-16" : "w-64"}`}>
         <div className={`flex h-14 items-center border-b border-border/50 lg:h-[60px] ${isSidebarCollapsed ? "justify-center px-2" : "justify-between px-4 lg:px-6"}`}>
           {!isSidebarCollapsed && (
             <Link href="/" className="flex items-center gap-2 font-semibold overflow-hidden">
@@ -59,20 +61,13 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
           </Button>
         </div>
         
-        {/* Workspace Switcher Placeholder */}
+        {/* Workspace Switcher */}
         <div className={`py-4 border-b border-border/50 ${isSidebarCollapsed ? "px-2" : "px-4"}`}>
-          <Button variant="outline" className={`w-full h-10 font-normal ${isSidebarCollapsed ? "px-0 justify-center" : "justify-start px-3"}`}>
-            <div className="flex items-center gap-2 truncate">
-              {workspace.logo ? (
-                <Image src={workspace.logo} alt="" width={20} height={20} className="shrink-0 rounded-sm" />
-              ) : (
-                <div className="w-5 h-5 shrink-0 rounded-sm bg-muted flex items-center justify-center text-[10px] font-medium">
-                  {workspace.name.substring(0, 1)}
-                </div>
-              )}
-              {!isSidebarCollapsed && <span className="truncate">{workspace.name}</span>}
-            </div>
-          </Button>
+          <WorkspaceSwitcher 
+            workspaces={workspaces} 
+            activeWorkspace={workspace} 
+            isSidebarCollapsed={isSidebarCollapsed} 
+          />
         </div>
 
         <div className="flex-1 overflow-auto py-4">
@@ -130,8 +125,8 @@ export function DashboardShell({ children, user, workspace, navigation: customNa
       </aside>
 
       {/* Main Content */}
-      <div className={`flex flex-col flex-1 transition-all duration-300 ${isSidebarCollapsed ? "sm:pl-16" : "sm:pl-64"}`}>
-        <header className="sticky top-0 z-30 flex shrink-0 h-14 items-center gap-4 border-b border-border/50 bg-background/80 backdrop-blur-md px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+      <div className={`flex flex-col flex-1 transition-all duration-300 print:pl-0 ${isSidebarCollapsed ? "sm:pl-16" : "sm:pl-64"}`}>
+        <header className="sticky top-0 z-30 flex shrink-0 h-14 items-center gap-4 border-b border-border/50 bg-background/80 backdrop-blur-md px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 print:hidden">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger className="sm:hidden" render={<Button size="icon" variant="outline" className="sm:hidden" />}>
               <Menu className="h-5 w-5" />

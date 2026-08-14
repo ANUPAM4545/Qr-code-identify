@@ -1,19 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Network, DatabaseBackup, Lock, WifiOff, UploadCloud, Activity, CloudSync } from "lucide-react";
+import { ShieldCheck, QrCode, Palette, UploadCloud, Activity, Briefcase } from "lucide-react";
 import { FADE_IN, STAGGER_CONTAINER, SLIDE_UP } from "../utils/animations";
 
 export function EnterpriseFeatures() {
   const features = [
-    { icon: Network, title: "Multi-Event Architecture", desc: "Manage simultaneous massive scale events." },
-    { icon: ShieldCheck, title: "Audit Logs", desc: "Comprehensive tracking of all system mutations." },
-    { icon: Lock, title: "Granular Permissions", desc: "Role-based access control for teams." },
-    { icon: WifiOff, title: "Offline Scanner", desc: "Scan QR tickets completely offline without data loss." },
-    { icon: UploadCloud, title: "Import & Export", desc: "Native CSV integrations for heavy data loads." },
-    { icon: Activity, title: "Real-time Analytics", desc: "Sub-second latency on check-in metrics." },
-    { icon: CloudSync, title: "Cloud Sync", desc: "Automatic conflict resolution across scanner devices." },
-    { icon: DatabaseBackup, title: "Enterprise SLA", desc: "99.99% guaranteed uptime." },
+    { icon: QrCode, title: "Dynamic QR Engine", desc: "Design intelligent, branded QR codes that adapt destination URLs in real-time." },
+    { icon: Palette, title: "White-label Branding", desc: "Completely customize event pages and tickets with your own logos and brand colors." },
+    { icon: Briefcase, title: "Workspace Isolation", desc: "Organize teams, events, and data into secure, separate workspaces." },
+    { icon: ShieldCheck, title: "Role-Based Access", desc: "Assign granular Owner, Manager, and Viewer roles to team members." },
+    { icon: UploadCloud, title: "Bulk Data Processing", desc: "Import thousands of guests and generate batch QR codes in seconds." },
+    { icon: Activity, title: "Real-time Analytics", desc: "Live check-in metrics, attendance timelines, and engagement tracking." },
   ];
 
   return (
@@ -34,7 +32,7 @@ export function EnterpriseFeatures() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={STAGGER_CONTAINER}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16 max-w-5xl mx-auto"
         >
           {features.map((feat, i) => (
             <motion.div key={i} variants={SLIDE_UP} className="flex flex-col gap-4 group p-4 -m-4 rounded-2xl hover:bg-zinc-50 transition-colors cursor-default">

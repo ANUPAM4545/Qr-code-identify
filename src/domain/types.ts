@@ -85,6 +85,19 @@ export interface Membership {
   updatedAt: Date;
 }
 
+export interface WorkspaceInvite {
+  _id?: string | ObjectId;
+  workspaceId: string;
+  email: string;
+  role: 'owner' | 'admin' | 'manager' | 'member' | 'viewer';
+  token: string;
+  invitedBy: string;
+  status: 'pending' | 'accepted' | 'expired';
+  expiresAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Event {
   _id?: ObjectId | string;
   workspaceId: string;

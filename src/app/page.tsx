@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { SiteHeader } from "@/features/landing/components/SiteHeader";
 import { HeroSection } from "@/features/landing/components/HeroSection";
 import { TrustedBy } from "@/features/landing/components/TrustedBy";
-import { FeatureBento } from "@/features/landing/components/FeatureBento";
+import { AdvancedFeatures } from "@/features/landing/components/AdvancedFeatures";
 import { ProductShowcase } from "@/features/landing/components/ProductShowcase";
 import { Timeline } from "@/features/landing/components/Timeline";
 import { EnterpriseFeatures } from "@/features/landing/components/EnterpriseFeatures";
@@ -71,7 +71,7 @@ export default function LandingPage() {
         <div className="relative z-10">
           <HeroSection />
           <TrustedBy />
-          <FeatureBento />
+          <AdvancedFeatures />
           <ProductShowcase />
           <Timeline />
           <EnterpriseFeatures />

@@ -15,6 +15,7 @@ const eventSchema = z.object({
   venue: z.string().optional(),
   description: z.string().optional(),
   templateId: z.string().optional(),
+  maxCapacity: z.coerce.number().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -79,7 +80,8 @@ export async function POST(req: NextRequest) {
       new Date(validated.date),
       validated.venue,
       validated.description,
-      validated.templateId
+      validated.templateId,
+      validated.maxCapacity
     );
 
     return NextResponse.json(successResponse(event, "Event created successfully"), { status: 201 });

@@ -35,51 +35,53 @@ export function KPIGrid({ eventId }: { eventId: string }) {
   return (
     <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
 
-      {/* Guests Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
-        <div className="flex flex-row items-center justify-between pb-2">
-          <h3 className="tracking-tight text-sm font-medium text-zinc-600">Approved Guests</h3>
-          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center">
-            <Users className="h-4 w-4 text-zinc-900" />
+      {/* Capacity Card */}
+      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 group flex flex-col justify-between h-36">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-50/50 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-2xl" />
+        <div className="relative z-10 flex flex-row items-center justify-between">
+          <h3 className="tracking-tight text-sm font-semibold text-zinc-500 uppercase tracking-wider">Event Capacity</h3>
+          <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 transition-transform duration-300 group-hover:scale-110 shadow-sm">
+            <Users className="h-5 w-5" />
           </div>
         </div>
-        <div>
-          <div className="text-3xl font-bold text-zinc-900">{kpis.guests.value}</div>
-          <div className="flex items-center mt-2 text-xs text-zinc-500">
-            <span className="mr-1 text-zinc-400">Total guest list size</span>
+        <div className="relative z-10 mt-2">
+          <div className="text-4xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">{kpis.capacity?.value || "Unlimited"}</div>
+          <div className="flex items-center mt-1 text-xs font-medium text-zinc-400">
+            Total maximum guests
           </div>
         </div>
       </div>
 
       {/* Check-ins Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
-        <div className="flex flex-row items-center justify-between pb-2">
-          <h3 className="tracking-tight text-sm font-medium text-zinc-600">Checked In</h3>
-          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center">
-            <ScanLine className="h-4 w-4 text-zinc-900" />
+      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-emerald-200 group flex flex-col justify-between h-36">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-50/50 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-2xl" />
+        <div className="relative z-10 flex flex-row items-center justify-between">
+          <h3 className="tracking-tight text-sm font-semibold text-zinc-500 uppercase tracking-wider">Checked In</h3>
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-transform duration-300 group-hover:scale-110 shadow-sm">
+            <ScanLine className="h-5 w-5" />
           </div>
         </div>
-        <div>
-          <div className="text-3xl font-bold text-zinc-900">{kpis.checkIns.value}</div>
-          <div className="flex items-center mt-2 text-xs text-zinc-500">
-            <span className="text-zinc-900 font-medium mr-1">{kpis.checkIns.rate}%</span>
-            {" attendance rate"}
+        <div className="relative z-10 mt-2">
+          <div className="text-4xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">{kpis.checkIns.value}</div>
+          <div className="flex items-center mt-1 text-xs font-medium text-zinc-400">
+            Verified attendees
           </div>
         </div>
       </div>
 
       {/* QR Codes Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between">
-        <div className="flex flex-row items-center justify-between pb-2">
-          <h3 className="tracking-tight text-sm font-medium text-zinc-600">QR Scans</h3>
-          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center">
-            <QrCode className="h-4 w-4 text-zinc-900" />
+      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-orange-200 group flex flex-col justify-between h-36">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-orange-50/50 opacity-0 transition-opacity duration-500 group-hover:opacity-100 blur-2xl" />
+        <div className="relative z-10 flex flex-row items-center justify-between">
+          <h3 className="tracking-tight text-sm font-semibold text-zinc-500 uppercase tracking-wider">QR Scans</h3>
+          <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 transition-transform duration-300 group-hover:scale-110 shadow-sm">
+            <QrCode className="h-5 w-5" />
           </div>
         </div>
-        <div>
-          <div className="text-3xl font-bold text-zinc-900">{kpis.scans.value}</div>
-          <div className="flex items-center mt-2 text-xs text-zinc-500">
-            <span className="text-zinc-400">Total lifetime scans</span>
+        <div className="relative z-10 mt-2">
+          <div className="text-4xl font-extrabold tracking-tight text-zinc-900 drop-shadow-sm">{kpis.scans.value}</div>
+          <div className="flex items-center mt-1 text-xs font-medium text-zinc-400">
+            Total lifetime scans
           </div>
         </div>
       </div>

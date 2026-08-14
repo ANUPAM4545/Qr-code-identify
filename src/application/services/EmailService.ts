@@ -43,6 +43,35 @@ export class EmailService {
     }
   }
 
+  static async sendWorkspaceInvite(workspaceId: string, to: string, role: string, token: string) {
+    const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    // We should create a proper accept link. Since we didn't build a dedicated UI page to accept the invite
+    // (we just have an API route right now), we should probably make an API GET route that accepts it
+    // and redirects to the dashboard, OR just send them a link to the dashboard where the UI will process the token.
+    // Let's create an accept link that points to an API route which will accept the invite and redirect to dashboard.
+    // Wait, the API route is POST. We can make a GET route to handle the link click in the email.
+    const inviteLink = `${appUrl}/api/invites/${token}/accept-email`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>You've been invited!</h2>
+        <p>You have been invited to join a workspace as a <strong>${role}</strong>.</p>
+        <p>Click the button below to accept the invitation and join the team:</p>
+        <div style="margin: 30px 0;">
+          <a href="${inviteLink}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Accept Invitation</a>
+        </div>
+        <p style="color: #666; font-size: 14px;">If you didn't expect this invitation, you can safely ignore this email.</p>
+      </div>
+    `;
+
+    await this.sendEmail(
+      workspaceId,
+      to,
+      "You have been invited to join a Workspace",
+      html
+    );
+  }
+
   static async sendRegistrationConfirmation(workspaceId: string, eventName: string, to: string) {
     await this.sendEmail(
       workspaceId,

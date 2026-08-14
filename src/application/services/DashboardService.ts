@@ -13,16 +13,18 @@ export class DashboardService {
       approvedRegistrations,
       totalGuests,
       checkedInGuests,
-      totalScansAgg
+      totalScansAgg,
+      eventSettings
     ] = await Promise.all([
       db.collection("registration_submissions").countDocuments({ eventId }),
       db.collection("registration_submissions").countDocuments({ eventId, status: "approved" }),
       db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" } }),
       db.collection("guests").countDocuments({ eventId, "checkIns.direction": "in" }),
-      db.collection("qrcodes").aggregate([
+      db.collection("qr_codes").aggregate([
         { $match: { eventId } },
         { $group: { _id: null, total: { $sum: "$scanCount" } } }
-      ]).toArray()
+      ]).toArray(),
+      db.collection("event_settings").findOne({ eventId })
     ]);
 
     const totalScans = totalScansAgg[0]?.total || 0;
@@ -43,6 +45,9 @@ export class DashboardService {
         },
         scans: {
           value: totalScans
+        },
+        capacity: {
+          value: eventSettings?.maxCapacity || "Unlimited"
         }
       }
     };
@@ -165,13 +170,14 @@ export class DashboardService {
         max: capacity > 0 ? capacity : "Unlimited"
       },
       checkIns: {
-        total: totalGuests,
+        total: capacity > 0 ? capacity : totalGuests,
         checkedIn: checkedInGuests,
-        rate: totalGuests > 0 ? Math.round((checkedInGuests / totalGuests) * 100) : 0
+        rate: capacity > 0 ? Math.round((checkedInGuests / capacity) * 100) : (totalGuests > 0 ? Math.round((checkedInGuests / totalGuests) * 100) : 0)
       },
       qrs: {
         assigned: qrsAssigned,
-        rate: totalGuests > 0 ? Math.round((qrsAssigned / totalGuests) * 100) : 0
+        rate: capacity > 0 ? Math.round((qrsAssigned / capacity) * 100) : (totalGuests > 0 ? Math.round((qrsAssigned / totalGuests) * 100) : 0),
+        total: capacity > 0 ? capacity : totalGuests
       }
     };
   }

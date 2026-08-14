@@ -10,9 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function QRSettingsPage() {
   const { event } = useEvent();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [clearing, setClearing] = useState(false);
 
   const handleClearAnalytics = async () => {
@@ -28,6 +32,12 @@ export default function QRSettingsPage() {
         throw new Error(data.error || "Failed to clear analytics");
       }
       toast.success("Analytics cleared successfully.");
+      
+      // Clear react-query cache and refresh page
+      queryClient.invalidateQueries({ queryKey: ["qr-kpis"] });
+      queryClient.invalidateQueries({ queryKey: ["qr-timeseries"] });
+      queryClient.invalidateQueries({ queryKey: ["qr-recent"] });
+      router.refresh();
     } catch (e: unknown) {
       toast.error((e as Error).message);
     } finally {

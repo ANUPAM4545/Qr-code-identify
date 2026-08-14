@@ -20,6 +20,7 @@ const eventSchema = z.object({
   endDate: z.string().min(1, "End Date is required"),
   date: z.string().min(1, "Date is required"),
   venue: z.string().optional(),
+  maxCapacity: z.coerce.number().min(1, "Capacity must be at least 1"),
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
@@ -48,6 +49,7 @@ export default function CreateEventPage() {
       endDate: new Date().toISOString().split("T")[0],
       date: "",
       venue: "",
+      maxCapacity: 0 as any, // Start empty or 0, but validation requires > 0
     },
   });
 
@@ -65,16 +67,7 @@ export default function CreateEventPage() {
 
   // Load draft logic would go here in useEffect (fetch latest draft from API)
 
-  // Debounced auto-save effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (values.name && values.slug && session) {
-        saveDraft(false);
-      }
-    }, 5000); // 5s debounce for auto-save
-
-    return () => clearTimeout(timer);
-  }, [values, session]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Debounced auto-save effect removed per user request: only create on publish
 
   const saveDraft = async (showToast = true) => {
     try {
@@ -136,13 +129,13 @@ export default function CreateEventPage() {
     let fieldsToValidate: string[] = [];
     if (currentStep === 0) fieldsToValidate = ['name', 'slug'];
     if (currentStep === 1) fieldsToValidate = ['date', 'endDate'];
+    if (currentStep === 2) fieldsToValidate = ['venue', 'maxCapacity'];
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isValid = await form.trigger(fieldsToValidate as any);
     if (!isValid) return;
 
     if (currentStep < STEPS.length - 1) {
-      if (!templateId) await saveDraft(false); // Only save draft if not using a template
       setCurrentStep(s => s + 1);
     } else {
       // Publish event or Create from Template
@@ -217,9 +210,6 @@ export default function CreateEventPage() {
           </p>
           <div className="flex items-center gap-2">
             {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            <span className="text-xs text-muted-foreground">
-              {draftId ? "Draft saved" : "Unsaved"}
-            </span>
           </div>
         </div>
         
@@ -290,6 +280,13 @@ export default function CreateEventPage() {
                   <Label>Venue Location</Label>
                   <Input {...form.register("venue")} placeholder="e.g. Moscone Center, San Francisco" />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label>Maximum Capacity <span className="text-red-500">*</span></Label>
+                  <Input type="number" min="1" {...form.register("maxCapacity")} placeholder="e.g. 500" />
+                  {form.formState.errors.maxCapacity && <p className="text-xs text-red-500">{form.formState.errors.maxCapacity.message}</p>}
+                </div>
+                
                 <p className="text-sm text-muted-foreground mt-4">
                   You can update venue, registration settings, and branding later from the Event Dashboard.
                 </p>
@@ -304,10 +301,7 @@ export default function CreateEventPage() {
           </Button>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => saveDraft(true)} disabled={isSaving}>
-              <Save className="mr-2 h-4 w-4" /> Save Draft
-            </Button>
-            <Button onClick={nextStep}>
+            <Button onClick={nextStep} disabled={isSaving}>
               {currentStep === STEPS.length - 1 ? "Publish Event" : "Next Step"}
               {currentStep < STEPS.length - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>

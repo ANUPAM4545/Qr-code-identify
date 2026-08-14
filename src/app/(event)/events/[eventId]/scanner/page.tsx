@@ -240,9 +240,22 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
                 {overlay.status === "offline_accepted" && "Queued Offline"}
               </h2>
               {!!overlay.guest && (
-                <p className="text-xl text-gray-300">
-                  {(overlay.guest as any).firstName} {(overlay.guest as any).lastName}
-                </p>
+                <div className="flex flex-col items-center gap-1 mt-2">
+                  <p className="text-2xl text-white font-semibold">
+                    {(overlay.guest as any).firstName} {(overlay.guest as any).lastName}
+                  </p>
+                  {((overlay.guest as any).email || (overlay.guest as any).organization || (overlay.guest as any).title) && (
+                    <div className="text-gray-300 text-sm mt-1 bg-white/10 px-4 py-2 rounded-lg flex flex-col items-center">
+                      {(overlay.guest as any).email && <p>{(overlay.guest as any).email}</p>}
+                      {((overlay.guest as any).organization || (overlay.guest as any).title) && (
+                        <p>
+                          {[(overlay.guest as any).title, (overlay.guest as any).organization].filter(Boolean).join(" @ ")}
+                        </p>
+                      )}
+                      {(overlay.guest as any).phone && <p>{(overlay.guest as any).phone}</p>}
+                    </div>
+                  )}
+                </div>
               )}
               {overlay.reason && (
                 <p className="text-sm text-red-400 mt-2 max-w-md mx-auto">
@@ -307,7 +320,15 @@ export default function ScannerTerminalPage({ params }: { params: Promise<{ even
                   <p className="font-medium truncate text-gray-200">
                     {scan.guest ? `${(scan.guest as any).firstName} ${(scan.guest as any).lastName}` : "Unknown Guest"}
                   </p>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
+                  {(scan.guest as any)?.email && (
+                    <p className="text-xs text-gray-400 truncate">{(scan.guest as any).email}</p>
+                  )}
+                  {((scan.guest as any)?.organization || (scan.guest as any)?.title) && (
+                    <p className="text-xs text-gray-400 truncate">
+                      {[((scan.guest as any).title), ((scan.guest as any).organization)].filter(Boolean).join(" @ ")}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 truncate mt-1">
                     {scan.reason || "Checked In"}
                   </p>
                 </div>

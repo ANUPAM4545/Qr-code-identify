@@ -4,7 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { useEvent } from "@/providers/event-provider";
 import { QRCodeDesignOptions } from "@/domain/types";
 import { Button } from "@/components/ui/button";
-import { Save, Layout, Undo2, Redo2, RotateCcw } from "lucide-react";
+import { Save, Layout, Undo2, Redo2, RotateCcw, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -232,7 +232,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
               {generationMode === "bulk" ? (
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 shadow-md shadow-indigo-900/20"
+                  className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white border-0 shadow-[0_4px_14px_0_rgb(79,70,229,39%)] hover:shadow-[0_6px_20px_rgba(79,70,229,23%)] hover:-translate-y-0.5 transition-all duration-300 font-medium px-6 rounded-full group"
                   onClick={async () => {
                     try {
                       toast.loading("Generating bulk batch...", { id: "bulk-gen" });
@@ -255,6 +255,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
                     }
                   }}
                 >
+                  <Sparkles className="w-4 h-4 mr-2 text-blue-200 group-hover:text-white transition-colors animate-pulse" />
                   Generate Batch
                 </Button>
               ) : (

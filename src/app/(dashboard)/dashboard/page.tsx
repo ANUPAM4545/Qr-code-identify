@@ -8,6 +8,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, Calendar as CalendarIcon, Users, QrCode, ArrowRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
@@ -26,6 +29,9 @@ export default async function DashboardPage() {
 
   const client = await clientPromise;
   const db = client.db();
+
+  const allMemberships = await membershipRepository.findMany({ workspaceId: activeWorkspace._id as string });
+  const totalTeamMembers = allMemberships.length;
 
   const totalGuests = await db.collection("guests").countDocuments({ workspaceId: activeWorkspace._id });
   
@@ -81,10 +87,10 @@ export default async function DashboardPage() {
             </div>
             <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Active Sessions</h3>
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Team Members</h3>
                 <Users className="h-5 w-5 text-amber-500" />
               </div>
-              <div className="text-3xl font-bold">1</div>
+              <div className="text-3xl font-bold">{totalTeamMembers}</div>
             </div>
           </div>
 

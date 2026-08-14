@@ -21,10 +21,32 @@ export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 
     margin: { top: 10, right: 10, left: -20, bottom: 0 }
   };
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover text-popover-foreground border border-border shadow-lg rounded-lg p-2 min-w-[100px] animate-in fade-in zoom-in-95 duration-200">
+          <p className="text-[11px] text-muted-foreground font-medium mb-1.5 border-b border-border/50 pb-1.5">{label}</p>
+          <div className="space-y-1">
+            {payload.map((entry: any, index: number) => (
+              <div key={index} className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full shadow-sm" style={{ backgroundColor: entry.color }} />
+                  <span className="text-[12px] font-medium">{entry.name}</span>
+                </div>
+                <span className="text-[12px] font-bold">{entry.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const renderTooltip = () => (
     <Tooltip 
-      contentStyle={{ backgroundColor: "hsl(var(--popover))", borderColor: "hsl(var(--border))", borderRadius: "8px", color: "hsl(var(--popover-foreground))" }}
-      itemStyle={{ color: "hsl(var(--popover-foreground))" }}
+      content={<CustomTooltip />}
+      cursor={{ fill: "hsl(var(--muted))", opacity: 0.4, strokeWidth: 1, strokeDasharray: "3 3" }}
     />
   );
 
@@ -32,7 +54,7 @@ export function RechartsAdapter({ type, data, series = DEFAULT_SERIES, height = 
     <>
       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
       <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dx={-10} allowDecimals={false} />
     </>
   );
 

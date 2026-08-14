@@ -12,24 +12,24 @@ import { FADE_IN, SLIDE_UP } from "../utils/animations";
 export function FAQ() {
   const faqs = [
     {
-      question: "How does the offline scanner work?",
-      answer: "Our scanner app securely downloads the guest list to the device prior to the event. When a QR code is scanned, it validates locally. Once an internet connection is re-established, all check-ins automatically sync to the cloud with conflict resolution."
+      question: "How does the White-label Branding work?",
+      answer: "You can fully customize the look and feel of event pages and guest tickets. Upload your custom logo, select your brand colors, and deliver a seamless, premium experience to your attendees without any Identify branding."
     },
     {
       question: "Can I manage multiple events simultaneously?",
-      answer: "Yes. Identify is built on a multi-event architecture, allowing you to manage, track, and analyze dozens of events concurrently from a single unified workspace."
+      answer: "Yes. Identify is built on a multi-event architecture with strict Workspace Isolation, allowing agencies and teams to manage, track, and analyze dozens of events concurrently from a single unified workspace."
     },
     {
       question: "What level of access control is available?",
-      answer: "Identify supports granular Role-Based Access Control (RBAC). You can assign custom permissions ensuring team members only have access to the specific events or modules they need."
+      answer: "Identify supports strict Role-Based Access Control. You can assign specific roles (Owner, Manager, Viewer) to team members, ensuring they only have access to the specific event data and modules they need."
     },
     {
-      question: "Do you support custom integrations?",
-      answer: "Absolutely. Our Enterprise plan includes access to a robust GraphQL API, webhooks, and native CSV import/export capabilities, allowing seamless integration with your existing CRM or marketing stack."
+      question: "Are the generated QR codes dynamic or static?",
+      answer: "Identify uses a powerful Dynamic QR Engine. This means you can update the destination URL or ticket metadata even after the QR codes have been printed or distributed, without needing to generate new ones."
     },
     {
-      question: "Is the platform secure and compliant?",
-      answer: "Security is our top priority. We provide detailed audit logs, support SAML SSO, and host data in isolated environments to ensure strict compliance with enterprise security standards."
+      question: "Is the analytics dashboard real-time?",
+      answer: "Absolutely. Our Real-time Analytics dashboard tracks live check-ins, peak attendance times, and live attendance cross-sections. When a guest is scanned at the door, your dashboard updates instantly."
     }
   ];
 

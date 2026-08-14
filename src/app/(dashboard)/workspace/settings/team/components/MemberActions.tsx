@@ -11,10 +11,11 @@ interface MemberActionsProps {
   membershipId: string;
   workspaceId: string;
   currentRole: string;
+  currentUserRole: string;
   isCurrentUser: boolean;
 }
 
-export function MemberActions({ membershipId, workspaceId, currentRole, isCurrentUser }: MemberActionsProps) {
+export function MemberActions({ membershipId, workspaceId, currentRole, currentUserRole, isCurrentUser }: MemberActionsProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,11 +64,34 @@ export function MemberActions({ membershipId, workspaceId, currentRole, isCurren
   };
 
   const roles = [
-    { id: "owner", label: "Owner", icon: Shield },
-    { id: "admin", label: "Admin", icon: Shield },
+    { id: "manager", label: "Manager", icon: Shield },
     { id: "member", label: "Member", icon: User },
     { id: "viewer", label: "Viewer", icon: User }
   ];
+
+  // RBAC checks for frontend UI
+  // Owner can edit anyone (including duplicate memberships of themselves, but NOT their own owner membership)
+  // Admin can edit managers, members, viewers (but not owners)
+  // Manager can edit members, viewers (but not owners, admins, managers)
+  const canManage = () => {
+    // Prevent modifying the owner membership of the current user
+    if (isCurrentUser && currentRole === 'owner') return false;
+    
+    // Normal checks
+    if (currentUserRole === 'owner') return true;
+    if (isCurrentUser) return false; // Other roles cannot edit their own memberships here
+    
+    if (currentUserRole === 'admin' && currentRole !== 'owner') return true;
+    if (currentUserRole === 'manager' && ['member', 'viewer'].includes(currentRole)) return true;
+    return false;
+  };
+
+  if (!canManage()) {
+    // If they can't manage, we just don't render the MoreVertical dropdown button
+    // But since the design might look weird if the column is totally empty, we can just return null
+    // or return a disabled button. Let's return null to keep it clean.
+    return <div className="w-8 h-8"></div>;
+  }
 
   return (
     <DropdownMenu>

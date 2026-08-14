@@ -47,7 +47,8 @@ export class EventService {
     date: Date, 
     venue?: string,
     description?: string,
-    templateId?: string
+    templateId?: string,
+    maxCapacity?: number
   ) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
 
@@ -66,7 +67,7 @@ export class EventService {
     const eventId = event._id as string;
 
     await Promise.all([
-      eventSettingsRepository.create({ eventId, workspaceId, isPublic: false }),
+      eventSettingsRepository.create({ eventId, workspaceId, isPublic: false, maxCapacity: maxCapacity || 0 }),
       scannerSettingsRepository.create({ eventId, workspaceId, offlineEnabled: true, autoSync: true }),
       registrationSettingsRepository.create({ eventId, workspaceId, requireApproval: false, allowWaitlist: false }),
       brandingSettingsRepository.create({ eventId, workspaceId, primaryColor: "#000000" }),
@@ -87,7 +88,17 @@ export class EventService {
     // Prevent updating status directly through updateEvent
     if (updates.status) delete updates.status;
 
-    const event = await eventRepository.update(eventId, updates as Partial<import("@/domain/types").Event>);
+    const { maxCapacity, ...eventUpdates } = updates;
+
+    const event = await eventRepository.update(eventId, eventUpdates as Partial<import("@/domain/types").Event>);
+    
+    if (maxCapacity !== undefined) {
+      const settings = await eventSettingsRepository.findOne({ eventId });
+      if (settings && settings._id) {
+        await eventSettingsRepository.update(settings._id.toString(), { maxCapacity: Number(maxCapacity) });
+      }
+    }
+
     await AuditService.log(userId, "EVENT_UPDATED", { eventId, updates }, workspaceId);
     return event;
   }
