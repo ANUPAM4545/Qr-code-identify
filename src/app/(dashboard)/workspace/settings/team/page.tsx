@@ -33,7 +33,7 @@ export default async function TeamSettingsPage() {
   const activeWorkspace = await workspaceRepository.findById(activeMembership.workspaceId);
   if (!activeWorkspace) return null;
 
-  const allMemberships = await membershipRepository.findMany({ workspaceId: activeWorkspace._id.toString() });
+  const allMemberships = await membershipRepository.findMany({ workspaceId: activeWorkspace._id!.toString() });
   
   // Fetch user details for all members
   const memberDetails = await Promise.all(allMemberships.map(async (m) => {
@@ -68,7 +68,7 @@ export default async function TeamSettingsPage() {
           <p className="text-muted-foreground mt-1">Manage who has access to this workspace and their roles.</p>
         </div>
         {['owner', 'admin'].includes(currentUserRole) && (
-          <InviteMemberModal workspaceId={activeWorkspace._id.toString()} />
+          <InviteMemberModal workspaceId={activeWorkspace._id!.toString()} />
         )}
       </div>
 
@@ -89,7 +89,7 @@ export default async function TeamSettingsPage() {
               const isCurrentUser = m.userId === session.user?.id;
               
               return (
-                <div key={m._id.toString()} className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 gap-4 ${index !== memberDetails.length - 1 ? 'border-b border-zinc-100' : ''}`}>
+                <div key={m._id!.toString()} className={`flex flex-col sm:flex-row sm:items-center justify-between p-6 gap-4 ${index !== memberDetails.length - 1 ? 'border-b border-zinc-100' : ''}`}>
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12 border border-zinc-200">
                       <AvatarImage src={user?.image || ""} />
@@ -116,8 +116,8 @@ export default async function TeamSettingsPage() {
                       {m.role}
                     </span>
                     <MemberActions 
-                      membershipId={m._id.toString()} 
-                      workspaceId={activeWorkspace._id.toString()}
+                      membershipId={m._id!.toString()} 
+                      workspaceId={activeWorkspace._id!.toString()}
                       currentRole={m.role}
                       currentUserRole={currentUserRole}
                       isCurrentUser={isCurrentUser}
@@ -130,7 +130,7 @@ export default async function TeamSettingsPage() {
         </section>
 
         <PendingInvitationsList 
-          workspaceId={activeWorkspace._id.toString()} 
+          workspaceId={activeWorkspace._id!.toString()} 
           currentUserRole={currentUserRole} 
         />
       </div>
