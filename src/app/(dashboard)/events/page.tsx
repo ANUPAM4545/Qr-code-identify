@@ -35,7 +35,7 @@ export default async function EventsPage() {
         </div>
       </div>
       
-      <EventList workspaceId={activeWorkspace._id as string} />
+      <EventList workspaceId={activeWorkspace._id.toString()} />
     </div>
   );
 }

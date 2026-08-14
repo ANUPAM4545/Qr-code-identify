@@ -35,7 +35,7 @@ export default async function WorkspaceSettingsPage() {
   const activeWorkspace = await workspaceRepository.findById(activeMembership.workspaceId);
   if (!activeWorkspace) return null;
 
-  const allMemberships = await membershipRepository.findByWorkspaceId(activeWorkspace._id as string);
+  const allMemberships = await membershipRepository.findByWorkspaceId(activeWorkspace._id.toString());
   const ownerMembership = allMemberships.find(m => m.role === "owner") || allMemberships[0];
   const ownerUser = await userRepository.findById(ownerMembership.userId);
 
@@ -73,7 +73,7 @@ export default async function WorkspaceSettingsPage() {
         <div className="lg:col-span-2 flex flex-col gap-10">
           
           {/* 2. General Information Card */}
-          <GeneralSettingsForm workspace={{ _id: activeWorkspace._id as string, name: activeWorkspace.name, slug: activeWorkspace.slug }} />
+          <GeneralSettingsForm workspace={{ _id: activeWorkspace._id.toString(), name: activeWorkspace.name, slug: activeWorkspace.slug }} />
 
           {/* 3. Workspace Preferences */}
           {/* Kept out for now as the user explicitly asked to "Remove Language, Date Format, Timezone unless they are already implemented and actively used elsewhere in the application." */}
@@ -125,7 +125,7 @@ export default async function WorkspaceSettingsPage() {
             </div>
             
             <div className="pt-2 border-t border-red-200/60">
-              <DeleteWorkspaceButton workspaceId={activeWorkspace._id as string} />
+              <DeleteWorkspaceButton workspaceId={activeWorkspace._id.toString()} />
             </div>
           </section>
 
