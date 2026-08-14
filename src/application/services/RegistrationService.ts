@@ -1,6 +1,7 @@
 import { registrationFormRepository } from "@/infrastructure/repositories/RegistrationFormRepository";
 import { registrationSubmissionRepository } from "@/infrastructure/repositories/RegistrationSubmissionRepository";
 import { eventRepository } from "@/infrastructure/repositories/EventRepository";
+import { eventSettingsRepository } from "@/infrastructure/repositories/SettingsRepositories";
 import { GuestService } from "./GuestService";
 import { AuditService } from "./AuditService";
 import { RealtimeService } from "./RealtimeService";
@@ -22,16 +23,19 @@ export class RegistrationService {
     const form = await registrationFormRepository.findByEventId(eventId);
     if (!form) throw new Error("Registration form not configured for this event");
 
+    const eventSettings = await eventSettingsRepository.findOne({ eventId });
+    const capacity = form.settings.capacity || eventSettings?.maxCapacity;
+
     // Capacity Check
-    if (form.settings.capacity) {
+    if (capacity) {
       const currentCount = await registrationSubmissionRepository.countByEventId(eventId, { status: { $in: ["approved", "pending"] } });
-      if (currentCount >= form.settings.capacity && !form.settings.allowWaitlist) {
+      if (currentCount >= capacity && !form.settings.allowWaitlist) {
         throw new Error("Registration is full");
       }
     }
 
-    const isWaitlisted = form.settings.capacity 
-      ? (await registrationSubmissionRepository.countByEventId(eventId, { status: { $in: ["approved", "pending"] } })) >= form.settings.capacity 
+    const isWaitlisted = capacity 
+      ? (await registrationSubmissionRepository.countByEventId(eventId, { status: { $in: ["approved", "pending"] } })) >= capacity 
       : false;
 
     // Duplicate Check logic would go here (e.g. check duplicate email in submissions)
