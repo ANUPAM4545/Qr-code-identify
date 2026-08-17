@@ -15,12 +15,22 @@ import { useSession } from "next-auth/react";
 
 const eventSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Only lowercase letters, numbers, and hyphens"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-._/]+$/, "Only lowercase letters, numbers, hyphens, underscores, dots, and slashes"),
+  category: z.string().min(1, "Please select an event category"),
+  customCategory: z.string().optional(),
   description: z.string().optional(),
   endDate: z.string().min(1, "End Date is required"),
-  date: z.string().min(1, "Date is required"),
+  date: z.string().min(1, "Start Date is required"),
   venue: z.string().optional(),
   maxCapacity: z.coerce.number().min(1, "Capacity must be at least 1"),
+}).refine((data) => {
+  if (data.category === "Other") {
+    return !!data.customCategory && data.customCategory.trim().length >= 2;
+  }
+  return true;
+}, {
+  message: "Please specify the custom category (at least 2 characters)",
+  path: ["customCategory"]
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
@@ -45,6 +55,8 @@ export default function CreateEventPage() {
     defaultValues: {
       name: "",
       slug: "",
+      category: "",
+      customCategory: "",
       description: "",
       endDate: new Date().toISOString().split("T")[0],
       date: "",
@@ -60,7 +72,7 @@ export default function CreateEventPage() {
   const eventName = watch("name");
   useEffect(() => {
     if (eventName && !form.formState.dirtyFields.slug) {
-      const slug = eventName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slug = eventName.toLowerCase().replace(/[^a-z0-9-._/]+/g, '-').replace(/(^-|-$)+/g, '');
       form.setValue("slug", slug, { shouldValidate: true });
     }
   }, [eventName, form]);
@@ -72,7 +84,7 @@ export default function CreateEventPage() {
   const saveDraft = async (showToast = true) => {
     try {
       if (!values.name || !values.slug || !values.date || !values.endDate) {
-        if (showToast) toast.error("Missing required fields (Date, End Date) to save draft");
+        if (showToast) toast.error("Missing required fields (Start Date, End Date) to save draft");
         return null;
       }
 
@@ -88,12 +100,15 @@ export default function CreateEventPage() {
 
       if (!workspaceId) return null;
 
+      const effectiveCategory = values.category === "Other" && values.customCategory ? values.customCategory.trim() : values.category;
+      const eventPayload = { ...values, category: effectiveCategory, workspaceId };
+
       if (!draftId) {
         // Create new draft
         const res = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...values, workspaceId })
+          body: JSON.stringify(eventPayload)
         });
         const data = await res.json();
         if (data.success) {
@@ -109,7 +124,7 @@ export default function CreateEventPage() {
         const res = await fetch(`/api/events/${draftId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...values, workspaceId })
+          body: JSON.stringify(eventPayload)
         });
         const data = await res.json();
         if (data.success) {
@@ -129,9 +144,16 @@ export default function CreateEventPage() {
     }
   };
 
+  const selectedCategory = watch("category");
+
   const nextStep = async () => {
     let fieldsToValidate: string[] = [];
-    if (currentStep === 0) fieldsToValidate = ['name', 'slug'];
+    if (currentStep === 0) {
+      fieldsToValidate = ['name', 'slug', 'category'];
+      if (selectedCategory === "Other") {
+        fieldsToValidate.push('customCategory');
+      }
+    }
     if (currentStep === 1) fieldsToValidate = ['date', 'endDate'];
     if (currentStep === 2) fieldsToValidate = ['venue', 'maxCapacity'];
     
@@ -152,6 +174,9 @@ export default function CreateEventPage() {
         };
         const workspaceId = getCookie("active-workspace-id");
 
+        const effectiveCategory = values.category === "Other" && values.customCategory ? values.customCategory.trim() : values.category;
+        const finalEventPayload = { ...values, category: effectiveCategory };
+
         if (templateId) {
           // Create from template
           const res = await fetch(`/api/templates/${templateId}/action`, {
@@ -162,7 +187,7 @@ export default function CreateEventPage() {
               action: "use",
               payload: {
                 eventData: {
-                  ...values,
+                  ...finalEventPayload,
                   date: new Date(values.date)
                 }
               }
@@ -249,17 +274,73 @@ export default function CreateEventPage() {
                 
                 <div className="space-y-2">
                   <Label>Event URL Slug</Label>
-                  <Input 
-                    {...form.register("slug")} 
-                    placeholder="e.g. summit-2026" 
-                    onChange={(e) => {
-                      const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
-                      form.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
-                    }}
-                  />
+                  <div className="flex rounded-md overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all">
+                    <span className="flex items-center px-3 bg-muted border-r border-input text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap select-none">
+                      identify.com/r/
+                    </span>
+                    <Input 
+                      {...form.register("slug")} 
+                      placeholder="summit-2026" 
+                      className="rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-10 text-sm"
+                      onChange={(e) => {
+                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-._/]/g, '-');
+                        form.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
+                      }}
+                    />
+                  </div>
                   {form.formState.errors.slug && <p className="text-xs text-red-500">{form.formState.errors.slug.message}</p>}
                 </div>
                 
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
+                  <div className="relative">
+                    <select
+                      id="category"
+                      {...form.register("category")}
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring transition-all"
+                    >
+                      <option value="" disabled>Select an event category...</option>
+                      <option value="Technology & Innovation">Technology & Innovation</option>
+                      <option value="Conference & Summit">Conference & Summit</option>
+                      <option value="Corporate & Enterprise">Corporate & Enterprise</option>
+                      <option value="Festival & Entertainment">Festival & Entertainment</option>
+                      <option value="Networking & Social Meetup">Networking & Social Meetup</option>
+                      <option value="Workshop & Training">Workshop & Training</option>
+                      <option value="Exhibition & Trade Show">Exhibition & Trade Show</option>
+                      <option value="Product Launch & Keynote">Product Launch & Keynote</option>
+                      <option value="Charity & Gala Fundraiser">Charity & Gala Fundraiser</option>
+                      <option value="Sports, Gaming & Esports">Sports, Gaming & Esports</option>
+                      <option value="Education & Academic">Education & Academic</option>
+                      <option value="Community & Private Gathering">Community & Private Gathering</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  {form.formState.errors.category && <p className="text-xs text-red-500">{form.formState.errors.category.message}</p>}
+                </div>
+
+                <AnimatePresence>
+                  {selectedCategory === "Other" && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0, y: -6 }}
+                      animate={{ opacity: 1, height: "auto", y: 0 }}
+                      exit={{ opacity: 0, height: 0, y: -6 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <Label htmlFor="customCategory">Specify Category <span className="text-red-500">*</span></Label>
+                      <Input 
+                        id="customCategory"
+                        {...form.register("customCategory")} 
+                        placeholder="e.g. Hackathon, Fashion Show, Webinar, etc."
+                        className="h-10 text-sm"
+                      />
+                      {form.formState.errors.customCategory && (
+                        <p className="text-xs text-red-500">{form.formState.errors.customCategory.message}</p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="space-y-2">
                   <Label>Description (Optional)</Label>
                   <Input {...form.register("description")} placeholder="Brief overview of the event" />
@@ -270,7 +351,7 @@ export default function CreateEventPage() {
             {currentStep === 1 && (
               <div className="flex flex-col gap-4">
                 <div className="space-y-2">
-                  <Label>Date</Label>
+                  <Label>Start Date</Label>
                   <Input type="date" {...form.register("date")} />
                   {form.formState.errors.date && <p className="text-xs text-red-500">{form.formState.errors.date.message}</p>}
                 </div>

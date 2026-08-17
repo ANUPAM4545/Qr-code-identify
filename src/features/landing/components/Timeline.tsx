@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CalendarPlus, SlidersHorizontal, QrCode, Mail, Smartphone, LineChart, CheckCircle2, ChevronRight, FileText, Send, UserCheck, BarChart } from "lucide-react";
 
 const steps = [
-  { title: "Create Event", desc: "Set up the foundation", icon: CalendarPlus, color: "text-blue-500", bg: "bg-blue-500" },
-  { title: "Configure Form", desc: "Build custom registration", icon: SlidersHorizontal, color: "text-indigo-500", bg: "bg-indigo-500" },
-  { title: "Generate QR", desc: "Intelligent ticket access", icon: QrCode, color: "text-emerald-500", bg: "bg-emerald-500" },
-  { title: "Invite Guests", desc: "Mass import & invite", icon: Mail, color: "text-amber-500", bg: "bg-amber-500" },
-  { title: "Scan Check-ins", desc: "Offline scanner app", icon: Smartphone, color: "text-purple-500", bg: "bg-purple-500" },
-  { title: "Track Analytics", desc: "Live dashboard", icon: LineChart, color: "text-rose-500", bg: "bg-rose-500" },
+  { title: "Create Event", desc: "Set up the foundation", icon: CalendarPlus },
+  { title: "Configure Form", desc: "Build custom registration", icon: SlidersHorizontal },
+  { title: "Generate QR", desc: "Intelligent ticket access", icon: QrCode },
+  { title: "Invite Guests", desc: "Mass import & invite", icon: Mail },
+  { title: "Scan Check-ins", desc: "Offline scanner app", icon: Smartphone },
+  { title: "Track Analytics", desc: "Live dashboard", icon: LineChart },
 ];
 
 export function Timeline() {
@@ -30,7 +30,7 @@ export function Timeline() {
       case 0:
         return (
           <motion.div key="step0" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full h-full flex items-center justify-center">
-            <div className="w-[420px] bg-white rounded-2xl shadow-2xl border border-zinc-100 p-6 flex flex-col gap-4">
+            <div className="w-[420px] bg-white rounded-2xl shadow-2xl border border-zinc-200 p-6 flex flex-col gap-4">
               <div className="text-xl font-bold text-zinc-900 mb-2">Create New Event</div>
               
               <div className="space-y-3">
@@ -54,20 +54,20 @@ export function Timeline() {
                 </div>
               </div>
 
-              <div className="mt-4 bg-blue-600 text-white rounded-lg py-2.5 text-sm font-bold text-center shadow-md">
+              <div className="mt-4 bg-zinc-900 text-white rounded-lg py-2.5 text-sm font-bold text-center shadow-md hover:bg-zinc-800 transition-colors">
                 Launch Event
               </div>
-              <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 3.5 }} className="h-1 bg-blue-500 mt-1 rounded-full opacity-50" />
+              <motion.div initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 3.5 }} className="h-1 bg-zinc-900 mt-1 rounded-full opacity-30" />
             </div>
           </motion.div>
         );
       case 1:
         return (
           <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full h-full flex items-center justify-center">
-            <div className="w-[420px] bg-white rounded-2xl shadow-2xl border border-zinc-100 p-6 flex flex-col gap-4">
+            <div className="w-[420px] bg-white rounded-2xl shadow-2xl border border-zinc-200 p-6 flex flex-col gap-4">
               <div className="flex justify-between items-center border-b border-zinc-100 pb-4">
                 <div className="text-lg font-bold text-zinc-900">Registration Form</div>
-                <div className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] rounded-full font-bold uppercase tracking-wider border border-indigo-100">Published</div>
+                <div className="px-3 py-1 bg-zinc-900 text-white text-[10px] rounded-full font-bold uppercase tracking-wider">Published</div>
               </div>
               
               <div className="space-y-3">
@@ -80,9 +80,9 @@ export function Timeline() {
                     <FileText className="w-4 h-4 text-zinc-400" />
                     <div className="flex-1">
                       <span className="text-sm font-medium text-zinc-700">{field.label}</span>
-                      {field.req && <span className="text-red-500 ml-1">*</span>}
+                      {field.req && <span className="text-zinc-900 font-bold ml-1">*</span>}
                     </div>
-                    <div className="text-[10px] font-mono text-zinc-400 bg-white px-2 py-0.5 rounded border border-zinc-200">{field.type}</div>
+                    <div className="text-[10px] font-mono text-zinc-500 bg-white px-2 py-0.5 rounded border border-zinc-200">{field.type}</div>
                   </motion.div>
                 ))}
               </div>
@@ -92,10 +92,10 @@ export function Timeline() {
       case 2:
         return (
           <motion.div key="step2" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-full h-full flex items-center justify-center">
-            <div className="relative w-72 h-96 bg-white rounded-3xl shadow-2xl border border-zinc-100 overflow-hidden flex flex-col items-center pt-12">
-              <div className="w-40 h-40 bg-zinc-50 border-2 border-dashed border-emerald-200 rounded-2xl flex items-center justify-center relative">
-                <QrCode className="w-24 h-24 text-emerald-600" />
-                <motion.div animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2, repeat: Infinity }} className="absolute left-0 right-0 h-[2px] bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
+            <div className="relative w-72 h-96 bg-white rounded-3xl shadow-2xl border border-zinc-200 overflow-hidden flex flex-col items-center pt-12">
+              <div className="w-40 h-40 bg-zinc-50 border-2 border-dashed border-zinc-300 rounded-2xl flex items-center justify-center relative">
+                <QrCode className="w-24 h-24 text-zinc-900" />
+                <motion.div animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 2, repeat: Infinity }} className="absolute left-0 right-0 h-[2px] bg-zinc-900 shadow-[0_0_15px_rgba(0,0,0,0.5)]" />
               </div>
               <div className="mt-8 text-center space-y-2">
                 <div className="text-xl font-bold text-zinc-900">VIP Access Pass</div>
@@ -118,22 +118,22 @@ export function Timeline() {
                   y: (Math.random() - 0.5) * 300
                 }}
                 transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-                className="absolute w-12 h-12 bg-white rounded-xl shadow-xl border border-zinc-100 flex items-center justify-center"
+                className="absolute w-12 h-12 bg-white rounded-xl shadow-xl border border-zinc-200 flex items-center justify-center"
               >
-                <Send className="w-5 h-5 text-amber-500" />
+                <Send className="w-5 h-5 text-zinc-800" />
               </motion.div>
             ))}
-            <div className="w-64 h-64 bg-amber-50 rounded-full flex items-center justify-center z-10 border-4 border-white shadow-2xl">
-              <Mail className="w-24 h-24 text-amber-500" />
+            <div className="w-64 h-64 bg-zinc-100 rounded-full flex items-center justify-center z-10 border-4 border-white shadow-2xl">
+              <Mail className="w-24 h-24 text-zinc-800" />
             </div>
           </motion.div>
         );
       case 4:
         return (
           <motion.div key="step4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full h-full flex items-center justify-center">
-            <div className="w-72 h-[32rem] bg-zinc-900 rounded-[3rem] shadow-2xl border-[8px] border-zinc-800 p-4 relative overflow-hidden flex flex-col items-center justify-center">
-              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-32 h-32 rounded-full border-4 border-purple-500/50 flex items-center justify-center mb-8 relative">
-                <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+            <div className="w-72 h-[32rem] bg-zinc-950 rounded-[3rem] shadow-2xl border-[8px] border-zinc-800 p-4 relative overflow-hidden flex flex-col items-center justify-center">
+              <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1, repeat: Infinity }} className="w-32 h-32 rounded-full border-4 border-zinc-700 flex items-center justify-center mb-8 relative">
+                <div className="absolute inset-0 rounded-full border-4 border-white border-t-transparent animate-spin" />
                 <UserCheck className="w-12 h-12 text-white" />
               </motion.div>
               <div className="text-white text-xl font-bold mb-2">Guest Checked In</div>
@@ -144,14 +144,14 @@ export function Timeline() {
       case 5:
         return (
           <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full h-full flex items-center justify-center">
-            <div className="w-full max-w-2xl h-80 bg-white rounded-2xl shadow-2xl border border-zinc-100 p-8 flex flex-col">
+            <div className="w-full max-w-2xl h-80 bg-white rounded-2xl shadow-2xl border border-zinc-200 p-8 flex flex-col">
               <div className="flex justify-between items-start mb-8">
                 <div>
                   <div className="text-2xl font-bold text-zinc-900">1,452 Attendees</div>
-                  <div className="text-sm text-emerald-500 font-medium mt-1">+12% from last hour</div>
+                  <div className="text-sm text-zinc-600 font-medium mt-1">+12% from last hour</div>
                 </div>
-                <div className="px-4 py-1.5 bg-rose-50 text-rose-600 font-bold text-xs rounded-full border border-rose-100 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> LIVE DASHBOARD
+                <div className="px-4 py-1.5 bg-zinc-900 text-white font-bold text-xs rounded-full border border-zinc-900 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" /> LIVE DASHBOARD
                 </div>
               </div>
               <div className="flex-1 flex items-end justify-between gap-4 mt-auto">
@@ -161,7 +161,7 @@ export function Timeline() {
                     initial={{ height: 0 }} 
                     animate={{ height: `${h}%` }} 
                     transition={{ duration: 1, type: "spring", delay: i * 0.1 }}
-                    className="w-full bg-gradient-to-t from-rose-400 to-rose-600 rounded-t-lg relative group"
+                    className="w-full bg-gradient-to-t from-zinc-700 via-zinc-800 to-zinc-950 rounded-t-lg relative group"
                   >
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-xs px-2 py-1 rounded">
                       {h * 12}
@@ -220,7 +220,7 @@ export function Timeline() {
                     w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center mb-6 
                     transition-all duration-500 border-4 shadow-sm relative bg-white z-10
                     ${isActive 
-                      ? `border-zinc-900 ${step.color} scale-110 shadow-xl` 
+                      ? `border-zinc-900 text-zinc-950 scale-110 shadow-xl` 
                       : isPast 
                         ? `border-zinc-900 text-zinc-900` 
                         : `border-zinc-200 text-zinc-400 hover:border-zinc-300 hover:text-zinc-600`}
@@ -245,10 +245,7 @@ export function Timeline() {
           </div>
 
           {/* Dynamic Showcase Area */}
-          <div className="w-full h-[500px] bg-zinc-200/40 rounded-[2.5rem] border border-zinc-200/60 p-4 md:p-8 relative overflow-hidden shadow-inner">
-            {/* Themed Background Glow */}
-            <div className={`absolute inset-0 opacity-20 blur-3xl transition-colors duration-1000 ${steps[activeStep].bg}`} />
-            
+          <div className="w-full h-[500px] bg-zinc-100 rounded-[2.5rem] border border-zinc-200/80 p-4 md:p-8 relative overflow-hidden shadow-inner">
             <div className="relative z-10 w-full h-full flex items-center justify-center">
               <AnimatePresence mode="wait">
                 {renderMockup(activeStep)}

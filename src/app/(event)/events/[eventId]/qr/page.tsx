@@ -1,10 +1,22 @@
 "use client";
 
 import { useEvent } from "@/providers/event-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { QrCode, ScanLine, Activity, Download, ArrowRight, Library, LayoutTemplate } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { 
+  QrCode, 
+  ScanLine, 
+  Download, 
+  ArrowRight, 
+  Library, 
+  LayoutTemplate, 
+  Sparkles,
+  Camera,
+  BarChart3,
+  ExternalLink
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 
@@ -17,7 +29,10 @@ export default function QROverviewPage() {
       const res = await fetch(`/api/events/${event._id}/qr/analytics/kpi`);
       if (!res.ok) throw new Error("Failed to fetch KPIs");
       return res.json();
-    }
+    },
+    refetchInterval: 2000,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   const { data: recent, isLoading: recentLoading } = useQuery({
@@ -27,127 +42,205 @@ export default function QROverviewPage() {
       if (!res.ok) throw new Error("Failed to fetch recent QRs");
       const data = await res.json();
       return data.qrs;
-    }
+    },
+    refetchInterval: 2000,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
-  
-  const stats = [
-    { name: "Total QR Codes", value: kpis?.totalQRs ?? 0, icon: QrCode, description: "Total generated" },
-    { name: "Active Codes", value: kpis?.activeQRs ?? 0, icon: Activity, description: "Currently scanning" },
-    { name: "Total Scans", value: kpis?.totalScans ?? 0, icon: ScanLine, description: "Across all QRs" },
-    { name: "Downloads", value: kpis?.totalDownloads ?? 0, icon: Download, description: "Total exports" },
-  ];
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
+    <div className="p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-card border border-border/60 rounded-2xl p-6 shadow-xs">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">QR Studio</h1>
-          <p className="text-muted-foreground mt-1">Manage all QR codes and scan metrics for {event.name}.</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">QR Studio</h1>
+            <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-500/20">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">Manage badges, custom QR codes, templates, and real-time attendance scans for {event.name}.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link href={`/events/${event._id}/qr/library`}>
-            <Button variant="outline"><Library className="mr-2 h-4 w-4" /> QR Library</Button>
+            <Button variant="outline" size="sm" className="font-semibold">
+              <Library className="mr-2 h-4 w-4 text-muted-foreground" /> QR Library
+            </Button>
           </Link>
           <Link href={`/events/${event._id}/qr/new/design`}>
-            <Button>Create New QR Code</Button>
+            <Button size="sm" className="font-semibold shadow-xs">
+              <Sparkles className="mr-2 h-4 w-4" /> Create New QR Code
+            </Button>
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <Card key={stat.name} className="border border-border/50 bg-card shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.name}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {kpiLoading ? (
-                <div className="h-8 w-16 bg-muted animate-pulse rounded mt-1"></div>
-              ) : (
-                <div className="text-2xl font-bold text-foreground">{stat.value.toLocaleString()}</div>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="col-span-2 border border-border/50 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Activity</CardTitle>
-            <Link href={`/events/${event._id}/qr/library`} className="text-sm text-primary hover:underline flex items-center">
-              View All <ArrowRight className="ml-1 h-3 w-3" />
-            </Link>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Total QR Codes */}
+        <Card className="border-border/60 bg-card shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Total QR Codes
+            </CardTitle>
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600">
+              <QrCode className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            {recentLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => <div key={i} className="h-12 bg-muted animate-pulse rounded"></div>)}
-              </div>
-            ) : recent?.length === 0 ? (
-              <div className="text-sm text-muted-foreground py-12 text-center border rounded-md border-dashed">
-                No QR codes created yet. 
-                <div className="mt-4">
-                  <Link href={`/events/${event._id}/qr/new/design`}>
-                    <Button variant="outline" size="sm">Create your first QR Code</Button>
-                  </Link>
-                </div>
-              </div>
+            {kpiLoading ? (
+              <div className="h-8 w-16 bg-muted animate-pulse rounded mt-1"></div>
             ) : (
-              <div className="space-y-4">
-                {recent?.map((qr: { _id: string; name: string; createdAt: string; scanCount: number }, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-primary/10 rounded-md flex items-center justify-center">
-                        <QrCode className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{qr.name}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(qr.createdAt), "MMM d, yyyy")}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{qr.scanCount || 0}</p>
-                        <p className="text-xs text-muted-foreground">Scans</p>
-                      </div>
-                      <Link href={`/events/${event._id}/qr/${qr._id}/design`}>
-                        <Button variant="ghost" size="sm">Edit</Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="text-3xl font-black tracking-tight text-foreground">{kpis?.totalQRs ?? 0}</div>
             )}
+            <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
+              Active codes generated for event tickets & badges
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border/50 shadow-sm h-fit">
-          <CardHeader>
-            <CardTitle>Quick Resources</CardTitle>
+        {/* Total Scans */}
+        <Card className="border-border/60 bg-card shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Total Scans (All Time)
+            </CardTitle>
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <ScanLine className="h-4 w-4" />
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Link href={`/events/${event._id}/qr/templates`} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border">
-              <LayoutTemplate className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Templates Gallery</p>
-                <p className="text-xs text-muted-foreground">{kpis?.templates || 0} templates available</p>
-              </div>
-            </Link>
-            <Link href={`/events/${event._id}/qr/downloads`} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border">
-              <Download className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Download History</p>
-                <p className="text-xs text-muted-foreground">View recent exports</p>
-              </div>
-            </Link>
+          <CardContent>
+            {kpiLoading ? (
+              <div className="h-8 w-16 bg-muted animate-pulse rounded mt-1"></div>
+            ) : (
+              <div className="text-3xl font-black tracking-tight text-foreground">{kpis?.totalScans ?? 0}</div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" /> Live verification actions across all doors
+            </p>
           </CardContent>
+        </Card>
+      </div>
+      
+      {/* Balanced 12-column Main Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Recent Activity (8 cols) */}
+        <Card className="lg:col-span-8 border-border/60 shadow-xs flex flex-col justify-between">
+          <div>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+              <div>
+                <CardTitle className="text-base font-bold">Recent QR Activity</CardTitle>
+                <CardDescription className="text-xs mt-0.5">Recently created and updated event QR codes</CardDescription>
+              </div>
+              <Link href={`/events/${event._id}/qr/library`}>
+                <Button variant="ghost" size="sm" className="text-xs font-semibold">
+                  View Library <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {recentLoading ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => <div key={i} className="h-14 bg-muted animate-pulse rounded-xl"></div>)}
+                </div>
+              ) : !recent || recent.length === 0 ? (
+                <div className="text-sm text-muted-foreground py-14 text-center border-2 border-dashed border-border/60 rounded-xl">
+                  <QrCode className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-foreground">No custom QR codes created yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Design customized badge tickets with your brand logo and styles.</p>
+                  <div className="mt-4">
+                    <Link href={`/events/${event._id}/qr/new/design`}>
+                      <Button size="sm" className="font-semibold">Create your first QR Code</Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recent.map((qr: { _id: string; name: string; createdAt: string; scanCount: number }, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-3.5 border border-border/60 rounded-xl hover:bg-muted/30 transition-all">
+                      <div className="flex items-center gap-3.5">
+                        <div className="h-10 w-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0 border border-primary/20">
+                          <QrCode className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">{qr.name || "Untitled QR Code"}</p>
+                          <p className="text-xs text-muted-foreground">{format(new Date(qr.createdAt), "MMM d, yyyy • h:mm a")}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className="font-semibold text-xs px-2.5 py-1">
+                          {qr.scanCount || 0} scans
+                        </Badge>
+                        <Link href={`/events/${event._id}/qr/${qr._id}/design`}>
+                          <Button variant="outline" size="sm" className="text-xs font-semibold h-8">Edit</Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </div>
+        </Card>
+
+        {/* Right Column: Quick Resources & Actions (4 cols) */}
+        <Card className="lg:col-span-4 border-border/60 shadow-xs flex flex-col justify-between">
+          <div>
+            <CardHeader className="border-b border-border/50 pb-4">
+              <CardTitle className="text-base font-bold">Quick Actions</CardTitle>
+              <CardDescription className="text-xs mt-0.5">Shortcuts to QR tools & workflows</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3">
+              <Link href={`/events/${event._id}/scanner`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors border border-border/60 group">
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                  <Camera className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    Scanner Terminal <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">Live check-in gate terminal</p>
+                </div>
+              </Link>
+
+              <Link href={`/events/${event._id}/qr/analytics`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors border border-border/60 group">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                  <BarChart3 className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    QR Analytics <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">Detailed charts & devices</p>
+                </div>
+              </Link>
+
+              <Link href={`/events/${event._id}/qr/templates`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors border border-border/60 group">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 border border-blue-500/20">
+                  <LayoutTemplate className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    Templates Gallery <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{kpis?.templates || 1} pre-built designs</p>
+                </div>
+              </Link>
+
+              <Link href={`/events/${event._id}/qr/downloads`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors border border-border/60 group">
+                <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center shrink-0 border border-orange-500/20">
+                  <Download className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    Download Center <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">Export badges in bulk</p>
+                </div>
+              </Link>
+            </CardContent>
+          </div>
         </Card>
       </div>
     </div>

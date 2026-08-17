@@ -11,7 +11,8 @@ import { z } from "zod";
 const eventSchema = z.object({
   workspaceId: z.string().min(1, "Workspace ID is required"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-._/]+$/, "Slug can only contain lowercase letters, numbers, hyphens, underscores, dots, and slashes"),
+  category: z.string().optional(),
   endDate: z.string().min(1, "End Date is required"),
   date: z.string().min(1, "Date is required"),
   venue: z.string().optional(),
@@ -83,7 +84,8 @@ export async function POST(req: NextRequest) {
       validated.venue,
       validated.description,
       validated.templateId,
-      validated.maxCapacity
+      validated.maxCapacity,
+      validated.category
     );
 
     return NextResponse.json(successResponse(event, "Event created successfully"), { status: 201 });

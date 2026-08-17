@@ -46,6 +46,33 @@ class RegistrationFormRepositoryImpl extends MongoRepository<RegistrationForm> {
           hidden: false,
           readOnly: false,
           width: "full"
+        },
+        {
+          id: "field_" + new ObjectId().toString(),
+          type: "phone",
+          label: "Phone Number",
+          required: false,
+          hidden: false,
+          readOnly: false,
+          width: "full"
+        },
+        {
+          id: "field_" + new ObjectId().toString(),
+          type: "text",
+          label: "Role/Title",
+          required: false,
+          hidden: false,
+          readOnly: false,
+          width: "half"
+        },
+        {
+          id: "field_" + new ObjectId().toString(),
+          type: "text",
+          label: "Company",
+          required: false,
+          hidden: false,
+          readOnly: false,
+          width: "half"
         }
       ],
       settings: {

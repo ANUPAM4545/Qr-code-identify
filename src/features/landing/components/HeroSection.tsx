@@ -8,7 +8,7 @@ import Link from "next/link";
 import { FADE_IN, SLIDE_UP, STAGGER_CONTAINER } from "../utils/animations";
 import { HeroPreview } from "./HeroPreview";
 
-const Typewriter = ({ items }: { items: { text: string, color: string }[] }) => {
+const Typewriter = ({ items }: { items: { text: string, color?: string }[] }) => {
   const [index, setIndex] = useState(0);
   const [text, setText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -37,10 +37,8 @@ const Typewriter = ({ items }: { items: { text: string, color: string }[] }) => 
     return () => clearTimeout(timeout);
   }, [text, isDeleting, index, items]);
 
-  const currentColor = items[index % items.length].color;
-
   return (
-    <span className={`inline-block ${currentColor} transition-colors duration-300`}>
+    <span className="inline-block text-zinc-900 transition-colors duration-300">
       {text}
       <span className="animate-pulse">|</span>
     </span>

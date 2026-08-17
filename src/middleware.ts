@@ -10,9 +10,6 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/signup");
 
     if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
-      }
       return null;
     }
 

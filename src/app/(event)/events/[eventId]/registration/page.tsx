@@ -82,7 +82,12 @@ function SortableFieldItem({ field, index, handleFieldChange, removeField }: any
             <Label className="text-xs text-muted-foreground mb-1 block">Field Type</Label>
             <Select 
               value={field.type} 
-              onValueChange={(val) => handleFieldChange(index, "type", val)}
+              onValueChange={(val) => {
+                handleFieldChange(index, "type", val);
+                if (val === "dropdown" && (!field.options || field.options.length === 0)) {
+                  handleFieldChange(index, "options", ["Option 1", "Option 2"]);
+                }
+              }}
             >
               <SelectTrigger className="bg-background h-9">
                 <SelectValue />
@@ -217,7 +222,11 @@ export default function RegistrationPage() {
   };
 
   const addField = () => {
-    const newField = {
+    addPresetField("custom");
+  };
+
+  const addPresetField = (preset: "custom" | "phone" | "role" | "company") => {
+    let newField = {
       id: "field_" + Math.random().toString(36).substr(2, 9),
       type: "text",
       label: "New Field",
@@ -226,6 +235,39 @@ export default function RegistrationPage() {
       readOnly: false,
       width: "full"
     };
+
+    if (preset === "phone") {
+      newField = {
+        id: "field_" + Math.random().toString(36).substr(2, 9),
+        type: "phone",
+        label: "Phone Number",
+        required: false,
+        hidden: false,
+        readOnly: false,
+        width: "full"
+      };
+    } else if (preset === "role") {
+      newField = {
+        id: "field_" + Math.random().toString(36).substr(2, 9),
+        type: "text",
+        label: "Role/Title",
+        required: false,
+        hidden: false,
+        readOnly: false,
+        width: "half"
+      };
+    } else if (preset === "company") {
+      newField = {
+        id: "field_" + Math.random().toString(36).substr(2, 9),
+        type: "text",
+        label: "Company",
+        required: false,
+        hidden: false,
+        readOnly: false,
+        width: "half"
+      };
+    }
+
     setFormConfig((prev: any) => ({ ...prev, fields: [...prev.fields, newField] }));
   };
 
@@ -344,10 +386,21 @@ export default function RegistrationPage() {
                   </SortableContext>
                 </DndContext>
 
-                <Button variant="outline" onClick={addField} className="w-full border-dashed py-8 bg-muted/10 hover:bg-muted/30">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Field
-                </Button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Button variant="outline" onClick={() => addPresetField("custom")} className="flex-1 border-dashed py-6 bg-muted/10 hover:bg-muted/30">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Custom Field
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => addPresetField("phone")} className="rounded-xl h-11 text-xs font-medium">
+                    + Phone Number
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => addPresetField("role")} className="rounded-xl h-11 text-xs font-medium">
+                    + Role / Title
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => addPresetField("company")} className="rounded-xl h-11 text-xs font-medium">
+                    + Company
+                  </Button>
+                </div>
 
                 <div className="pt-6 mt-4 border-t border-border flex justify-end gap-3">
                   <a 

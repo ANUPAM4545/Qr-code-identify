@@ -49,8 +49,13 @@ export function EventHero() {
           </div>
         )}
         <div>
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{event.name}</h1>
+            {event.category && (
+              <span className="text-xs px-2.5 py-0.5 rounded-full border border-zinc-200 bg-zinc-100 text-zinc-700 font-medium">
+                {event.category}
+              </span>
+            )}
             <div className={`text-xs px-2.5 py-0.5 rounded-full border font-medium capitalize ${
               event.status === 'published' ? 'border-zinc-300 bg-zinc-100 text-zinc-900' : 'border-zinc-200 bg-zinc-50 text-zinc-600'
             }`}>

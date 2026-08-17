@@ -28,13 +28,23 @@ export async function POST(
       return NextResponse.json({ error: "Either qrData or guestId must be provided" }, { status: 400 });
     }
 
+    const userAgent = req.headers.get("user-agent") || "";
+    let device = "Desktop Scanner";
+    if (/iPad|Tablet/i.test(userAgent)) device = "Tablet";
+    else if (/iPhone|iPod/i.test(userAgent)) device = "iOS (iPhone)";
+    else if (/Android/i.test(userAgent)) device = "Android";
+    else if (/Macintosh|Mac OS/i.test(userAgent)) device = "macOS";
+    else if (/Windows/i.test(userAgent)) device = "Windows";
+    else if (/Linux/i.test(userAgent)) device = "Linux";
+
     const result = await ScannerService.processScan(
       event.workspaceId,
       eventId,
       session.user.id,
       { qrData, guestId },
       direction || "in",
-      location
+      location,
+      device
     );
 
     return NextResponse.json(result);

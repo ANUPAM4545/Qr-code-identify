@@ -81,11 +81,11 @@ export function HeroPreview() {
         {/* Fake Browser Header */}
         <div className="h-12 border-b border-zinc-200 flex items-center px-4 bg-zinc-50/80 backdrop-blur-sm z-30 relative" style={{ transform: "translateZ(30px)" }}>
           <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-amber-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
+            <div className="w-3 h-3 rounded-full bg-zinc-300" />
+            <div className="w-3 h-3 rounded-full bg-zinc-400" />
+            <div className="w-3 h-3 rounded-full bg-zinc-500" />
           </div>
-          <div className="mx-auto flex h-7 w-1/3 items-center justify-center rounded-md bg-white border border-zinc-200 text-[11px] text-zinc-500 font-medium shadow-sm">
+          <div className="mx-auto flex h-7 w-1/3 items-center justify-center rounded-md bg-white border border-zinc-200 text-[11px] text-zinc-600 font-medium shadow-sm font-mono">
             identify.com/dashboard
           </div>
         </div>
@@ -106,11 +106,11 @@ export function HeroPreview() {
                 onClick={() => setActiveTab(i)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer ${
                   activeTab === i 
-                  ? 'bg-white shadow-[0_2px_10px_rgb(0,0,0,0.05)] border border-zinc-200/60 text-zinc-900 translate-x-1' 
+                  ? 'bg-zinc-900 shadow-sm text-white translate-x-1' 
                   : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50'
                 }`}
               >
-                <item.icon className={`w-4 h-4 ${activeTab === i ? 'text-blue-600' : 'text-zinc-400'}`} />
+                <item.icon className={`w-4 h-4 ${activeTab === i ? 'text-white' : 'text-zinc-400'}`} />
                 {item.label}
               </div>
             ))}
@@ -132,7 +132,7 @@ export function HeroPreview() {
                   <div>
                     <h2 className="text-2xl font-bold text-zinc-900">Global Tech Summit 2026</h2>
                     <p className="text-sm text-zinc-500 mt-1 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-zinc-900 animate-pulse" />
                       Live • San Francisco, CA
                     </p>
                   </div>
@@ -142,7 +142,7 @@ export function HeroPreview() {
                     </div>
                     <div className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center bg-white shadow-sm hover:bg-zinc-50 transition-colors cursor-pointer relative">
                       <Bell className="w-4 h-4 text-zinc-600" />
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full" />
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-zinc-900 rounded-full" />
                     </div>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-600 shadow-sm border border-zinc-900 ml-2" />
                   </div>
@@ -166,11 +166,11 @@ export function HeroPreview() {
                         >
                           <span className="text-sm text-zinc-500 font-medium flex items-center gap-2">
                             {stat.label}
-                            {stat.live && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+                            {stat.live && <span className="w-2 h-2 rounded-full bg-zinc-900 animate-pulse" />}
                           </span>
                           <div className="flex items-end justify-between">
                             <span className="text-3xl font-bold text-zinc-900">{stat.value}</span>
-                            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">{stat.trend}</span>
+                            <span className="text-xs font-bold text-zinc-800 bg-zinc-100 px-2.5 py-1 rounded-md border border-zinc-200">{stat.trend}</span>
                           </div>
                         </motion.div>
                       ))}
@@ -184,7 +184,7 @@ export function HeroPreview() {
                     >
                       <div className="border-b border-zinc-100 px-6 py-4 flex items-center justify-between bg-zinc-50/50">
                         <span className="text-sm font-bold text-zinc-900">Recent Activity Stream</span>
-                        <span className="text-xs font-medium text-blue-600 hover:text-blue-700 cursor-pointer bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">View Live Feed</span>
+                        <span className="text-xs font-semibold text-zinc-900 hover:text-black cursor-pointer bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-full border border-zinc-200 transition-colors">View Live Feed</span>
                       </div>
                       <div className="p-6 flex flex-col gap-6 flex-1 overflow-hidden relative">
                         {/* Fake Multiplayer Cursor */}
@@ -196,14 +196,14 @@ export function HeroPreview() {
                           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
                           className="absolute z-50 pointer-events-none flex flex-col items-center"
                         >
-                          <MousePointer2 className="w-5 h-5 text-rose-500 fill-rose-500 -rotate-12 drop-shadow-md" />
-                          <div className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 drop-shadow-md">Sarah J.</div>
+                          <MousePointer2 className="w-5 h-5 text-zinc-900 fill-zinc-900 -rotate-12 drop-shadow-md" />
+                          <div className="bg-zinc-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 drop-shadow-md">Sarah J.</div>
                         </motion.div>
 
                         {[
-                          { name: "John Smith", role: "Checked in at Main Entrance", time: "Just now", init: "JS", color: "bg-blue-100 text-blue-700" },
-                          { name: "Alice Lee", role: "Registered for VIP Pass", time: "2 mins ago", init: "AL", color: "bg-emerald-100 text-emerald-700" },
-                          { name: "Michael Kim", role: "Checked in at Workshop B", time: "14 mins ago", init: "MK", color: "bg-purple-100 text-purple-700" }
+                          { name: "John Smith", role: "Checked in at Main Entrance", time: "Just now", init: "JS" },
+                          { name: "Alice Lee", role: "Registered for VIP Pass", time: "2 mins ago", init: "AL" },
+                          { name: "Michael Kim", role: "Checked in at Workshop B", time: "14 mins ago", init: "MK" }
                         ].map((item, i) => (
                           <motion.div 
                             initial={{ opacity: 0, x: -20 }}
@@ -213,7 +213,7 @@ export function HeroPreview() {
                             className="flex items-center justify-between group"
                           >
                             <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${item.color}`}>
+                              <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-zinc-100 text-zinc-800 border border-zinc-200">
                                 {item.init}
                               </div>
                               <div className="flex flex-col gap-0.5">
@@ -235,23 +235,23 @@ export function HeroPreview() {
                       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 h-24 rounded-2xl border border-zinc-200 bg-white shadow-sm p-5 flex flex-col justify-between relative overflow-hidden">
                         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider relative z-10">Peak Attendance</span>
                         <span className="text-3xl font-bold text-zinc-900 relative z-10">842 <span className="text-xs font-medium text-zinc-400">@ 11:30 AM</span></span>
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl" />
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-zinc-100 rounded-full blur-2xl" />
                       </motion.div>
                       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1 }} className="flex-1 h-24 rounded-2xl border border-zinc-200 bg-white shadow-sm p-5 flex flex-col justify-between relative overflow-hidden">
                         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider relative z-10">Avg Session</span>
                         <span className="text-3xl font-bold text-zinc-900 relative z-10">4h 12m</span>
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl" />
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-zinc-100 rounded-full blur-2xl" />
                       </motion.div>
                       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2 }} className="flex-1 h-24 rounded-2xl border border-zinc-200 bg-white shadow-sm p-5 flex flex-col justify-between relative overflow-hidden">
                         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider relative z-10">Drop-off Rate</span>
                         <span className="text-3xl font-bold text-zinc-900 relative z-10">4.2%</span>
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-rose-50 rounded-full blur-2xl" />
+                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-zinc-100 rounded-full blur-2xl" />
                       </motion.div>
                     </div>
                     <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm p-6 flex flex-col gap-6">
                       <div className="flex justify-between items-center">
                         <span className="text-base font-bold text-zinc-900">Live Attendance Cross-section</span>
-                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider bg-zinc-100 px-3 py-1 rounded-md">Today</span>
+                        <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider bg-zinc-100 px-3 py-1 rounded-md border border-zinc-200">Today</span>
                       </div>
                       <div className="flex-1 flex items-end gap-3 relative">
                          <div className="absolute inset-0 flex flex-col justify-between py-2">
@@ -265,7 +265,7 @@ export function HeroPreview() {
                              initial={{ height: 0 }}
                              animate={{ height: `${h}%` }}
                              transition={{ duration: 1, delay: 0.4 + (i * 0.05), type: "spring" }}
-                             className="flex-1 bg-gradient-to-t from-zinc-800 to-zinc-900 rounded-t-md relative z-10 hover:opacity-80 transition-opacity cursor-pointer shadow-lg" 
+                             className="flex-1 bg-gradient-to-t from-zinc-700 via-zinc-800 to-zinc-950 rounded-t-md relative z-10 hover:opacity-80 transition-opacity cursor-pointer shadow-sm" 
                            />
                          ))}
                       </div>
@@ -281,11 +281,11 @@ export function HeroPreview() {
                      </div>
                      <div className="p-6 flex flex-col gap-5 flex-1 overflow-hidden">
                        {[
-                         { name: "Sarah Jenkins", email: "sarah@example.com", status: "VIP", init: "SJ" },
-                         { name: "David Chen", email: "david.c@startup.io", status: "Checked In", init: "DC" },
-                         { name: "Emily Watson", email: "emilyw@enterprise.com", status: "Checked In", init: "EW" },
-                         { name: "Robert Fox", email: "rfox@agency.net", status: "Pending", init: "RF" },
-                         { name: "Jessica Alba", email: "jessica@studio.com", status: "Checked In", init: "JA" }
+                         { name: "Sarah Jenkins", email: "sarah@example.com", status: "VIP", init: "SJ", isVip: true },
+                         { name: "David Chen", email: "david.c@startup.io", status: "Checked In", init: "DC", isVip: false },
+                         { name: "Emily Watson", email: "emilyw@enterprise.com", status: "Checked In", init: "EW", isVip: false },
+                         { name: "Robert Fox", email: "rfox@agency.net", status: "Pending", init: "RF", isVip: false },
+                         { name: "Jessica Alba", email: "jessica@studio.com", status: "Checked In", init: "JA", isVip: false }
                        ].map((item, i) => (
                          <motion.div 
                            initial={{ opacity: 0, x: -10 }}
@@ -295,13 +295,21 @@ export function HeroPreview() {
                            className="flex items-center justify-between pb-4 border-b border-zinc-100 last:border-0 last:pb-0"
                          >
                            <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs text-zinc-600 font-bold">{item.init}</div>
+                             <div className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs text-zinc-700 font-bold">{item.init}</div>
                              <div className="flex flex-col gap-0.5">
                                <span className="text-sm font-bold text-zinc-900">{item.name}</span>
                                <span className="text-xs font-medium text-zinc-500">{item.email}</span>
                              </div>
                            </div>
-                           <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${item.status === 'VIP' ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm' : item.status === 'Pending' ? 'bg-zinc-50 text-zinc-600 border-zinc-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'}`}>{item.status}</span>
+                           <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
+                             item.isVip 
+                               ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm' 
+                               : item.status === 'Pending' 
+                                 ? 'bg-zinc-50 text-zinc-600 border-zinc-200' 
+                                 : 'bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm'
+                           }`}>
+                             {item.status}
+                           </span>
                          </motion.div>
                        ))}
                      </div>
@@ -311,9 +319,9 @@ export function HeroPreview() {
                 {activeTab === 2 && (
                   <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex gap-6 min-h-0">
                     <div className="w-1/3 rounded-2xl border border-zinc-200 bg-zinc-50 shadow-sm flex flex-col items-center justify-center p-8 gap-6 h-full text-center relative overflow-hidden">
-                      <div className="w-48 h-48 bg-white p-4 rounded-3xl shadow-xl border border-zinc-100 flex items-center justify-center relative">
+                      <div className="w-48 h-48 bg-white p-4 rounded-3xl shadow-xl border border-zinc-200 flex items-center justify-center relative">
                         <QrCode className="w-full h-full text-zinc-900" />
-                        <motion.div animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} className="absolute left-0 right-0 h-[3px] bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]" />
+                        <motion.div animate={{ top: ["0%", "100%", "0%"] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} className="absolute left-0 right-0 h-[3px] bg-zinc-900 shadow-[0_0_15px_rgba(0,0,0,0.5)]" />
                       </div>
                       <div className="flex flex-col items-center z-10">
                         <span className="text-base font-bold text-zinc-900">VIP Access Pass</span>
@@ -325,7 +333,7 @@ export function HeroPreview() {
                          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Total Scans Today</span>
                          <div className="flex items-end justify-between">
                            <span className="text-3xl font-bold text-zinc-900">12,405</span>
-                           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100">+14% vs yesterday</span>
+                           <span className="text-xs font-bold text-zinc-900 bg-zinc-100 px-2 py-1 rounded-md border border-zinc-200">+14% vs yesterday</span>
                          </div>
                        </div>
                        <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm p-6 flex flex-col gap-4">
@@ -337,7 +345,7 @@ export function HeroPreview() {
                               <div className="border-b border-zinc-200/50 w-full"></div>
                            </div>
                            {[30, 50, 40, 70, 60, 90, 80, 100, 85].map((h, i) => (
-                             <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ duration: 0.5, delay: i * 0.05 }} className="flex-1 bg-blue-500 hover:bg-blue-600 transition-colors rounded-t-sm relative z-10 shadow-sm" />
+                             <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ duration: 0.5, delay: i * 0.05 }} className="flex-1 bg-zinc-800 hover:bg-zinc-900 transition-colors rounded-t-sm relative z-10 shadow-sm" />
                            ))}
                          </div>
                        </div>

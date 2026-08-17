@@ -125,7 +125,7 @@ export class RegistrationService {
     // Map answers to Guest model
     // In a real app, form fields would have mapped semantic tags (e.g. isEmail, isFirstName)
     // For now, we best-effort map based on typical field labels or types from answers
-    let email = "", firstName = "Guest", lastName = "", phone = "", organization = "";
+    let email = "", firstName = "Guest", lastName = "", phone = "", organization = "", title = "";
     
     for (const field of form.fields) {
       const answer = submission.answers[field.id] as string | undefined;
@@ -133,10 +133,24 @@ export class RegistrationService {
       
       const label = field.label.toLowerCase();
       if (field.type === "email" || label.includes("email")) email = answer;
-      else if (field.type === "phone" || label.includes("phone")) phone = answer;
+      else if (field.type === "phone" || label.includes("phone") || label.includes("mobile")) phone = answer;
       else if (label.includes("first")) firstName = answer;
       else if (label.includes("last")) lastName = answer;
       else if (label.includes("org") || label.includes("company")) organization = answer;
+      else if (label.includes("role") || label.includes("title") || label.includes("job") || label.includes("position") || label.includes("designation")) title = answer;
+    }
+
+    // Direct key fallback for custom form payloads
+    for (const [key, val] of Object.entries(submission.answers || {})) {
+      if (!val || typeof val !== "string") continue;
+      const strVal = val.trim();
+      if (!strVal) continue;
+      
+      const lowerKey = key.toLowerCase();
+      if (!phone && (lowerKey.includes("phone") || lowerKey.includes("mobile") || lowerKey.includes("contact") || lowerKey.includes("tel"))) phone = strVal;
+      else if (!title && (lowerKey.includes("role") || lowerKey.includes("title") || lowerKey.includes("job") || lowerKey.includes("position") || lowerKey.includes("designation"))) title = strVal;
+      else if (!organization && (lowerKey.includes("company") || lowerKey.includes("org") || lowerKey.includes("organization") || lowerKey.includes("business") || lowerKey.includes("corp") || lowerKey.includes("work"))) organization = strVal;
+      else if (!email && lowerKey.includes("email")) email = strVal;
     }
 
     const guest = await GuestService.createGuest(workspaceId, eventId, actorId, {
@@ -145,6 +159,7 @@ export class RegistrationService {
       email,
       phone,
       organization,
+      title,
       customData: submission.answers,
       status: "approved"
     });

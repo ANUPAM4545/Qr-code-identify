@@ -256,28 +256,13 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
       </div>
 
       {/* Live Preview Area */}
-      <div className="flex-1 bg-muted/20 p-12 overflow-auto flex items-center justify-center print:p-0 print:bg-white perspective-[2000px]">
-        
-        {/* Floating Animation Wrapper */}
-        <motion.div
-          animate={{ 
-            y: [-15, 15, -15],
-            rotateX: [2, -2, 2],
-            rotateY: [-2, 2, -2]
-          }}
-          transition={{ 
-            duration: 8, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }}
-          className="print:!transform-none"
+      <div className="flex-1 bg-muted/20 p-12 overflow-auto flex items-center justify-center print:p-0 print:bg-white">
+        {/* Actual Printable Badge Element */}
+        <div 
+          id="badge-preview-element"
+          className="bg-white shadow-xl rounded-3xl overflow-hidden flex flex-col relative print:shadow-none print:rounded-none ring-1 ring-black/5"
+          style={{ width: '400px', height: '600px' }}
         >
-          {/* Actual Printable Badge Element */}
-          <div 
-            id="badge-preview-element"
-            className="bg-white shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-3xl overflow-hidden flex flex-col relative print:shadow-none print:rounded-none ring-1 ring-black/5"
-            style={{ width: '400px', height: '600px' }}
-          >
           {/* Top Branding Banner */}
           <div className={`h-28 flex items-center justify-center p-6 relative overflow-hidden ${theme.top}`}>
             {/* Ambient light glow inside banner */}
@@ -323,22 +308,10 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
           </div>
 
           {/* Bottom Sleek Footer */}
-          <div className={`h-12 w-full flex items-center justify-between px-8 text-[10px] font-black tracking-widest uppercase relative overflow-hidden ${theme.bottom}`}>
-            <div className="flex gap-[2px] items-center opacity-50">
-               <div className="w-0.5 h-4 bg-current" />
-               <div className="w-1 h-4 bg-current" />
-               <div className="w-0.5 h-4 bg-current" />
-               <div className="w-2 h-4 bg-current" />
-               <div className="w-0.5 h-4 bg-current" />
-               <div className="w-1 h-4 bg-current ml-1" />
-               <div className="w-1.5 h-4 bg-current" />
-               <div className="w-0.5 h-4 bg-current" />
-            </div>
+          <div className={`h-12 w-full flex items-center justify-center px-8 text-[10px] font-black tracking-widest uppercase relative overflow-hidden ${theme.bottom}`}>
             <span className="opacity-80">IDENTIFY.COM</span>
           </div>
         </div>
-        </motion.div>
-
       </div>
 
       {/* Global CSS overrides for printing only this specific component */}

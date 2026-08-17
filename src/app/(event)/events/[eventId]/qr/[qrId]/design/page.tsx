@@ -4,7 +4,8 @@ import { use, useEffect, useRef, useState } from "react";
 import { useEvent } from "@/providers/event-provider";
 import { QRCodeDesignOptions } from "@/domain/types";
 import { Button } from "@/components/ui/button";
-import { Save, Layout, Undo2, Redo2, RotateCcw, Sparkles } from "lucide-react";
+import { Save, Layout, Undo2, Redo2, RotateCcw, Sparkles, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,6 +84,8 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
     enabled: isNew && !!templateId
   });
 
+  const loadedTemplate = (templates as any[])?.find((t: any) => t._id === templateId);
+
   useEffect(() => {
     if (existingQR) {
       // Initialize without adding to history stack
@@ -90,13 +93,39 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
       replaceDestination(existingQR.destinationUrl || existingQR.design.data || "https://identify.com");
       replaceDesign(existingQR.design);
     } else if (isNew && templateId && templates) {
-      const template = templates.find((t: any) => t._id === templateId);
+      const template = (templates as any[]).find((t: any) => t._id === templateId);
       if (template && template.design) {
         replaceDesign(template.design);
-        replaceName(`Copy of ${template.name}`);
+        replaceName(template.name);
       }
     }
   }, [existingQR, templates, templateId, isNew, replaceName, replaceDestination, replaceDesign]);
+
+  const updateLoadedTemplateMutation = useMutation({
+    mutationFn: async () => {
+      if (!templateId) return;
+      const res = await fetch(`/api/events/${event._id}/qr/templates/${templateId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim() || loadedTemplate?.name || "My Template",
+          design: design
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to update template");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["qr-templates", event._id] });
+      toast.success("Template design updated in real-time!");
+    },
+    onError: (err: unknown) => {
+      toast.error((err as Error).message || "Failed to update template");
+    }
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -206,12 +235,19 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
     <div className="flex flex-col h-[calc(100vh-120px)] w-full bg-background overflow-hidden">
       
       {/* Top Application Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card flex-wrap gap-2">
+        <div className="flex items-center gap-3">
           <span className="font-semibold text-sm">Design Studio</span>
           
+          {loadedTemplate && (
+            <Badge variant="secondary" className="text-xs flex items-center gap-1.5 py-0.5 px-2.5 font-medium rounded-full">
+              <Sparkles className="w-3 h-3 text-muted-foreground" />
+              Template: {loadedTemplate.name}
+            </Badge>
+          )}
+
           {/* History Tools */}
-          <div className="flex items-center gap-1 border-l border-border pl-4">
+          <div className="flex items-center gap-1 border-l border-border pl-3">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={!canUndo}>
               <Undo2 className="w-4 h-4" />
             </Button>
@@ -224,10 +260,32 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
           </div>
         </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => router.push(`/events/${event._id}/qr`)}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={() => router.push(templateId ? `/events/${event._id}/qr/templates` : `/events/${event._id}/qr`)}>
                 Cancel
               </Button>
+              
+              {templateId && loadedTemplate && !loadedTemplate.isSystem && (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  className="font-medium shadow-sm"
+                  onClick={() => updateLoadedTemplateMutation.mutate()} 
+                  disabled={updateLoadedTemplateMutation.isPending}
+                >
+                  {updateLoadedTemplateMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-1.5" />
+                      Update Template
+                    </>
+                  )}
+                </Button>
+              )}
               
               {generationMode === "bulk" ? (
                 <Button 
@@ -266,12 +324,12 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setIsTemplateModalOpen(true)}>
                     <Layout className="w-4 h-4 mr-2" />
-                    Save as Template
+                    Save as New Template
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger render={
-                      <Button size="sm" variant="default" disabled={saveMutation.isPending}>
-                        {saveMutation.isPending ? "Saving..." : "Publish"}
+                      <Button size="sm" variant={templateId ? "outline" : "default"} disabled={saveMutation.isPending}>
+                        {saveMutation.isPending ? "Saving..." : "Publish QR"}
                       </Button>
                     } />
                     <DropdownMenuContent align="end">

@@ -5,14 +5,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
-  Search, 
-  Filter, 
   Plus, 
+  Search, 
   MoreHorizontal, 
   Copy, 
   Archive, 
+  MapPin, 
   Calendar,
-  MapPin
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Event } from "@/domain/types";
 import { toast } from "sonner";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -35,114 +42,155 @@ export function EventList({ workspaceId }: EventListProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [status, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
 
-  const fetchEvents = async () => {
-    const params = new URLSearchParams({
-      workspaceId,
-      page: page.toString(),
-      limit: "12",
-    });
-    if (search) params.append("search", search);
-    if (statusFilter) params.append("status", statusFilter);
-    
-    const res = await fetch(`/api/events?${params.toString()}`);
-    if (!res.ok) throw new Error("Failed to fetch events");
-    return res.json();
-  };
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["events", workspaceId, search, statusFilter, page],
-    queryFn: fetchEvents,
-  });
-
-
-
-  const actionMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ eventId, action, payload }: { eventId: string, action: string, payload?: any }) => {
-      const res = await fetch(`/api/events/${eventId}/action`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId, action, payload }),
+  const { data, isLoading } = useQuery({
+    queryKey: ['events', workspaceId, search, status, sortBy, sortOrder, page],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        workspaceId,
+        page: page.toString(),
+        limit: "9",
+        sortBy,
+        sortOrder
       });
-      if (!res.ok) throw new Error(`Failed to ${action} event`);
-    },
-    onSuccess: (_, variables) => {
-      toast.success(`Event ${variables.action}d successfully`);
-      queryClient.invalidateQueries({ queryKey: ["events"] });
+      if (search) params.append("search", search);
+      if (status !== "all") params.append("status", status);
+
+      const res = await fetch(`/api/events?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch events");
+      return res.json();
     }
   });
-
-  if (error) {
-    return <div className="text-red-500">Error loading events: {(error as Error).message}</div>;
-  }
 
   const events: Event[] = data?.data?.events || [];
   const totalPages = data?.data?.totalPages || 1;
 
+  const actionMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: async ({ eventId, action, payload }: { eventId: string; action: string; payload?: any }) => {
+      const res = await fetch(`/api/events/${eventId}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId, action, payload })
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Action failed");
+      }
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`Event ${variables.action}d successfully`);
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (err: any) => {
+      toast.error(err.message);
+    }
+  });
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search events..." 
-            className="pl-9 bg-background w-full"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          />
+      {/* Controls Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <div className="flex flex-1 gap-2 items-center max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search events..." 
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9 bg-background/50"
+            />
+          </div>
         </div>
         
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full sm:w-auto text-sm font-medium">
-              <Filter className="mr-2 h-4 w-4" />
-              {statusFilter ? `Status: ${statusFilter}` : "All Statuses"}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => { setStatusFilter(""); setPage(1); }}>All Statuses</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => { setStatusFilter("draft"); setPage(1); }}>Draft</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setStatusFilter("published"); setPage(1); }}>Published</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setStatusFilter("archived"); setPage(1); }}>Archived</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex flex-wrap gap-2 items-center">
+          <Select value={status} onValueChange={(val) => { if (val) { setStatus(val); setPage(1); } }}>
+            <SelectTrigger className="w-[130px] bg-background/50">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <Button nativeButton={false} render={<Link href="/events/create" />}>
-            <Plus className="mr-2 h-4 w-4" /> Create Event
+          <Select value={sortBy} onValueChange={(val) => { if (val) setSortBy(val); }}>
+            <SelectTrigger className="w-[130px] bg-background/50">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Date</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="createdAt">Created</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => setSortOrder(o => o === "asc" ? "desc" : "asc")}
+            title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
+            className="bg-background/50"
+          >
+            {sortOrder === "asc" ? "↑" : "↓"}
+          </Button>
+
+          <Button onClick={() => router.push("/events/create")} className="gap-2">
+            <Plus className="h-4 w-4" /> Create Event
           </Button>
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Events Grid */}
       {isLoading ? (
         <div className="h-64 flex items-center justify-center">
           <LoadingState text="Loading events..." />
         </div>
       ) : events.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-border/50 border-dashed bg-background/50 p-12 text-center h-[300px]">
+        <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-xl bg-muted/20 min-h-[300px]">
           <Calendar className="h-10 w-10 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No events found</h2>
-          <p className="text-muted-foreground mb-6">Create an event to get started.</p>
-          <Button nativeButton={false} render={<Link href="/events/create" />} variant="outline">
-            Create Event
-          </Button>
+          <h3 className="font-semibold text-lg mb-1">No events found</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mb-4">
+            {search || status !== "all" 
+              ? "No events match your current filter criteria. Try clearing some filters."
+              : "Get started by creating your first event."}
+          </p>
+          {(search || status !== "all") ? (
+            <Button variant="outline" onClick={() => { setSearch(""); setStatus("all"); }}>Clear Filters</Button>
+          ) : (
+            <Button onClick={() => router.push("/events/create")}>Create Event</Button>
+          )}
         </div>
       ) : (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
               <div 
                 key={event._id as string} 
-                className="group relative flex flex-col rounded-xl border border-border/50 bg-background overflow-hidden hover:border-foreground/20 transition-all hover:shadow-md"
+                className="group relative flex flex-col justify-between rounded-xl border border-border/50 bg-card p-6 shadow-sm hover:shadow-md transition-all hover:border-primary/30"
               >
-                <div className="p-5 flex-1">
+                <div>
                   <div className="flex justify-between items-start mb-4">
-                    <div className="text-xs px-2 py-0.5 rounded-full border border-border/50 bg-muted/50 font-medium capitalize">
-                      {event.status}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {event.category && (
+                        <span className="text-[11px] px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/60 text-foreground font-medium truncate max-w-[140px]">
+                          {event.category}
+                        </span>
+                      )}
+                      <div className="text-xs px-2.5 py-0.5 rounded-full border border-border/50 bg-background/50 capitalize font-medium text-muted-foreground">
+                        {event.status}
+                      </div>
                     </div>
                     
                     <DropdownMenu>
@@ -182,6 +230,12 @@ export function EventList({ workspaceId }: EventListProps) {
                   </p>
                   
                   <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    {event.category && (
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-3.5 w-3.5" />
+                        <span className="truncate">{event.category}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-3.5 w-3.5" />
                       <span className="truncate">{new Date(event.date).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
@@ -220,7 +274,7 @@ export function EventList({ workspaceId }: EventListProps) {
               </Button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

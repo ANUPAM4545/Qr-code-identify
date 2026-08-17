@@ -13,7 +13,7 @@ import { Loader2 } from "lucide-react";
 
 const workspaceSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-._/]+$/, "Slug can only contain lowercase letters, numbers, hyphens, underscores, dots, and slashes"),
   timezone: z.string().min(1, "Timezone is required"),
 });
 
@@ -43,7 +43,7 @@ export default function OnboardingPage() {
   const workspaceName = workspaceForm.watch("name");
   useEffect(() => {
     if (workspaceName && !workspaceForm.formState.dirtyFields.slug) {
-      const slug = workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slug = workspaceName.toLowerCase().replace(/[^a-z0-9-._/]+/g, '-').replace(/(^-|-$)+/g, '');
       workspaceForm.setValue("slug", slug, { shouldValidate: true });
     }
   }, [workspaceName, workspaceForm]);
@@ -139,7 +139,7 @@ export default function OnboardingPage() {
                       className="rounded-l-none"
                       {...workspaceForm.register("slug")} 
                       onChange={(e) => {
-                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-._]/g, '-');
                         workspaceForm.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
                       }}
                     />

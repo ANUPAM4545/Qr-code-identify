@@ -21,7 +21,6 @@ export default function QRStudioLayout({
     { name: "Templates", href: `/events/${eventId}/qr/templates`, icon: LayoutTemplate },
     { name: "Downloads", href: `/events/${eventId}/qr/downloads`, icon: Download },
     { name: "Analytics", href: `/events/${eventId}/qr/analytics`, icon: BarChart },
-    { name: "Settings", href: `/events/${eventId}/qr/settings`, icon: Settings },
   ];
 
   const isDesignStudio = pathname.includes("/design");

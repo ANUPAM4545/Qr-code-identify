@@ -1,15 +1,11 @@
 "use client";
 
 import { useEvent } from "@/providers/event-provider";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -20,7 +16,7 @@ export default function QRSettingsPage() {
   const [clearing, setClearing] = useState(false);
 
   const handleClearAnalytics = async () => {
-    if (!confirm("Are you sure you want to permanently delete all scan and download analytics for this event? This action cannot be undone.")) return;
+    if (!confirm("Are you sure you want to permanently clear all scan analytics, time-series charts, and reset all attendee check-ins for this event? This action is irreversible.")) return;
     
     setClearing(true);
     try {
@@ -31,12 +27,15 @@ export default function QRSettingsPage() {
         const data = await res.json();
         throw new Error(data.error || "Failed to clear analytics");
       }
-      toast.success("Analytics cleared successfully.");
+      toast.success("All analytics, scan history, and check-in records have been reset.");
       
-      // Clear react-query cache and refresh page
+      // Invalidate all related caches
       queryClient.invalidateQueries({ queryKey: ["qr-kpis"] });
       queryClient.invalidateQueries({ queryKey: ["qr-timeseries"] });
       queryClient.invalidateQueries({ queryKey: ["qr-recent"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["guests"] });
+      
       router.refresh();
     } catch (e: unknown) {
       toast.error((e as Error).message);
@@ -46,27 +45,30 @@ export default function QRSettingsPage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
+    <div className="p-8 max-w-5xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">QR Studio Settings</h1>
         <p className="text-muted-foreground mt-1">Manage data retention and advanced settings.</p>
       </div>
 
       <div className="space-y-6">
-        <Card className="border-destructive/30 shadow-sm">
+        {/* Danger Zone */}
+        <Card className="border-destructive/30 shadow-sm bg-card">
           <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible actions for your QR Studio.</CardDescription>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <Trash2 className="w-5 h-5" /> Danger Zone
+            </CardTitle>
+            <CardDescription>Irreversible actions for your QR Studio analytics and scan history.</CardDescription>
           </CardHeader>
-          <CardContent>
-             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+          <CardContent className="space-y-4">
+             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-4 border border-destructive/20 rounded-xl bg-destructive/5">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Delete all analytics data</p>
-                  <p className="text-xs text-muted-foreground">Permanently wipe all scan history and downloads for this event.</p>
+                  <p className="text-sm font-bold text-foreground">Delete all analytics data</p>
+                  <p className="text-xs text-muted-foreground">Permanently wipe all scan history, device breakdown, check-in records, and reset all analytics back to 0.</p>
                 </div>
-                <Button variant="destructive" onClick={handleClearAnalytics} disabled={clearing}>
+                <Button variant="destructive" onClick={handleClearAnalytics} disabled={clearing} className="shrink-0 font-semibold shadow-xs">
                   {clearing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {clearing ? "Clearing..." : "Clear Analytics"}
+                  {clearing ? "Wiping Data..." : "Clear Analytics"}
                 </Button>
              </div>
           </CardContent>

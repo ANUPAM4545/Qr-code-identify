@@ -21,7 +21,8 @@ export class ScannerService {
       guestId?: string; // For manual check-in
     },
     direction: "in" | "out" = "in",
-    location?: string
+    location?: string,
+    device: string = "Mobile Scanner"
   ): Promise<ScanResult> {
     
     // 1. Resolve ID
@@ -103,41 +104,17 @@ export class ScannerService {
     }
 
     // 2. Business Validation
-    if (guest.status !== "approved" && guest.status !== "registered") {
+    if (guest.status === "rejected" || guest.status === "cancelled" || guest.status === "archived") {
       return { 
         success: false, 
         status: "invalid", 
-        reason: `Guest status is ${guest.status}. Registration must be approved.`,
+        reason: `Access Denied: Ticket is ${guest.status}.`,
         guest 
       };
     }
 
-    const lastCheckIn = guest.checkIns && guest.checkIns.length > 0 
-      ? guest.checkIns[guest.checkIns.length - 1] 
-      : null;
-
-    if (direction === "in" && lastCheckIn?.direction === "in") {
-      return { 
-        success: false, 
-        status: "duplicate", 
-        reason: "Guest is already checked in",
-        guest 
-      };
-    }
-
-    if (direction === "out" && (!lastCheckIn || lastCheckIn.direction === "out")) {
-      return { 
-        success: false, 
-        status: "duplicate", 
-        reason: "Guest is already checked out",
-        guest 
-      };
-    }
-
-    // If guest has an assigned QR Code, log its metrics!
-    if (guest.qrCodeId) {
-      await ScannerService.logScanMetrics(guest.qrCodeId, eventId, workspaceId);
-    }
+    // Log metrics for analytics charts
+    await ScannerService.logScanMetrics(guest.qrCodeId || finalGuestId, eventId, workspaceId, device);
 
     // 3. Execute Check In via GuestService (which logs Audit and Realtime)
     try {
@@ -170,7 +147,7 @@ export class ScannerService {
   /**
    * Helper to update QR Code scan counts and time-series analytics
    */
-  private static async logScanMetrics(qrId: string, eventId: string, workspaceId: string) {
+  private static async logScanMetrics(qrId: string, eventId: string, workspaceId: string, device: string = "Mobile Scanner") {
     try {
       const client = await (await import("@/infrastructure/db")).default;
       
@@ -205,7 +182,7 @@ export class ScannerService {
         qrId,
         eventId,
         workspaceId,
-        device: "Mobile", // Basic mock for the "Device Breakdown" chart
+        device: device || "Mobile Scanner",
         createdAt: new Date()
       });
     } catch (e) {

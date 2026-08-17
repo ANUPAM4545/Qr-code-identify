@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useDashboardProgress } from "../hooks/useDashboard";
@@ -22,13 +23,12 @@ export function EventProgress({ eventId }: { eventId: string }) {
   }
 
   const { capacity, checkIns, qrs } = data;
-  const capacityPct = capacity.max !== "Unlimited" && capacity.max > 0 ? Math.round((capacity.used / capacity.max) * 100) : 0;
 
   const chartData = [
     { 
       name: 'Capacity', 
-      value: capacity.max !== "Unlimited" ? capacityPct : 100,
-      actualValue: capacity.max !== "Unlimited" ? `${capacityPct}%` : 'Unlimited',
+      value: capacity.max !== "Unlimited" ? capacity.rate : 100,
+      actualValue: capacity.max !== "Unlimited" ? `${capacity.rate}%` : 'Unlimited',
       detail: `${capacity.used} / ${capacity.max}`
     },
     { 

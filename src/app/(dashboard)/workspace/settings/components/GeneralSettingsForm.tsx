@@ -65,7 +65,7 @@ export function GeneralSettingsForm({ workspace }: GeneralSettingsFormProps) {
             <input 
               id="slug" 
               value={slug}
-              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-._]/g, '-'))}
               className="flex-1 px-3 h-10 text-sm outline-none bg-transparent"
             />
           </div>

@@ -103,6 +103,7 @@ export interface Event {
   workspaceId: string;
   name: string;
   slug: string; // Internal slug
+  category?: string | null;
   uniqueSlug?: string; // Public registration slug (/r/slug)
   vanityUrl?: string | null; // Custom domain mapping
   description?: string | null;

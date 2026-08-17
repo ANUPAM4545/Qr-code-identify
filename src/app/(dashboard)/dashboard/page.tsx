@@ -117,12 +117,19 @@ export default async function DashboardPage() {
                 <Link key={event._id as string} href={`/events/${event._id as string}`} className="block rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-card/80 hover:shadow-lg transition-all cursor-pointer group">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-lg group-hover:text-primary transition-colors truncate pr-2">{event.name}</h3>
-                    <div className="text-xs px-2.5 py-1 rounded-full border border-border/50 bg-background/50 capitalize font-medium text-muted-foreground">
-                      {event.status}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {event.category && (
+                        <span className="text-[11px] px-2 py-0.5 rounded-full border border-border/60 bg-muted/60 font-medium text-foreground truncate max-w-[120px]">
+                          {event.category}
+                        </span>
+                      )}
+                      <div className="text-xs px-2.5 py-1 rounded-full border border-border/50 bg-background/50 capitalize font-medium text-muted-foreground">
+                        {event.status}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground gap-4">
-                    <span>{new Date(event.date).toLocaleDateString()}</span>
+                  <div className="flex items-center text-sm text-muted-foreground gap-4 flex-wrap">
+                    <span>{new Date(event.date).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
                     {event.venue && <span>• {event.venue}</span>}
                   </div>
                 </Link>

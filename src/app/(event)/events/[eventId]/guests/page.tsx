@@ -52,6 +52,8 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
+    title: "",
     organization: ""
   });
 
@@ -66,7 +68,10 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
       return json.data as GuestDocument[];
-    }
+    },
+    refetchInterval: 2000,
+    staleTime: 0,
+    refetchOnWindowFocus: true
   });
 
   const toggleSelect = (id: string) => {
@@ -118,6 +123,25 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
       toast.error("Failed to send notifications");
     } finally {
       setIsNotifying(false);
+    }
+  };
+
+  const handleQuickCheckIn = async (guestId: string) => {
+    try {
+      const res = await fetch(`/api/events/${eventId}/scanner/scan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestId, direction: "in" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Guest checked in and verified successfully!");
+        refetch();
+      } else {
+        toast.error(data.reason || "Failed to check in");
+      }
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Failed to check in");
     }
   };
 
@@ -205,7 +229,7 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
       
       toast.success("Guest added successfully!");
       setIsAddModalOpen(false);
-      setFormData({ firstName: "", lastName: "", email: "", organization: "" });
+      setFormData({ firstName: "", lastName: "", email: "", phone: "", title: "", organization: "" });
       refetch();
     } catch (err: any) {
       toast.error(err.message);
@@ -246,21 +270,33 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
               <form onSubmit={handleAddGuest} className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">First Name *</Label>
                     <Input id="firstName" required value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" required value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
+                    <Input id="lastName" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number (Optional)</Label>
+                    <Input id="phone" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+1 (555) 000-0000" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="organization">Organization (Optional)</Label>
-                  <Input id="organization" value={formData.organization} onChange={e => setFormData({ ...formData, organization: e.target.value })} />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Role / Title (Optional)</Label>
+                    <Input id="title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Lead Engineer" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="organization">Company / Organization (Optional)</Label>
+                    <Input id="organization" value={formData.organization} onChange={e => setFormData({ ...formData, organization: e.target.value })} placeholder="e.g. Acme Corp" />
+                  </div>
                 </div>
                 <DialogFooter className="pt-4">
                   <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
@@ -433,8 +469,14 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                   <td className="px-4 py-4">
                     <StatusBadge status={guest.status} />
                   </td>
-                  <td className="px-4 py-4 text-muted-foreground">
-                    {guest.checkIns?.length || 0}
+                  <td className="px-4 py-4">
+                    {guest.checkIns && guest.checkIns.length > 0 ? (
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold text-xs">
+                        {guest.checkIns.length} scan{guest.checkIns.length === 1 ? '' : 's'}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground font-medium pl-1">0</span>
+                    )}
                   </td>
                   <td className="px-4 py-4 text-right">
                     <DropdownMenu>
@@ -442,6 +484,9 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
                         <MoreHorizontal className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleQuickCheckIn(guest._id as string)} className="text-emerald-600 font-medium">
+                          <CheckCircle2 className="w-4 h-4 mr-2" /> Check In / Scan
+                        </DropdownMenuItem>
                         <Link href={`/events/${eventId}/guests/${guest._id}`}>
                           <DropdownMenuItem>
                             View Profile

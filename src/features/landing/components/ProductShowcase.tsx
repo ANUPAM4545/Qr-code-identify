@@ -13,7 +13,7 @@ const features = [
       <div className="w-full h-full bg-zinc-50 p-6 flex flex-col gap-4 border border-zinc-200 rounded-xl overflow-hidden shadow-sm transition-transform hover:scale-[1.02] duration-500">
         <div className="w-full h-8 flex justify-between items-center border-b border-zinc-200 pb-4">
           <span className="text-sm font-semibold text-zinc-900">identify.com/dashboard</span>
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs border border-indigo-200">AC</div>
+          <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white font-bold text-xs">AC</div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="h-24 bg-white border border-zinc-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
@@ -50,8 +50,8 @@ const features = [
       <div className="w-full h-full bg-zinc-50 p-6 flex flex-col gap-4 border border-zinc-200 rounded-xl overflow-hidden shadow-sm transition-transform hover:scale-[1.02] duration-500">
         <span className="text-sm font-semibold text-zinc-900 mb-2">Create New Event</span>
         <div className="flex gap-2 mb-6">
-          <div className="flex-1 h-1.5 bg-indigo-600 rounded-full" />
-          <div className="flex-1 h-1.5 bg-indigo-600 rounded-full" />
+          <div className="flex-1 h-1.5 bg-zinc-900 rounded-full" />
+          <div className="flex-1 h-1.5 bg-zinc-900 rounded-full" />
           <div className="flex-1 h-1.5 bg-zinc-200 rounded-full" />
         </div>
         <div className="bg-white border border-zinc-200 rounded-xl p-6 flex-1 shadow-sm flex flex-col gap-5">
@@ -87,14 +87,14 @@ const features = [
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider ml-auto">Status</span>
           </div>
           {[
-            { n: "David O.", s: "Checked In", c: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-            { n: "Sarah K.", s: "Pending", c: "bg-amber-100 text-amber-700 border-amber-200" },
-            { n: "Marcus T.", s: "Checked In", c: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-            { n: "Elena R.", s: "VIP", c: "bg-indigo-100 text-indigo-700 border-indigo-200" }
+            { n: "David O.", s: "Checked In", c: "bg-zinc-100 text-zinc-900 border-zinc-200" },
+            { n: "Sarah K.", s: "Pending", c: "bg-zinc-50 text-zinc-500 border-zinc-200" },
+            { n: "Marcus T.", s: "Checked In", c: "bg-zinc-100 text-zinc-900 border-zinc-200" },
+            { n: "Elena R.", s: "VIP", c: "bg-zinc-900 text-white border-zinc-900" }
           ].map((g, i) => (
              <div key={i} className="border-b border-zinc-100 px-4 py-2.5 flex gap-4 items-center hover:bg-zinc-50 transition-colors">
                <div className="w-3 h-3 rounded border border-zinc-300" />
-               <div className="w-5 h-5 rounded-full bg-zinc-200 flex items-center justify-center text-[8px] font-bold text-zinc-500">{g.n.charAt(0)}</div>
+               <div className="w-5 h-5 rounded-full bg-zinc-200 flex items-center justify-center text-[8px] font-bold text-zinc-600">{g.n.charAt(0)}</div>
                <span className="text-xs font-medium text-zinc-900">{g.n}</span>
                <div className={`px-2 py-0.5 text-[9px] font-bold rounded-full border ml-auto ${g.c}`}>{g.s}</div>
              </div>

@@ -9,30 +9,83 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const STANDARD_CATEGORIES = [
+  "Technology & Innovation",
+  "Conference & Summit",
+  "Corporate & Enterprise",
+  "Festival & Entertainment",
+  "Networking & Social Meetup",
+  "Workshop & Training",
+  "Exhibition & Trade Show",
+  "Product Launch & Keynote",
+  "Charity & Gala Fundraiser",
+  "Sports, Gaming & Esports",
+  "Education & Academic",
+  "Community & Private Gathering",
+  "Other"
+];
 
 export default function EventSettingsPage() {
   const { event } = useEvent();
   const router = useRouter();
+  
+  const initialCategory = event.category || "";
+  const isPredefined = STANDARD_CATEGORIES.slice(0, -1).includes(initialCategory);
+
   const [name, setName] = useState(event.name || "");
   const [slug, setSlug] = useState(event.slug || "");
+  const [category, setCategory] = useState(isPredefined ? initialCategory : initialCategory ? "Other" : "");
+  const [customCategory, setCustomCategory] = useState(isPredefined ? "" : initialCategory);
   const [date, setDate] = useState(event.date ? new Date(event.date).toISOString().split('T')[0] : "");
   const [endDate, setEndDate] = useState(event.endDate ? new Date(event.endDate).toISOString().split('T')[0] : "");
   const [venue, setVenue] = useState(event.venue || "");
   const [description, setDescription] = useState(event.description || "");
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
   const saveGeneral = async () => {
-    const res = await fetch(`/api/events/${event._id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workspaceId: event.workspaceId, name, slug, date: new Date(date), endDate: new Date(endDate), venue, description })
-    });
-    if (res.ok) {
-      toast.success("Settings saved");
-      router.refresh();
-    } else {
-      toast.error("Failed to save settings");
+    const finalCategory = category === "Other" ? customCategory.trim() : category;
+
+    if (!finalCategory) {
+      toast.error("Please select or specify a category");
+      return;
+    }
+    if (category === "Other" && finalCategory.length < 2) {
+      toast.error("Please specify a custom category (at least 2 characters)");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/events/${event._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          workspaceId: event.workspaceId, 
+          name, 
+          slug, 
+          category: finalCategory, 
+          date: date ? new Date(date) : undefined, 
+          endDate: endDate ? new Date(endDate) : undefined, 
+          venue, 
+          description 
+        })
+      });
+      if (res.ok) {
+        toast.success("Settings saved successfully!");
+        router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to save settings");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to save settings");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -100,16 +153,61 @@ export default function EventSettingsPage() {
               <Label htmlFor="slug" className="text-sm font-semibold text-foreground/80">Event Slug</Label>
               <div className="flex">
                 <span className="inline-flex items-center rounded-l-xl border border-r-0 border-border/50 bg-muted/30 px-4 text-sm text-muted-foreground h-12">
-                  identify.com/
+                  identify.com/r/
                 </span>
                 <Input 
                   id="slug" 
                   value={slug} 
-                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'))} 
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-._/]/g, '-'))} 
                   className="h-12 text-lg px-4 bg-muted/30 border-border/50 rounded-l-none rounded-r-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" 
                 />
               </div>
             </div>
+
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="category" className="text-sm font-semibold text-foreground/80">
+                Category <span className="text-destructive">*</span>
+              </Label>
+              <div className="relative">
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-border/50 bg-muted/30 text-base appearance-none cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-all pr-10"
+                >
+                  <option value="" disabled>Select an event category...</option>
+                  {STANDARD_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {category === "Other" && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col gap-3 overflow-hidden"
+                >
+                  <Label htmlFor="customCategory" className="text-sm font-semibold text-foreground/80">
+                    Specify Category <span className="text-destructive">*</span>
+                  </Label>
+                  <Input 
+                    id="customCategory" 
+                    value={customCategory} 
+                    onChange={(e) => setCustomCategory(e.target.value)} 
+                    placeholder="e.g. Hackathon, Art Exhibition, etc." 
+                    className="h-12 text-base px-4 bg-muted/30 border-border/50 rounded-xl focus-visible:ring-primary/20 focus-visible:border-primary transition-all" 
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-3">
@@ -133,7 +231,21 @@ export default function EventSettingsPage() {
             </div>
 
             <div className="pt-4 flex justify-end">
-              <Button onClick={saveGeneral} size="lg" className="bg-primary text-primary-foreground font-semibold px-8 hover:scale-105 transition-transform">Save Changes</Button>
+              <Button 
+                onClick={saveGeneral} 
+                disabled={isSaving}
+                size="lg" 
+                className="bg-primary text-primary-foreground font-semibold px-8 hover:scale-105 transition-transform"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </div>
           </TabsContent>
 

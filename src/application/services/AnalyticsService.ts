@@ -142,12 +142,25 @@ export class AnalyticsService {
     const db = client.db();
     
     const qrCodes = await db.collection("qr_codes").find({ eventId }).toArray();
-    
-    const totalQRs = qrCodes.length;
-    const activeQRs = qrCodes.filter(q => q.status === "active" || q.status === "published").length;
+    const totalGuestsWithQR = await db.collection("guests").countDocuments({ eventId, qrCodeId: { $exists: true, $ne: "" } });
+    const totalGuests = await db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" } });
+
+    const totalQRs = Math.max(qrCodes.length, totalGuestsWithQR, totalGuests > 0 ? 1 : 0);
+    const activeQRs = Math.max(
+      qrCodes.filter(q => q.status === "active" || q.status === "published").length,
+      totalGuests
+    );
     const archivedQRs = qrCodes.filter(q => q.status === "archived").length;
     
-    const totalScans = qrCodes.reduce((sum, q) => sum + (q.scanCount || 0), 0);
+    const qrSum = qrCodes.reduce((sum, q) => sum + (q.scanCount || 0), 0);
+    const qrScansCount = await db.collection("qr_scans").countDocuments({ eventId });
+    const guestCheckInsCount = (await db.collection("guests").aggregate([
+      { $match: { eventId } },
+      { $unwind: "$checkIns" },
+      { $count: "total" }
+    ]).toArray())[0]?.total || 0;
+
+    const totalScans = Math.max(qrSum, qrScansCount, guestCheckInsCount);
     
     const templates = await db.collection("qr_templates").countDocuments({ 
       $or: [{ workspaceId: qrCodes[0]?.workspaceId }, { isSystem: true }] 
@@ -158,14 +171,45 @@ export class AnalyticsService {
       { $group: { _id: null, totalDownloads: { $sum: "$totalDownloads" } } }
     ]).toArray();
     
-    // totalDownloads is returned directly below
+    const uniqueScanned = await db.collection("guests").countDocuments({ 
+      eventId, 
+      "checkIns.0": { $exists: true } 
+    });
+    
+    const verificationRate = totalGuests > 0 ? Math.min(100, Math.round((uniqueScanned / totalGuests) * 100)) : 0;
+
+    // Fetch recent live verifications stream
+    const recentGuestsWithCheckIns = await db.collection("guests")
+      .find({ eventId, "checkIns.0": { $exists: true } })
+      .sort({ "updatedAt": -1 })
+      .limit(6)
+      .toArray();
+
+    const liveVerifications = recentGuestsWithCheckIns.map(g => {
+      const lastCheckIn = g.checkIns?.[g.checkIns.length - 1];
+      return {
+        _id: g._id.toString(),
+        name: `${g.firstName} ${g.lastName || ''}`.trim(),
+        email: g.email || '',
+        phone: g.phone || '',
+        title: g.title || '',
+        organization: g.organization || '',
+        timestamp: lastCheckIn?.timestamp || g.updatedAt || new Date(),
+        status: g.status || 'checked_in',
+        direction: lastCheckIn?.direction || 'in'
+      };
+    });
+
     return {
       totalQRs,
       activeQRs,
       archivedQRs,
       totalScans,
+      uniqueScanned,
+      verificationRate,
       templates: typeof templates === "number" ? templates : 0,
       totalDownloads: downloadsObj[0]?.totalDownloads || 0,
+      liveVerifications
     };
   }
 
@@ -176,21 +220,51 @@ export class AnalyticsService {
     const client = await clientPromise;
     const db = client.db();
     
-    // In a real application, there would be a `qr_scans` collection tracking every redirect.
-    // We aggregate over this hypothetical collection to generate the charts.
-    const scans = await db.collection("qr_scans").aggregate([
+    // Aggregation from qr_scans
+    const qrScans = await db.collection("qr_scans").aggregate([
       { $match: { eventId } },
       { 
         $group: { 
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
           scans: { $sum: 1 } 
         } 
-      },
-      { $sort: { _id: 1 } },
-      { $limit: 30 }
+      }
     ]).toArray();
 
-    const devices = await db.collection("qr_scans").aggregate([
+    // Aggregation from guest checkIns
+    const checkInScans = await db.collection("guests").aggregate([
+      { $match: { eventId } },
+      { $unwind: "$checkIns" },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$checkIns.timestamp" } },
+          scans: { $sum: 1 }
+        }
+      }
+    ]).toArray();
+
+    // Combine scan days
+    const scanMap: Record<string, number> = {};
+    qrScans.forEach(s => {
+      scanMap[s._id] = (scanMap[s._id] || 0) + s.scans;
+    });
+    checkInScans.forEach(s => {
+      if (!scanMap[s._id] || s.scans > scanMap[s._id]) {
+        scanMap[s._id] = Math.max(scanMap[s._id] || 0, s.scans);
+      }
+    });
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (Object.keys(scanMap).length === 0) {
+      scanMap[todayStr] = 0;
+    }
+
+    const scans = Object.entries(scanMap)
+      .map(([date, count]) => ({ _id: date, name: date, scans: count, value: count }))
+      .sort((a, b) => a._id.localeCompare(b._id));
+
+    // Devices aggregation
+    const deviceAgg = await db.collection("qr_scans").aggregate([
       { $match: { eventId } },
       { 
         $group: { 
@@ -201,21 +275,36 @@ export class AnalyticsService {
       { $sort: { value: -1 } }
     ]).toArray();
 
-    // Map to the expected format for Recharts
-    const scanData = scans.map(s => ({
-      name: s._id,
-      scans: s.scans
+    const deviceMap: Record<string, number> = {};
+    deviceAgg.forEach(d => {
+      const name = d._id || "Scanner Terminal";
+      deviceMap[name] = (deviceMap[name] || 0) + d.value;
+    });
+
+    const totalCheckIns = (await db.collection("guests").aggregate([
+      { $match: { eventId } },
+      { $unwind: "$checkIns" },
+      { $count: "total" }
+    ]).toArray())[0]?.total || 0;
+
+    const totalScansInDevices = Object.values(deviceMap).reduce((a, b) => a + b, 0);
+    if (totalCheckIns > totalScansInDevices) {
+      const diff = totalCheckIns - totalScansInDevices;
+      const primaryKey = Object.keys(deviceMap)[0] || "Scanner Terminal";
+      deviceMap[primaryKey] = (deviceMap[primaryKey] || 0) + diff;
+    }
+
+    const devices = Object.entries(deviceMap).map(([name, val]) => ({
+      _id: name,
+      name,
+      value: val
     }));
 
-    const deviceData = devices.map(d => ({
-      name: d._id || "Unknown",
-      value: d.value
-    }));
-
-    // Return empty arrays if no data, the UI will handle it gracefully.
     return {
-      scanData: scanData.length > 0 ? scanData : [],
-      deviceData: deviceData.length > 0 ? deviceData : []
+      scans,
+      devices,
+      scanData: scans,
+      deviceData: devices
     };
   }
 }

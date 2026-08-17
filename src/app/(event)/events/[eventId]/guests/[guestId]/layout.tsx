@@ -142,7 +142,12 @@ export default function GuestProfileLayout({
                 <div className="flex items-center gap-3 mt-1.5 text-sm text-muted-foreground">
                   <span>{guest.email || "No email provided"}</span>
                   <span className="w-1 h-1 rounded-full bg-border" />
-                  <span>{guest.organization || "Independent"}</span>
+                  <span>
+                    {[
+                      guest.title || guest.role || (guest.customData && Object.entries(guest.customData).find(([k]) => k.toLowerCase().includes('role') || k.toLowerCase().includes('title') || k.toLowerCase().includes('job'))?.[1] as string),
+                      guest.organization || guest.company || (guest.customData && Object.entries(guest.customData).find(([k]) => k.toLowerCase().includes('company') || k.toLowerCase().includes('org') || k.toLowerCase().includes('business'))?.[1] as string)
+                    ].filter(Boolean).join(" @ ") || "Independent"}
+                  </span>
                   <span className="w-1 h-1 rounded-full bg-border" />
                   <StatusBadge status={guest.status} />
                 </div>

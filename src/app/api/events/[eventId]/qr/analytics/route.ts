@@ -30,18 +30,31 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ e
     // 2. Delete all download logs for this event
     await db.collection("qr_downloads").deleteMany({ eventId });
 
-    // 3. Clear aggregate analytics for these QR codes
+    // 3. Clear aggregate analytics for these QR codes and event
     if (qrIds.length > 0) {
       await db.collection("qr_analytics").deleteMany({ qrId: { $in: qrIds } });
     }
+    await db.collection("qr_analytics").deleteMany({ eventId });
 
     // 4. Reset scan counts on the QR codes themselves
     await db.collection("qr_codes").updateMany(
       { eventId },
-      { $set: { scanCount: 0 } }
+      { $set: { scanCount: 0, updatedAt: new Date() } }
     );
 
-    return NextResponse.json({ success: true });
+    // 5. Reset all guest check-ins and reset checked_in status to approved
+    await db.collection("guests").updateMany(
+      { eventId },
+      { 
+        $set: { 
+          checkIns: [],
+          status: "approved",
+          updatedAt: new Date() 
+        } 
+      }
+    );
+
+    return NextResponse.json({ success: true, message: "All analytics and check-in records have been reset." });
   } catch (err: unknown) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

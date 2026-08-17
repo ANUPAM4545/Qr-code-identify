@@ -48,7 +48,8 @@ export class EventService {
     venue?: string,
     description?: string,
     templateId?: string,
-    maxCapacity?: number
+    maxCapacity?: number,
+    category?: string
   ) {
     await RBACService.requirePermission(userId, workspaceId, "manager");
 
@@ -56,6 +57,7 @@ export class EventService {
       workspaceId,
       name,
       slug,
+      category: category || null,
       description: description || null,
       templateId: templateId || null,
       status: "draft",
