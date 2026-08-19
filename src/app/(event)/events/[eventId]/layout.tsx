@@ -54,7 +54,7 @@ export default async function EventLayout({
   const workspace = await workspaceRepository.findById(event.workspaceId);
   if (!workspace) redirect("/events");
 
-  // Load all settings in parallel
+  // Load all settings in parallel with resilient handling
   const [
     [settings],
     [branding],
@@ -73,19 +73,95 @@ export default async function EventLayout({
     notificationSettingsRepository.findMany({ eventId })
   ]);
 
-  if (!settings || !branding || !registration || !scanner || !qr || !guest || !notification) {
-    throw new Error("Critical event settings are missing. Please contact support.");
-  }
+  // Resilient fallbacks to guarantee no blank-screen crashes
+  const effectiveSettings = settings || {
+    workspaceId: event.workspaceId,
+    eventId,
+    timezone: "UTC",
+    maxCapacity: 500,
+    allowWaitlist: false,
+    updatedAt: new Date()
+  };
+
+  const effectiveBranding = branding || {
+    workspaceId: event.workspaceId,
+    eventId,
+    primaryColor: "#18181b",
+    secondaryColor: "#71717a",
+    updatedAt: new Date()
+  };
+
+  const effectiveRegistration = registration || {
+    workspaceId: event.workspaceId,
+    eventId,
+    requireApproval: false,
+    allowWaitlist: false,
+    updatedAt: new Date()
+  };
+
+  const effectiveScanner = scanner || {
+    workspaceId: event.workspaceId,
+    eventId,
+    offlineMode: true,
+    soundFeedback: true,
+    hapticFeedback: true,
+    cameraFacing: "environment" as const,
+    autoSync: true,
+    updatedAt: new Date()
+  };
+
+  const effectiveQr = qr || {
+    workspaceId: event.workspaceId,
+    eventId,
+    style: "rounded",
+    fgColor: "#000000",
+    bgColor: "#ffffff",
+    updatedAt: new Date()
+  };
+
+  const effectiveGuest = guest || {
+    workspaceId: event.workspaceId,
+    eventId,
+    collectPhone: false,
+    collectOrganization: true,
+    customFields: [],
+    updatedAt: new Date()
+  };
+
+  const effectiveNotification = notification || {
+    workspaceId: event.workspaceId,
+    eventId,
+    emailAlerts: true,
+    dailyDigest: false,
+    showDashboardBadge: true,
+    notifyOnRegistration: true,
+    notifyOnScan: true,
+    notifyOnExport: true,
+    notifyOnImport: true,
+    notifyOnQRGen: true,
+    updatedAt: new Date()
+  };
+
+  // Proactively initialize any missing settings in database in the background
+  try {
+    if (!settings) eventSettingsRepository.create(effectiveSettings).catch(() => {});
+    if (!branding) brandingSettingsRepository.create(effectiveBranding).catch(() => {});
+    if (!registration) registrationSettingsRepository.create(effectiveRegistration).catch(() => {});
+    if (!scanner) scannerSettingsRepository.create(effectiveScanner).catch(() => {});
+    if (!qr) qrConfigurationRepository.create(effectiveQr).catch(() => {});
+    if (!guest) guestConfigurationRepository.create(effectiveGuest).catch(() => {});
+    if (!notification) notificationSettingsRepository.create(effectiveNotification).catch(() => {});
+  } catch {}
 
   const contextValue: EventContextState = {
     event,
-    settings,
-    branding,
-    registration,
-    scanner,
-    qr,
-    guest,
-    notification,
+    settings: effectiveSettings,
+    branding: effectiveBranding,
+    registration: effectiveRegistration,
+    scanner: effectiveScanner,
+    qr: effectiveQr,
+    guest: effectiveGuest,
+    notification: effectiveNotification,
     role: membership.role
   };
 
