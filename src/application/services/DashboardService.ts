@@ -160,7 +160,7 @@ export class DashboardService {
     const event = await eventRepository.findById(eventId);
     if (!event) throw new Error("Event not found");
 
-    const [totalGuests, checkedInGuests, submissions, eventSettings] = await Promise.all([
+    const [totalGuests, checkedInGuests, qrsAssigned, submissions, eventSettings] = await Promise.all([
       db.collection("guests").countDocuments({ eventId, status: { $ne: "archived" } }),
       db.collection("guests").countDocuments({ 
         eventId, 
@@ -168,6 +168,11 @@ export class DashboardService {
           { status: "checked_in" }, 
           { "checkIns.0": { $exists: true } }
         ] 
+      }),
+      db.collection("guests").countDocuments({ 
+        eventId, 
+        status: { $ne: "archived" },
+        qrCodeId: { $exists: true, $ne: null, $nin: ["", null] } 
       }),
       db.collection("registration_submissions").aggregate([
         { $match: { eventId } },
@@ -181,11 +186,10 @@ export class DashboardService {
     const totalSubmissions = Object.values(funnelMap).reduce((a, b) => a + b, 0);
 
     const capacity = eventSettings?.maxCapacity || 0;
-    const qrsAssigned = totalGuests;
 
-    const checkInRate = totalGuests > 0 ? Math.round((checkedInGuests / totalGuests) * 100) : 0;
-    const qrRate = totalGuests > 0 ? Math.round((qrsAssigned / totalGuests) * 100) : 0;
-    const capacityRate = capacity > 0 ? Math.min(100, Math.round((totalGuests / capacity) * 100)) : 100;
+    const checkInRate = totalGuests > 0 ? (checkedInGuests / totalGuests) * 100 : 0;
+    const qrRate = totalGuests > 0 ? (qrsAssigned / totalGuests) * 100 : 0;
+    const capacityRate = capacity > 0 ? Math.min(100, (totalGuests / capacity) * 100) : 100;
 
     return {
       registration: {

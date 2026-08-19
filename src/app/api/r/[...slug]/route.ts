@@ -10,7 +10,10 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const rawSlug = resolvedParams.slug;
-    const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : decodeURIComponent(rawSlug);
+    let slug = Array.isArray(rawSlug) ? rawSlug.join('/') : String(rawSlug || '');
+    try {
+      slug = decodeURIComponent(slug);
+    } catch {}
     
     const event = await eventRepository.findByUniqueSlug(slug);
     if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
@@ -45,7 +48,10 @@ export async function POST(
   try {
     const resolvedParams = await params;
     const rawSlug = resolvedParams.slug;
-    const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : decodeURIComponent(rawSlug);
+    let slug = Array.isArray(rawSlug) ? rawSlug.join('/') : String(rawSlug || '');
+    try {
+      slug = decodeURIComponent(slug);
+    } catch {}
     
     const event = await eventRepository.findByUniqueSlug(slug);
     if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });

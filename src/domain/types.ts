@@ -240,6 +240,27 @@ export interface GuestConfiguration {
   updatedAt: Date;
 }
 
+export type NotificationType = 
+  | "registration" 
+  | "qr_scanned" 
+  | "report_exported" 
+  | "guests_imported" 
+  | "qr_generated" 
+  | "invitation_sent" 
+  | "system";
+
+export interface EventNotification {
+  _id?: ObjectId | string;
+  eventId: string;
+  workspaceId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  details?: Record<string, unknown>;
+  read: boolean;
+  createdAt: Date;
+}
+
 export interface NotificationSettings {
   _id?: ObjectId | string;
   workspaceId: string;
@@ -247,6 +268,12 @@ export interface NotificationSettings {
   emailAlerts: boolean;
   dailyDigest: boolean;
   webhookUrl?: string | null;
+  showDashboardBadge?: boolean;
+  notifyOnRegistration?: boolean;
+  notifyOnScan?: boolean;
+  notifyOnExport?: boolean;
+  notifyOnImport?: boolean;
+  notifyOnQRGen?: boolean;
   updatedAt: Date;
 }
 

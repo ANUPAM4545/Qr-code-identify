@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import { SaveAsTemplateModal } from "./SaveAsTemplateModal";
 
 export function EventHero() {
@@ -66,16 +67,23 @@ export function EventHero() {
         </div>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
+        <NotificationBell eventId={event._id as string} />
+
         {event.status === "draft" && (
-          <Button onClick={handlePublish} className="bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg h-10 px-5">Publish Event</Button>
+          <Button 
+            onClick={handlePublish} 
+            className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 rounded-xl h-10 px-5 font-medium shadow-sm cursor-pointer"
+          >
+            Publish Event
+          </Button>
         )}
         
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center justify-center h-10 w-10 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors">
-            <MoreHorizontal className="h-4 w-4" />
+          <DropdownMenuTrigger className="flex items-center justify-center h-10 w-10 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-sm">
+            <MoreHorizontal className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl">
+          <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-border/60">
             <DropdownMenuItem onClick={() => {
               navigator.clipboard.writeText(window.location.href);
               toast.success("Link copied");

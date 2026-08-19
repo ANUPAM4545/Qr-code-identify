@@ -251,7 +251,7 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
         <div className="flex items-center gap-2">
           <Link href={`/events/${eventId}/guests/import`}>
             <Button variant="outline">
-              <Upload className="w-4 h-4 mr-2" />
+              <Download className="w-4 h-4 mr-2" />
               Import Guests
             </Button>
           </Link>
@@ -260,47 +260,47 @@ export default function GuestLibraryPage({ params }: { params: Promise<{ eventId
             Add Guest
           </Button>
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Guest</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="sm:max-w-2xl p-6 sm:p-8 rounded-3xl">
+              <DialogHeader className="space-y-1">
+                <DialogTitle className="text-xl font-bold">Add New Guest</DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
                   Enter the guest's details manually. They will be added to the library with a Pending status.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleAddGuest} className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
-                    <Input id="firstName" required value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
+              <form onSubmit={handleAddGuest} className="space-y-5 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">First Name *</Label>
+                    <Input id="firstName" required className="h-11 rounded-xl bg-background" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} placeholder="First name" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" required value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number (Optional)</Label>
-                    <Input id="phone" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+1 (555) 000-0000" />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Last Name</Label>
+                    <Input id="lastName" className="h-11 rounded-xl bg-background" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} placeholder="Last name" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Role / Title (Optional)</Label>
-                    <Input id="title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Lead Engineer" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email Address *</Label>
+                    <Input id="email" type="email" required className="h-11 rounded-xl bg-background" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="email@example.com" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="organization">Company / Organization (Optional)</Label>
-                    <Input id="organization" value={formData.organization} onChange={e => setFormData({ ...formData, organization: e.target.value })} placeholder="e.g. Acme Corp" />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone Number (Optional)</Label>
+                    <Input id="phone" className="h-11 rounded-xl bg-background" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+1 (555) 000-0000" />
                   </div>
                 </div>
-                <DialogFooter className="pt-4">
-                  <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={isAdding}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role / Title (Optional)</Label>
+                    <Input id="title" className="h-11 rounded-xl bg-background" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Lead Engineer" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="organization" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Company / Organization (Optional)</Label>
+                    <Input id="organization" className="h-11 rounded-xl bg-background" value={formData.organization} onChange={e => setFormData({ ...formData, organization: e.target.value })} placeholder="e.g. Acme Corp" />
+                  </div>
+                </div>
+                <DialogFooter className="pt-4 gap-2">
+                  <Button type="button" variant="outline" className="h-11 px-5 rounded-xl cursor-pointer" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+                  <Button type="submit" className="h-11 px-6 rounded-xl font-semibold bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 cursor-pointer shadow-sm" disabled={isAdding}>
                     {isAdding ? "Adding..." : "Add Guest"}
                   </Button>
                 </DialogFooter>

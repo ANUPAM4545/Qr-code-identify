@@ -290,7 +290,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
               {generationMode === "bulk" ? (
                 <Button 
                   size="sm" 
-                  className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white border-0 shadow-[0_4px_14px_0_rgb(79,70,229,39%)] hover:shadow-[0_6px_20px_rgba(79,70,229,23%)] hover:-translate-y-0.5 transition-all duration-300 font-medium px-6 rounded-full group"
+                  className="rounded-full px-6 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-100 font-medium shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
                   onClick={async () => {
                     try {
                       toast.loading("Generating bulk batch...", { id: "bulk-gen" });
@@ -313,7 +313,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
                     }
                   }}
                 >
-                  <Sparkles className="w-4 h-4 mr-2 text-blue-200 group-hover:text-white transition-colors animate-pulse" />
+                  <Sparkles className="w-4 h-4 mr-2 text-white dark:text-zinc-900" />
                   Generate Batch
                 </Button>
               ) : (

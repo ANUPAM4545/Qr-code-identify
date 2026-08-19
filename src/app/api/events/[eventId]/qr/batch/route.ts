@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { eventRepository } from "@/infrastructure/repositories/EventRepository";
 import { BulkGenerationService } from "@/application/services/BulkGenerationService";
+import { EventNotificationService } from "@/application/services/EventNotificationService";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
   const session = await getServerSession(authOptions);
@@ -32,6 +33,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
       destinationUrlBase
     );
 
+    // Trigger Notification
+    await EventNotificationService.createNotification({
+      eventId,
+      workspaceId: event.workspaceId,
+      type: "qr_generated",
+      title: "QR Batch Generated",
+      message: `Generated a batch of ${result.quantity} customized QR codes (${name || "Bulk Batch"}).`,
+      details: {
+        batchId: result.batchId,
+        quantity: result.quantity,
+        name: name || "Bulk Batch",
+      },
+    });
+
     return NextResponse.json(result, { status: 201 });
   } catch (err: unknown) {
     return NextResponse.json({ error: (err as Error).message }, { status: 400 });
@@ -59,6 +74,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ even
   return NextResponse.json({
     batchId,
     quantity: qrs.length,
-    qrs: qrs.map((q: any) => ({ ...q, _id: q._id.toString() }))
+    qrs: qrs.map(q => ({ ...q, _id: q._id.toString() }))
   });
 }

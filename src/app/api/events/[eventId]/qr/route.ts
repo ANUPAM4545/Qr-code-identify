@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { eventRepository } from "@/infrastructure/repositories/EventRepository";
 import { QRService, GetQROptions } from "@/application/services/QRService";
+import { EventNotificationService } from "@/application/services/EventNotificationService";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ eventId: string }> }) {
   const session = await getServerSession(authOptions);
@@ -57,6 +58,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
       body.description,
       body.category
     );
+
+    // Trigger Notification
+    await EventNotificationService.createNotification({
+      eventId,
+      workspaceId: event.workspaceId,
+      type: "qr_generated",
+      title: "QR Code Created",
+      message: `Created custom QR Code "${body.name || 'Untitled QR'}".`,
+      details: {
+        qrId: qr._id,
+        name: body.name,
+      },
+    });
+
     return NextResponse.json(qr, { status: 201 });
   } catch (err: unknown) {
     return NextResponse.json({ error: (err as Error).message }, { status: 400 });

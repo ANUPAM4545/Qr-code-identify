@@ -5,6 +5,7 @@ import { eventSettingsRepository } from "@/infrastructure/repositories/SettingsR
 import { GuestService } from "./GuestService";
 import { AuditService } from "./AuditService";
 import { RealtimeService } from "./RealtimeService";
+import { EventNotificationService } from "./EventNotificationService";
 import { RegistrationSubmission } from "@/domain/types";
 
 export class RegistrationService {
@@ -66,6 +67,21 @@ export class RegistrationService {
       { eventId, submissionId: created._id },
       event.workspaceId
     );
+
+    const guestName = `${answers.firstName || ""} ${answers.lastName || ""}`.trim() || (answers.name as string) || (answers.email as string) || "Attendee";
+    await EventNotificationService.createNotification({
+      eventId,
+      workspaceId: event.workspaceId,
+      type: "registration",
+      title: "New Attendee Registered",
+      message: `${guestName} registered for ${event.name}`,
+      details: {
+        submissionId: created._id,
+        status: initialStatus,
+        email: answers.email,
+        name: guestName,
+      },
+    });
 
     await RealtimeService.notifyRegistrationSubmitted(eventId, created);
 

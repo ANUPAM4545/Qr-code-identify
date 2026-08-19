@@ -237,81 +237,89 @@ export default function GuestOverviewPage({ params }: { params: Promise<{ eventI
             </Button>
             
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Edit Guest Details</DialogTitle>
-                  <DialogDescription>
-                    Update personal information, phone number, title, and organization.
+              <DialogContent className="sm:max-w-2xl p-6 sm:p-8 rounded-3xl">
+                <DialogHeader className="space-y-1">
+                  <DialogTitle className="text-xl font-bold">Edit Guest Details</DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Update personal information, contact phone, designation, and organization.
                   </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSaveDetails} className="space-y-4 py-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSaveDetails} className="space-y-5 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="edit-fn" className="text-xs font-semibold">First Name *</Label>
+                      <Label htmlFor="edit-fn" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">First Name *</Label>
                       <Input 
                         id="edit-fn" 
                         required 
+                        className="h-11 rounded-xl bg-background"
                         value={editForm.firstName} 
                         onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} 
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="edit-ln" className="text-xs font-semibold">Last Name</Label>
+                      <Label htmlFor="edit-ln" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Last Name</Label>
                       <Input 
                         id="edit-ln" 
+                        className="h-11 rounded-xl bg-background"
                         value={editForm.lastName} 
                         onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} 
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="edit-email" className="text-xs font-semibold">Email Address *</Label>
-                    <Input 
-                      id="edit-email" 
-                      type="email" 
-                      required 
-                      value={editForm.email} 
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} 
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email Address *</Label>
+                      <Input 
+                        id="edit-email" 
+                        type="email" 
+                        required 
+                        className="h-11 rounded-xl bg-background"
+                        value={editForm.email} 
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone Number</Label>
+                      <Input 
+                        id="edit-phone" 
+                        className="h-11 rounded-xl bg-background"
+                        value={editForm.phone} 
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} 
+                        placeholder="+1 (555) 000-0000"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="edit-phone" className="text-xs font-semibold">Phone Number</Label>
-                    <Input 
-                      id="edit-phone" 
-                      value={editForm.phone} 
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} 
-                      placeholder="+1 (555) 000-0000"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role / Title</Label>
+                      <Input 
+                        id="edit-title" 
+                        className="h-11 rounded-xl bg-background"
+                        value={editForm.title} 
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} 
+                        placeholder="e.g. Senior Software Engineer"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-org" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Company / Organization</Label>
+                      <Input 
+                        id="edit-org" 
+                        className="h-11 rounded-xl bg-background"
+                        value={editForm.organization} 
+                        onChange={(e) => setEditForm({ ...editForm, organization: e.target.value })} 
+                        placeholder="e.g. Acme Corp"
+                      />
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="edit-title" className="text-xs font-semibold">Role / Title</Label>
-                    <Input 
-                      id="edit-title" 
-                      value={editForm.title} 
-                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} 
-                      placeholder="e.g. Senior Software Engineer"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="edit-org" className="text-xs font-semibold">Company / Organization</Label>
-                    <Input 
-                      id="edit-org" 
-                      value={editForm.organization} 
-                      onChange={(e) => setEditForm({ ...editForm, organization: e.target.value })} 
-                      placeholder="e.g. Acme Corp"
-                    />
-                  </div>
-
-                  <DialogFooter className="pt-3">
-                    <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                  <DialogFooter className="pt-4 gap-2">
+                    <Button type="button" variant="outline" className="h-11 px-5 rounded-xl cursor-pointer" onClick={() => setIsEditModalOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={isSavingEdit}>
+                    <Button type="submit" className="h-11 px-6 rounded-xl font-semibold bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 cursor-pointer shadow-sm" disabled={isSavingEdit}>
                       {isSavingEdit ? (
                         <>
                           <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> Saving...

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Loader2, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Sparkles, Calendar, MapPin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,9 +36,9 @@ const eventSchema = z.object({
 type EventFormValues = z.infer<typeof eventSchema>;
 
 const STEPS = [
-  { id: "basic", title: "Basic Information" },
-  { id: "datetime", title: "Date & Time" },
-  { id: "venue", title: "Venue" },
+  { id: "basic", title: "Basic Information", icon: Sparkles, desc: "Event name, slug & category" },
+  { id: "datetime", title: "Date & Schedule", icon: Calendar, desc: "Start & end dates" },
+  { id: "venue", title: "Venue & Capacity", icon: MapPin, desc: "Location & attendee limits" },
 ];
 
 export default function CreateEventPage() {
@@ -61,25 +61,29 @@ export default function CreateEventPage() {
       endDate: new Date().toISOString().split("T")[0],
       date: "",
       venue: "",
-      maxCapacity: 0 as any, // Start empty or 0, but validation requires > 0
+      maxCapacity: "" as any,
     },
   });
 
   const { watch } = form;
-   
   const values = watch();
   
+  const sanitizeSlug = (input: string) => {
+    return input
+      .toLowerCase()
+      .replace(/^https?:\/\//i, '')
+      .replace(/^(?:www\.)?[^\/]+\//i, '')
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+  };
+
   const eventName = watch("name");
   useEffect(() => {
     if (eventName && !form.formState.dirtyFields.slug) {
-      const slug = eventName.toLowerCase().replace(/[^a-z0-9-._/]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slug = sanitizeSlug(eventName);
       form.setValue("slug", slug, { shouldValidate: true });
     }
   }, [eventName, form]);
-
-  // Load draft logic would go here in useEffect (fetch latest draft from API)
-
-  // Debounced auto-save effect removed per user request: only create on publish
 
   const saveDraft = async (showToast = true) => {
     try {
@@ -89,7 +93,6 @@ export default function CreateEventPage() {
       }
 
       if (showToast) setIsSaving(true);
-      // Determine workspaceId from cookie
       const getCookie = (name: string) => {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -104,7 +107,6 @@ export default function CreateEventPage() {
       const eventPayload = { ...values, category: effectiveCategory, workspaceId };
 
       if (!draftId) {
-        // Create new draft
         const res = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -120,7 +122,6 @@ export default function CreateEventPage() {
           return null;
         }
       } else {
-        // Update existing draft
         const res = await fetch(`/api/events/${draftId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -149,22 +150,23 @@ export default function CreateEventPage() {
   const nextStep = async () => {
     let fieldsToValidate: string[] = [];
     if (currentStep === 0) {
-      fieldsToValidate = ['name', 'slug', 'category'];
+      fieldsToValidate = ["name", "slug", "category"];
       if (selectedCategory === "Other") {
-        fieldsToValidate.push('customCategory');
+        fieldsToValidate.push("customCategory");
       }
+    } else if (currentStep === 1) {
+      fieldsToValidate = ["date", "endDate"];
+    } else if (currentStep === 2) {
+      fieldsToValidate = ["maxCapacity"];
     }
-    if (currentStep === 1) fieldsToValidate = ['date', 'endDate'];
-    if (currentStep === 2) fieldsToValidate = ['venue', 'maxCapacity'];
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const isValid = await form.trigger(fieldsToValidate as any);
     if (!isValid) return;
 
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(s => s + 1);
     } else {
-      // Publish event or Create from Template
+      // Final submission
       try {
         const getCookie = (name: string) => {
           const value = `; ${document.cookie}`;
@@ -174,11 +176,20 @@ export default function CreateEventPage() {
         };
         const workspaceId = getCookie("active-workspace-id");
 
+        if (!workspaceId) {
+          toast.error("Active workspace not found. Please refresh.");
+          return;
+        }
+
         const effectiveCategory = values.category === "Other" && values.customCategory ? values.customCategory.trim() : values.category;
-        const finalEventPayload = { ...values, category: effectiveCategory };
+        const finalEventPayload = {
+          ...values,
+          category: effectiveCategory,
+          workspaceId,
+          maxCapacity: Number(values.maxCapacity) || 500
+        };
 
         if (templateId) {
-          // Create from template
           const res = await fetch(`/api/templates/${templateId}/action`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -201,7 +212,6 @@ export default function CreateEventPage() {
             toast.error(data.error || "Failed to create event from template");
           }
         } else {
-          // Standard publish
           const savedId = await saveDraft(false);
           const finalDraftId = savedId || draftId;
 
@@ -234,70 +244,134 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-12">
+    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
+      
+      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Create Event</h1>
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-muted-foreground">
-            Step {currentStep + 1} of {STEPS.length}: {STEPS[currentStep].title}
-          </p>
-          <div className="flex items-center gap-2">
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Create Event</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Set up your event identity, registration url, schedule, and attendee capacity.
+            </p>
           </div>
+          {isSaving && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              <span>Saving draft...</span>
+            </div>
+          )}
         </div>
-        
-        {/* Progress bar */}
-        <div className="h-2 w-full bg-muted rounded-full mt-4 overflow-hidden">
-          <div 
-            className="h-full bg-foreground transition-all duration-300" 
-            style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
-          />
+
+        {/* Multi-Step Tabs Bar */}
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
+          {STEPS.map((step, idx) => {
+            const isCompleted = idx < currentStep;
+            const isCurrent = idx === currentStep;
+            const StepIcon = step.icon;
+
+            return (
+              <div 
+                key={step.id}
+                className={`flex items-center gap-3 p-3 sm:p-4 rounded-2xl border transition-all ${
+                  isCurrent 
+                    ? "bg-card border-zinc-900 dark:border-white shadow-sm ring-1 ring-zinc-900/10" 
+                    : isCompleted
+                    ? "bg-muted/40 border-border/80"
+                    : "bg-transparent border-border/40 opacity-50"
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
+                  isCurrent
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    : isCompleted
+                    ? "bg-emerald-500 text-white"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
+                </div>
+                <div className="min-w-0 hidden sm:block">
+                  <p className="text-xs font-bold text-foreground truncate">{step.title}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{step.desc}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="bg-background border border-border/50 rounded-xl p-6 md:p-8 shadow-sm">
+      {/* Main Spacious Form Card */}
+      <div className="bg-card border border-border/80 rounded-3xl p-6 sm:p-10 shadow-sm">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
+            {/* Step 1: Basic Information */}
             {currentStep === 0 && (
-              <div className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <Label>Event Name</Label>
-                  <Input {...form.register("name")} placeholder="e.g. Identify Annual Summit 2026" />
-                  {form.formState.errors.name && <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>}
+              <div className="space-y-6">
+                <div className="border-b border-border/50 pb-4">
+                  <h2 className="text-lg font-bold text-foreground">Basic Information</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Define the core event identity and your public registration handle.
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>Event URL Slug</Label>
-                  <div className="flex rounded-md overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all">
-                    <span className="flex items-center px-3 bg-muted border-r border-input text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap select-none">
-                      identify.com/r/
-                    </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  
+                  {/* Event Name */}
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="eventName" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Event Name <span className="text-red-500">*</span>
+                    </Label>
                     <Input 
-                      {...form.register("slug")} 
-                      placeholder="summit-2026" 
-                      className="rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-10 text-sm"
-                      onChange={(e) => {
-                        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-._/]/g, '-');
-                        form.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
-                      }}
+                      id="eventName"
+                      {...form.register("name")} 
+                      placeholder="e.g. Global Tech Leadership Summit 2026" 
+                      className="h-12 rounded-xl bg-background text-sm px-4"
                     />
+                    {form.formState.errors.name && (
+                      <p className="text-xs text-red-500">{form.formState.errors.name.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.slug && <p className="text-xs text-red-500">{form.formState.errors.slug.message}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
-                  <div className="relative">
+
+                  {/* URL Slug */}
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="eventSlug" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Public Registration URL Handle <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex rounded-xl overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all bg-background">
+                      <span className="flex items-center px-4 bg-muted border-r border-input text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap select-none">
+                        identify.com/r/
+                      </span>
+                      <Input 
+                        id="eventSlug"
+                        {...form.register("slug")} 
+                        placeholder="summit-2026" 
+                        className="rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-12 text-sm px-3"
+                        onChange={(e) => {
+                          const val = sanitizeSlug(e.target.value);
+                          form.setValue("slug", val, { shouldValidate: true, shouldDirty: true });
+                        }}
+                      />
+                    </div>
+                    {form.formState.errors.slug && (
+                      <p className="text-xs text-red-500">{form.formState.errors.slug.message}</p>
+                    )}
+                  </div>
+
+                  {/* Category */}
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="category" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Event Category <span className="text-red-500">*</span>
+                    </Label>
                     <select
                       id="category"
                       {...form.register("category")}
-                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring transition-all"
+                      className="w-full h-12 px-4 rounded-xl border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring transition-all cursor-pointer"
                     >
                       <option value="" disabled>Select an event category...</option>
                       <option value="Technology & Innovation">Technology & Innovation</option>
@@ -314,83 +388,161 @@ export default function CreateEventPage() {
                       <option value="Community & Private Gathering">Community & Private Gathering</option>
                       <option value="Other">Other</option>
                     </select>
+                    {form.formState.errors.category && (
+                      <p className="text-xs text-red-500">{form.formState.errors.category.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.category && <p className="text-xs text-red-500">{form.formState.errors.category.message}</p>}
-                </div>
 
-                <AnimatePresence>
-                  {selectedCategory === "Other" && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0, y: -6 }}
-                      animate={{ opacity: 1, height: "auto", y: 0 }}
-                      exit={{ opacity: 0, height: 0, y: -6 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="space-y-2 overflow-hidden"
-                    >
-                      <Label htmlFor="customCategory">Specify Category <span className="text-red-500">*</span></Label>
-                      <Input 
-                        id="customCategory"
-                        {...form.register("customCategory")} 
-                        placeholder="e.g. Hackathon, Fashion Show, Webinar, etc."
-                        className="h-10 text-sm"
-                      />
-                      {form.formState.errors.customCategory && (
-                        <p className="text-xs text-red-500">{form.formState.errors.customCategory.message}</p>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  {/* Custom Category Input */}
+                  <AnimatePresence>
+                    {selectedCategory === "Other" && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="space-y-1.5 sm:col-span-2 overflow-hidden"
+                      >
+                        <Label htmlFor="customCategory" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Specify Custom Category <span className="text-red-500">*</span>
+                        </Label>
+                        <Input 
+                          id="customCategory"
+                          {...form.register("customCategory")} 
+                          placeholder="e.g. Hackathon, Gala Dinner, Demo Day"
+                          className="h-12 rounded-xl text-sm px-4 bg-background"
+                        />
+                        {form.formState.errors.customCategory && (
+                          <p className="text-xs text-red-500">{form.formState.errors.customCategory.message}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                <div className="space-y-2">
-                  <Label>Description (Optional)</Label>
-                  <Input {...form.register("description")} placeholder="Brief overview of the event" />
+                  {/* Description */}
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Description (Optional)
+                    </Label>
+                    <textarea 
+                      id="description"
+                      {...form.register("description")} 
+                      placeholder="Brief overview of the conference agenda, keynote themes, and attendee profile..."
+                      className="w-full rounded-xl border border-input bg-background p-4 text-sm shadow-xs min-h-[96px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* Step 2: Date & Schedule */}
             {currentStep === 1 && (
-              <div className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <Label>Start Date</Label>
-                  <Input type="date" {...form.register("date")} />
-                  {form.formState.errors.date && <p className="text-xs text-red-500">{form.formState.errors.date.message}</p>}
+              <div className="space-y-6">
+                <div className="border-b border-border/50 pb-4">
+                  <h2 className="text-lg font-bold text-foreground">Date & Schedule</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Specify the event dates for calendar sync and countdown badges.
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>End Date</Label>
-                  <Input type="date" {...form.register("endDate")} />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="startDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Start Date <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="startDate"
+                      type="date" 
+                      {...form.register("date")} 
+                      className="h-12 rounded-xl bg-background text-sm px-4"
+                    />
+                    {form.formState.errors.date && (
+                      <p className="text-xs text-red-500">{form.formState.errors.date.message}</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="endDate" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      End Date <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="endDate"
+                      type="date" 
+                      {...form.register("endDate")} 
+                      className="h-12 rounded-xl bg-background text-sm px-4"
+                    />
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* Step 3: Venue & Capacity */}
             {currentStep === 2 && (
-              <div className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <Label>Venue Location</Label>
-                  <Input {...form.register("venue")} placeholder="e.g. Moscone Center, San Francisco" />
+              <div className="space-y-6">
+                <div className="border-b border-border/50 pb-4">
+                  <h2 className="text-lg font-bold text-foreground">Venue & Capacity</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Set physical/virtual venue details and maximum capacity threshold.
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label>Maximum Capacity <span className="text-red-500">*</span></Label>
-                  <Input type="number" min="1" {...form.register("maxCapacity")} placeholder="e.g. 500" />
-                  {form.formState.errors.maxCapacity && <p className="text-xs text-red-500">{form.formState.errors.maxCapacity.message}</p>}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="venueLocation" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Venue Location / Address
+                    </Label>
+                    <Input 
+                      id="venueLocation"
+                      {...form.register("venue")} 
+                      placeholder="e.g. Moscone Convention Center, San Francisco" 
+                      className="h-12 rounded-xl bg-background text-sm px-4"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="maxCapacity" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Maximum Attendee Capacity <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="maxCapacity"
+                      type="number" 
+                      min="1" 
+                      {...form.register("maxCapacity")} 
+                      placeholder="e.g. 500" 
+                      className="h-12 rounded-xl bg-background text-sm px-4"
+                    />
+                    {form.formState.errors.maxCapacity && (
+                      <p className="text-xs text-red-500">{form.formState.errors.maxCapacity.message}</p>
+                    )}
+                  </div>
                 </div>
-                
-                <p className="text-sm text-muted-foreground mt-4">
-                  You can update venue, registration settings, and branding later from the Event Dashboard.
-                </p>
+
+                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-xs text-muted-foreground flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                  <span>You can customize registration forms, ticket tiers, QR styling, and badges anytime from the Event Dashboard.</span>
+                </div>
               </div>
             )}
           </motion.div>
         </AnimatePresence>
 
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
-          <Button variant="ghost" onClick={prevStep} disabled={currentStep === 0}>
+        {/* Action Controls */}
+        <div className="flex items-center justify-between mt-10 pt-6 border-t border-border/60">
+          <Button 
+            variant="outline" 
+            onClick={prevStep} 
+            disabled={currentStep === 0}
+            className="h-11 px-5 rounded-xl cursor-pointer"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
           
-          <div className="flex items-center gap-2">
-            <Button onClick={nextStep} disabled={isSaving}>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={nextStep} 
+              disabled={isSaving}
+              className="h-11 px-6 rounded-xl font-semibold bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 cursor-pointer shadow-sm"
+            >
               {currentStep === STEPS.length - 1 ? "Publish Event" : "Next Step"}
               {currentStep < STEPS.length - 1 && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>

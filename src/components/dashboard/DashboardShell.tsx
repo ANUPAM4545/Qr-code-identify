@@ -159,7 +159,7 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
           </Sheet>
           
           <div className="flex-1"></div>
-          
+
           <div className="sm:hidden">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user.image || ""} />

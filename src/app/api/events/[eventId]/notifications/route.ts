@@ -30,6 +30,12 @@ export async function GET(
         emailAlerts: true,
         dailyDigest: true,
         webhookUrl: null,
+        showDashboardBadge: true,
+        notifyOnRegistration: true,
+        notifyOnScan: true,
+        notifyOnExport: true,
+        notifyOnImport: true,
+        notifyOnQRGen: true,
       });
       return NextResponse.json(defaultSettings);
     }
@@ -56,7 +62,17 @@ export async function PUT(
     if (!hasAccess) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
-    const { emailAlerts, dailyDigest, webhookUrl } = body;
+    const { 
+      emailAlerts, 
+      dailyDigest, 
+      webhookUrl,
+      showDashboardBadge,
+      notifyOnRegistration,
+      notifyOnScan,
+      notifyOnExport,
+      notifyOnImport,
+      notifyOnQRGen
+    } = body;
 
     const settingsList = await notificationSettingsRepository.findMany({ eventId });
     let settings = settingsList[0];
@@ -68,6 +84,12 @@ export async function PUT(
         emailAlerts: true,
         dailyDigest: true,
         webhookUrl: null,
+        showDashboardBadge: true,
+        notifyOnRegistration: true,
+        notifyOnScan: true,
+        notifyOnExport: true,
+        notifyOnImport: true,
+        notifyOnQRGen: true,
       });
     }
 
@@ -75,11 +97,17 @@ export async function PUT(
     if (emailAlerts !== undefined) updates.emailAlerts = emailAlerts;
     if (dailyDigest !== undefined) updates.dailyDigest = dailyDigest;
     if (webhookUrl !== undefined) updates.webhookUrl = webhookUrl;
+    if (showDashboardBadge !== undefined) updates.showDashboardBadge = showDashboardBadge;
+    if (notifyOnRegistration !== undefined) updates.notifyOnRegistration = notifyOnRegistration;
+    if (notifyOnScan !== undefined) updates.notifyOnScan = notifyOnScan;
+    if (notifyOnExport !== undefined) updates.notifyOnExport = notifyOnExport;
+    if (notifyOnImport !== undefined) updates.notifyOnImport = notifyOnImport;
+    if (notifyOnQRGen !== undefined) updates.notifyOnQRGen = notifyOnQRGen;
     updates.updatedAt = new Date();
 
     await notificationSettingsRepository.update(settings._id as string, updates);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, settings: { ...settings, ...updates } });
   } catch (error: unknown) {
     return NextResponse.json({ error: (error as Error).message || String(error) }, { status: 500 });
   }

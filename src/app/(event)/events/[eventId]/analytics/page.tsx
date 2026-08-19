@@ -2,7 +2,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { Loader2, Download, RefreshCw } from "lucide-react";
+import { Loader2, Download, Upload, RefreshCw, FileText, Image as ImageIcon, Table } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, BarChart } from "@/components/ui/charts/ChartAdapter";
@@ -10,13 +10,29 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import * as htmlToImage from "html-to-image";
+import { useEvent } from "@/providers/event-provider";
+import { 
+  exportAnalyticsToPDF, 
+  exportAnalyticsToImage, 
+  exportAnalyticsToCSV 
+} from "@/lib/analytics-export";
 
 export default function AnalyticsOverviewPage({ params }: { params: Promise<{ eventId: string }> }) {
   const { eventId } = use(params);
   
+  let eventContext: any = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    eventContext = useEvent();
+  } catch {
+    eventContext = null;
+  }
+  const eventName = eventContext?.event?.name || "Event Analytics";
+
   const [kpis, setKpis] = useState<any>(null);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,10 +51,10 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
       setKpis(kpiData);
       
       // Convert UTC ISO strings to local time for the chart
-      const formattedTimeline = timeData.map((d: any) => ({
+      const formattedTimeline = Array.isArray(timeData) ? timeData.map((d: any) => ({
         ...d,
         name: new Date(d.name).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-      }));
+      })) : [];
       setTimeline(formattedTimeline);
     } catch (e) {
       toast.error("Failed to load analytics");
@@ -55,34 +71,42 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
     return () => clearInterval(interval);
   }, [eventId]);
 
-  const exportAsJPG = async () => {
-    const element = document.getElementById("analytics-dashboard-container");
-    if (!element) return;
-    try {
-      const imgData = await htmlToImage.toJpeg(element, { 
-        quality: 0.95,
-        backgroundColor: "#ffffff",
-        fontEmbedCSS: "",
-      });
-      const link = document.createElement("a");
-      link.href = imgData;
-      link.download = `analytics_report_${eventId}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Dashboard image saved!");
-    } catch (e: any) {
-      console.error("html-to-image error:", e);
-      toast.error(`Failed to generate image: ${e?.message || e}`);
-    }
+  const handleExportPDF = async () => {
+    await exportAnalyticsToPDF({
+      eventId,
+      eventName,
+      eventSlug: eventContext?.event?.slug,
+      kpis: kpis || {},
+      timeline: timeline || [],
+    });
   };
 
-  const exportAsPDF = () => {
-    // Relying on native browser print for high-quality vector PDFs
-    // Wrap in setTimeout to allow the dropdown menu state to close first
-    setTimeout(() => {
-      window.print();
-    }, 100);
+  const handleExportPNG = async () => {
+    await exportAnalyticsToImage({
+      elementId: "analytics-dashboard-container",
+      eventName,
+      eventId,
+      format: "png",
+    });
+  };
+
+  const handleExportJPG = async () => {
+    await exportAnalyticsToImage({
+      elementId: "analytics-dashboard-container",
+      eventName,
+      eventId,
+      format: "jpeg",
+      quality: 0.95,
+    });
+  };
+
+  const handleExportCSV = () => {
+    exportAnalyticsToCSV({
+      eventId,
+      eventName,
+      kpis: kpis || {},
+      timeline: timeline || [],
+    });
   };
 
   if (loading) return <div className="p-10 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-500" /></div>;
@@ -99,16 +123,32 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
           <Button variant="outline" size="sm" onClick={() => window.location.reload()} disabled={refreshing} className="border-gray-800 print:hidden">
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} /> Refresh
           </Button>
+          
           <DropdownMenu>
-            <DropdownMenuTrigger className={`${buttonVariants({ size: "sm" })} print:hidden`}>
-              <Download className="w-4 h-4 mr-2" /> Export Report
+            <DropdownMenuTrigger className={`${buttonVariants({ size: "sm" })} print:hidden cursor-pointer gap-2`}>
+              <Upload className="w-4 h-4 mr-1" /> Export Report
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={exportAsJPG}>
-                Save as Image (.jpg)
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                Export Options
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                <FileText className="w-4 h-4 mr-2 text-indigo-400" />
+                <span>Download PDF (.pdf)</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportAsPDF}>
-                Print as PDF (.pdf)
+              <DropdownMenuItem onClick={handleExportPNG} className="cursor-pointer">
+                <ImageIcon className="w-4 h-4 mr-2 text-emerald-400" />
+                <span>Download PNG (.png)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportJPG} className="cursor-pointer">
+                <ImageIcon className="w-4 h-4 mr-2 text-amber-400" />
+                <span>Download JPG (.jpg)</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
+                <Table className="w-4 h-4 mr-2 text-blue-400" />
+                <span>Download CSV (.csv)</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -121,12 +161,15 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
         <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Guests</h3>
           <p className="text-3xl font-bold">{kpis?.totalGuests?.toLocaleString() || 0}</p>
-          <div className="mt-2 text-xs text-muted-foreground font-medium">{kpis?.approvedRegistrations} Approved</div>
+          <div className="mt-2 text-xs text-muted-foreground font-medium">{kpis?.approvedRegistrations || 0} Approved</div>
         </div>
 
         <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Check-ins</h3>
           <p className="text-3xl font-bold">{kpis?.checkedInGuests?.toLocaleString() || 0}</p>
+          <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            {kpis?.totalGuests > 0 ? `${((kpis?.checkedInGuests / kpis?.totalGuests) * 100).toFixed(1)}% Attendance Rate` : "0% Attendance Rate"}
+          </div>
         </div>
 
         <div className="bg-card border border-border/50 rounded-xl p-6 shadow-sm">
@@ -136,8 +179,8 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Charts Container */}
+      <div id="analytics-charts-container" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Line Chart */}
         <div className="lg:col-span-2 bg-card border border-border/50 rounded-xl p-6 shadow-sm">

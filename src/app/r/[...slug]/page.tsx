@@ -138,12 +138,24 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
 
   if (error && !event) {
     return (
-      <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center justify-center p-4 text-center">
-        <h1 className="text-3xl font-bold tracking-tight mb-4 text-zinc-900">Registration Unavailable</h1>
-        <p className="text-zinc-500 max-w-md mb-6">{error}</p>
-        <Button variant="outline" className="border-zinc-300 text-zinc-900 hover:bg-zinc-100" onClick={() => window.location.reload()}>
-          Try Again
-        </Button>
+      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6 text-center relative">
+        <div className="bg-white border border-zinc-200 shadow-xl rounded-3xl p-8 sm:p-10 max-w-lg w-full flex flex-col items-center overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200/80 flex items-center justify-center mb-4 text-zinc-600">
+            <Calendar className="w-7 h-7 text-zinc-500" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight mb-2 text-zinc-900">Registration Unavailable</h1>
+          <p className="text-sm text-zinc-500 mb-6 max-w-sm">
+            The event <code className="bg-zinc-100 px-2 py-0.5 rounded text-zinc-800 font-mono text-xs break-all">{slug}</code> was not found or the registration link may be incorrect.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            <Button variant="outline" className="w-full h-11 rounded-xl border-zinc-200 hover:bg-zinc-100 cursor-pointer text-sm font-medium" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+            <Button className="w-full h-11 rounded-xl font-semibold bg-zinc-900 text-white hover:bg-zinc-800 cursor-pointer text-sm" onClick={() => window.location.href = "/events"}>
+              View All Events
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

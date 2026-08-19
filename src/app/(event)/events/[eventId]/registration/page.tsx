@@ -484,8 +484,13 @@ export default function RegistrationPage() {
                           </td>
                           <td className="px-6 py-4 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-2">
-                              {sub.qrCodeId && (
-                                <Button size="sm" variant="outline" className="text-zinc-700 hover:text-zinc-900" onClick={() => window.location.href = `/events/${sub.eventId}/qr?highlight=${sub.qrCodeId}`}>
+                              {(sub.guestId || sub.qrCodeId) && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-zinc-700 hover:text-zinc-900 border-zinc-200 hover:bg-zinc-100 rounded-lg cursor-pointer text-xs font-medium" 
+                                  onClick={() => window.location.href = `/events/${sub.eventId || event._id}/guests/${sub.guestId || sub._id}`}
+                                >
                                   View QR
                                 </Button>
                               )}

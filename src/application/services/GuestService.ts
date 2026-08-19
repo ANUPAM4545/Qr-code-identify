@@ -4,6 +4,7 @@ import { AuditService } from "./AuditService";
 import { QRService } from "./QRService";
 import { GuestDocument, CheckInRecord } from "@/domain/types";
 import { RealtimeService } from "./RealtimeService";
+import { EventNotificationService } from "./EventNotificationService";
 
 export class GuestService {
   /**
@@ -89,6 +90,15 @@ export class GuestService {
       workspaceId
     );
 
+    await EventNotificationService.createNotification({
+      eventId,
+      workspaceId,
+      type: "guests_imported",
+      title: "Guest Batch Imported",
+      message: `Successfully imported ${ids.length} attendee${ids.length === 1 ? "" : "s"} into the guest library.`,
+      details: { count: ids.length }
+    });
+
     return { inserted: ids.length };
   }
 
@@ -165,6 +175,21 @@ export class GuestService {
       { eventId, guestId, method: record.method, location: record.location },
       workspaceId
     );
+
+    await EventNotificationService.createNotification({
+      eventId,
+      workspaceId,
+      type: "qr_scanned",
+      title: record.direction === "in" ? "Attendee Checked In" : "Attendee Checked Out",
+      message: `${guest.firstName} ${guest.lastName} verified via ${record.method === "qr_scan" ? "QR Scanner" : "Manual Check-in"}${record.location ? ` at ${record.location}` : ""}.`,
+      details: {
+        guestId,
+        name: `${guest.firstName} ${guest.lastName}`,
+        direction: record.direction,
+        method: record.method,
+        location: record.location,
+      },
+    });
 
     await RealtimeService.notifyCheckIn(eventId, guestId, record);
   }
