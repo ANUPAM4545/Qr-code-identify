@@ -7,10 +7,11 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 0, // Always fetch fresh data to avoid stale UI bugs
-        gcTime: 1000 * 60 * 15, // 15 minutes to keep unused data in memory
-        refetchOnWindowFocus: true, // Automatically update when user switches back to the app
-        retry: 1, // Only retry failed requests once instead of 3 times
+        staleTime: 1000 * 20, // 20-second cache for instant sub-second tab navigation
+        gcTime: 1000 * 60 * 30, // 30 minutes in-memory cache
+        refetchOnWindowFocus: false, // Prevents tab-switch lag
+        refetchOnMount: true, // Re-validate fresh data in background
+        retry: 1, // Fast single retry on network failure
       },
     },
   }));

@@ -41,21 +41,20 @@ export default async function EventLayout({
 
   const { eventId } = await params;
 
-  // Load Event
-  const event = await eventRepository.findById(eventId);
+  // 1. Parallel Step: Load Event and User Memberships simultaneously
+  const [event, memberships] = await Promise.all([
+    eventRepository.findById(eventId),
+    membershipRepository.findByUserId(session.user.id)
+  ]);
+
   if (!event) redirect("/events");
 
-  // Load Memberships & Check Access
-  const memberships = await membershipRepository.findByUserId(session.user.id);
   const membership = memberships.find(m => m.workspaceId === event.workspaceId);
-  
   if (!membership) redirect("/events");
 
-  const workspace = await workspaceRepository.findById(event.workspaceId);
-  if (!workspace) redirect("/events");
-
-  // Load all settings in parallel with resilient handling
+  // 2. Parallel Step: Load Workspace and all 7 Settings collections simultaneously
   const [
+    workspace,
     [settings],
     [branding],
     [registration],
@@ -64,6 +63,7 @@ export default async function EventLayout({
     [guest],
     [notification]
   ] = await Promise.all([
+    workspaceRepository.findById(event.workspaceId),
     eventSettingsRepository.findMany({ eventId }),
     brandingSettingsRepository.findMany({ eventId }),
     registrationSettingsRepository.findMany({ eventId }),
@@ -72,6 +72,8 @@ export default async function EventLayout({
     guestConfigurationRepository.findMany({ eventId }),
     notificationSettingsRepository.findMany({ eventId })
   ]);
+
+  if (!workspace) redirect("/events");
 
   // Resilient fallbacks to guarantee no blank-screen crashes
   const effectiveSettings = settings || {
