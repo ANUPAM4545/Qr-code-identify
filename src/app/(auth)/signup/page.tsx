@@ -10,23 +10,26 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export default function SignupPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleGoogleSignUp = async () => {
-    setIsLoading(true);
+    setIsGoogleLoading(true);
     await signIn("google", { callbackUrl: "/dashboard" });
   };
 
   const handleEmailSignUp = async () => {
-    setIsLoading(true);
+    setIsEmailLoading(true);
     await signIn("credentials", { 
       email, 
       password, 
       callbackUrl: "/dashboard" 
     });
   };
+
+  const isAnyLoading = isGoogleLoading || isEmailLoading;
 
   return (
     <motion.div 
@@ -44,10 +47,10 @@ export default function SignupPage() {
         <Button 
           variant="outline" 
           onClick={handleGoogleSignUp} 
-          disabled={isLoading}
+          disabled={isAnyLoading}
           className="h-12 border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
         >
-          {isLoading ? (
+          {isGoogleLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin text-zinc-500" />
           ) : (
             <svg className="mr-3 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
@@ -93,9 +96,9 @@ export default function SignupPage() {
           <Button 
             className="w-full h-12 mt-2 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all font-semibold" 
             onClick={handleEmailSignUp} 
-            disabled={isLoading || !email || !password}
+            disabled={isAnyLoading || !email || !password}
           >
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isEmailLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Sign Up
           </Button>
         </div>
