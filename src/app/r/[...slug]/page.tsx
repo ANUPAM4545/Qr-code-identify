@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, ChevronRight, ChevronDown, Calendar, MapPin } from "lucide-react";
+import { Loader2, CheckCircle2, ChevronRight, ChevronDown, Calendar, MapPin, Info } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -21,6 +21,8 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
   const [form, setForm] = useState<{
     fields?: import("@/domain/types").FormField[];
     branding?: {
+      title?: string;
+      description?: string;
       coverImage?: string | null;
       primaryColor?: string;
       showEventDescription?: boolean;
@@ -30,6 +32,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
   } | null>(null);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [focusedFieldId, setFocusedFieldId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -193,47 +196,45 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
   }
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 selection:bg-zinc-200 pb-20 relative overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-50/50 text-zinc-900 selection:bg-zinc-200 py-8 px-4 sm:px-6 relative overflow-x-hidden">
       
       {/* Background Subtle Monochrome Grid Pattern */}
       <div 
-        className="fixed inset-0 z-0 opacity-40 pointer-events-none"
-        style={{ backgroundImage: 'linear-gradient(to right, #e4e4e7 1px, transparent 1px), linear-gradient(to bottom, #e4e4e7 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+        className="fixed inset-0 z-0 opacity-30 pointer-events-none"
+        style={{ backgroundImage: 'linear-gradient(to right, #e4e4e7 1px, transparent 1px), linear-gradient(to bottom, #e4e4e7 1px, transparent 1px)', backgroundSize: '32px 32px' }}
       />
 
-      {/* Cover Image Area */}
-      <div className="w-full h-64 md:h-80 relative overflow-hidden z-10 border-b border-zinc-100 bg-zinc-100">
-        {form?.branding?.coverImage ? (
-          <Image src={form.branding.coverImage as string} alt="Cover" fill className="object-cover opacity-90" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 via-zinc-50 to-zinc-200" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white" />
-      </div>
-
-      <div className="max-w-2xl mx-auto -mt-20 relative z-20 px-4 sm:px-6">
+      <div className="max-w-2xl mx-auto relative z-20">
         
-        {/* Continuous Floating Wrapper */}
-        <motion.div
-          animate={{ y: [-3, 3, -3] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        {/* Sleek Top Brand Header */}
+        <div className="flex items-center justify-between mb-6 px-2">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 bg-zinc-900 text-white rounded-lg flex items-center justify-center font-black text-xs">
+              I
+            </div>
+            <span className="font-bold text-sm tracking-tight text-zinc-900">IDENTITY</span>
+          </div>
+          <span className="text-[11px] font-mono font-medium text-zinc-500 uppercase tracking-widest bg-zinc-200/60 px-2.5 py-1 rounded-full">
+            OFFICIAL REGISTRATION
+          </span>
+        </div>
+
+        {/* Clean Form Card Container */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="bg-white border border-zinc-200/90 rounded-[2rem] shadow-lg overflow-hidden"
         >
-          {/* Animated Form Card Container */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-white border border-zinc-200/90 rounded-[2.5rem] shadow-xl overflow-hidden"
-          >
           {/* Header Section */}
-          <div className="p-8 md:p-12 border-b border-zinc-100 relative overflow-hidden bg-gradient-to-b from-zinc-50/50 to-white">
+          <div className="p-6 sm:p-10 border-b border-zinc-100 relative overflow-hidden bg-gradient-to-b from-zinc-50/80 to-white">
             <motion.h1 
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-              className="text-4xl md:text-5xl font-black tracking-tight mb-5 text-zinc-900 relative z-10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4 text-zinc-900 relative z-10 break-words [overflow-wrap:anywhere]"
             >
-              {event?.name as string}
+              {(form?.branding?.title as string) || (event?.name as string)}
             </motion.h1>
             
             {form?.branding?.showDateLocation !== false && (
@@ -258,29 +259,35 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
               </motion.div>
             )}
             
-            {!!(form?.branding?.showEventDescription !== false && event?.description) && (
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+            {!!(form?.branding?.showEventDescription !== false && (form?.branding?.description || event?.description)) && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-zinc-600 mt-5 text-base leading-relaxed relative z-10"
+                className="mt-5 p-5 bg-zinc-50/80 border border-zinc-200/70 rounded-2xl flex flex-col gap-2 relative z-10"
               >
-                {event?.description as string}
-              </motion.p>
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  <Info className="w-3.5 h-3.5 text-zinc-700" />
+                  <span>About This Event & Form</span>
+                </div>
+                <p className="text-zinc-700 text-sm sm:text-base leading-relaxed break-words [overflow-wrap:anywhere] whitespace-pre-line">
+                  {(form?.branding?.description as string) || (event?.description as string)}
+                </p>
+              </motion.div>
             )}
           </div>
 
           {/* Form Section */}
-          <div className="p-8 md:p-12">
+          <div className="p-6 md:p-10">
             {error && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium flex items-center gap-2">
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
                 {error}
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex flex-wrap -mx-3">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="flex flex-col gap-5">
                 {Array.isArray(form?.fields) && form.fields.map((field: import("@/domain/types").FormField, index: number) => {
                   if (field.hidden) return null;
 
@@ -290,19 +297,29 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                     if (condition.operator === "equals" && dependencyValue !== condition.value) return null;
                   }
 
-                  const isHalf = field.width === "half";
+                  const isFocused = focusedFieldId === field.id;
 
                   return (
                     <motion.div 
                       key={field.id} 
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + (index * 0.05), duration: 0.35 }}
-                      className={`px-3 mb-7 w-full ${isHalf ? "md:w-1/2" : ""}`}
+                      transition={{ delay: 0.2 + (index * 0.04), duration: 0.3 }}
+                      onFocus={() => setFocusedFieldId(field.id)}
+                      onClick={() => setFocusedFieldId(field.id)}
+                      className={`w-full p-6 rounded-2xl border transition-all duration-200 relative ${
+                        isFocused 
+                          ? "bg-white border-zinc-900 border-l-4 border-l-zinc-900 shadow-md ring-1 ring-zinc-900/10" 
+                          : "bg-zinc-50/50 border-zinc-200/90 hover:bg-white hover:border-zinc-300 shadow-sm"
+                      }`}
                     >
-                      <label className="text-xs font-bold tracking-wider uppercase text-zinc-600 mb-2.5 block">
-                        {field.label} {field.required && <span className="text-red-500">*</span>}
-                      </label>
+                      {/* MS Forms Question Label Header */}
+                      <div className="flex items-start gap-2 mb-3">
+                        <span className="text-sm font-bold font-mono text-zinc-900">{index + 1}.</span>
+                        <label className="text-sm font-bold text-zinc-900 leading-snug">
+                          {field.label} {field.required && <span className="text-red-500 font-bold ml-0.5">*</span>}
+                        </label>
+                      </div>
                       
                       {field.type === "text" || field.type === "email" || field.type === "phone" || field.type === "number" || field.type === "url" || field.type === "date" || field.type === "time" ? (
                         <Input 
@@ -318,7 +335,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`bg-zinc-50/70 border-zinc-200 text-zinc-900 h-14 rounded-2xl px-5 transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`bg-white border-zinc-200 text-zinc-900 h-12 rounded-xl px-4 text-sm transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         />
                       ) : field.type === "textarea" ? (
                         <Textarea 
@@ -327,7 +344,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`bg-zinc-50/70 border-zinc-200 text-zinc-900 min-h-[100px] rounded-2xl p-5 transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 resize-y ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`bg-white border-zinc-200 text-zinc-900 min-h-[90px] rounded-xl p-4 text-sm transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 resize-y ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         />
                       ) : field.type === "dropdown" || field.type === "country" || field.type === "state" || field.type === "multiselect" ? (
                         <div className="relative">
@@ -335,7 +352,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                             required={field.required}
                             value={(answers[field.id] as string) || ""}
                             onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                            className={`w-full bg-zinc-50/70 border border-zinc-200 text-zinc-900 h-14 rounded-2xl px-5 pr-11 transition-all focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 cursor-pointer appearance-none ${fieldErrors[field.id] ? "border-red-500 focus:ring-red-500" : ""}`}
+                            className={`w-full bg-white border border-zinc-200 text-zinc-900 h-12 rounded-xl px-4 pr-11 text-sm transition-all focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900 cursor-pointer appearance-none ${fieldErrors[field.id] ? "border-red-500 focus:ring-red-500" : ""}`}
                           >
                             <option value="" disabled className="text-zinc-400">
                               {field.placeholder || `Select ${field.label}...`}
@@ -358,7 +375,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                       ) : field.type === "radio" ? (
                         <div className="space-y-2 pt-1">
                           {(field.options && field.options.length > 0 ? field.options : ["Option 1", "Option 2"]).map((opt: string, optIdx: number) => (
-                            <label key={`${opt}-${optIdx}`} className="flex items-center gap-3 p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 cursor-pointer transition-colors">
+                            <label key={`${opt}-${optIdx}`} className="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer transition-colors">
                               <input
                                 type="radio"
                                 name={field.id}
@@ -372,7 +389,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           ))}
                         </div>
                       ) : field.type === "checkbox" ? (
-                        <label className="flex items-center gap-3 p-3.5 rounded-2xl border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 cursor-pointer transition-colors">
+                        <label className="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 cursor-pointer transition-colors">
                           <input
                             type="checkbox"
                             checked={!!answers[field.id]}
@@ -389,7 +406,7 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
                           placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
                           value={(answers[field.id] as string) || ""}
                           onChange={(e) => handleFieldChange(field.id, e.target.value, field.type)}
-                          className={`bg-zinc-50/70 border-zinc-200 text-zinc-900 h-14 rounded-2xl px-5 transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                          className={`bg-white border-zinc-200 text-zinc-900 h-12 rounded-xl px-4 text-sm transition-all focus:bg-white focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400 ${fieldErrors[field.id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         />
                       )}
                       
@@ -429,10 +446,9 @@ export default function PublicRegistrationPage({ params }: { params: Promise<{ s
             </form>
           </div>
         </motion.div>
-        </motion.div>
         
-        <div className="mt-12 text-center text-xs font-medium text-zinc-400 pb-12 flex justify-center items-center gap-1">
-          Powered by <span className="text-zinc-700 font-bold">IDENTIFY</span>
+        <div className="mt-8 text-center text-xs font-medium text-zinc-400 pb-8 flex justify-center items-center gap-1">
+          Powered by <span className="text-zinc-700 font-bold">IDENTITY</span>
         </div>
       </div>
     </div>

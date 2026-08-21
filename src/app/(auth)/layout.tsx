@@ -27,7 +27,7 @@ export default function AuthLayout({
           <div className="h-9 w-9 bg-white rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-zinc-950 font-bold text-lg leading-none">I</span>
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">Identify</span>
+          <span className="font-bold text-xl tracking-tight text-white">Identity</span>
         </div>
 
         {/* Bottom Editorial Content */}
@@ -51,7 +51,7 @@ export default function AuthLayout({
             <div className="h-8 w-8 bg-zinc-900 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-lg leading-none">I</span>
             </div>
-            <span className="font-semibold text-lg tracking-tight text-zinc-900">Identify</span>
+            <span className="font-semibold text-lg tracking-tight text-zinc-900">Identity</span>
           </div>
           {children}
         </div>

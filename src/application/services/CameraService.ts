@@ -37,7 +37,7 @@ export class CameraService {
   private loadSettings(): CameraSettings {
     if (typeof window === "undefined") return DEFAULT_SETTINGS;
     try {
-      const stored = localStorage.getItem("IdentifyScannerSettings");
+      const stored = localStorage.getItem("IdentityScannerSettings");
       if (stored) return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
     } catch {
       // Ignore
@@ -48,7 +48,7 @@ export class CameraService {
   saveSettings(settings: Partial<CameraSettings>) {
     this.settings = { ...this.settings, ...settings };
     if (typeof window !== "undefined") {
-      localStorage.setItem("IdentifyScannerSettings", JSON.stringify(this.settings));
+      localStorage.setItem("IdentityScannerSettings", JSON.stringify(this.settings));
     }
   }
 

@@ -45,7 +45,7 @@ export function SiteHeader() {
           <div className="h-9 w-9 bg-gradient-to-tr from-zinc-900 to-zinc-700 rounded-xl flex items-center justify-center shadow-md border border-zinc-800 transition-transform group-hover:scale-105">
             <span className="text-white font-bold text-lg leading-none">I</span>
           </div>
-          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600">Identify</span>
+          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600">Identity</span>
         </Link>
         <nav className="hidden md:flex items-center" onMouseLeave={() => setHoveredIndex(null)}>
           {navLinks.map((link, idx) => (

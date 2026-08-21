@@ -99,7 +99,7 @@ export function AnimatedQR() {
 
           <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.15)] ring-1 ring-white/50">
             <QRCodeSVG 
-              value="https://identify.app/q/demo" 
+              value="https://identity.app/q/demo" 
               size={180}
               level="H"
               includeMargin={false}

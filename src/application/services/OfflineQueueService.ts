@@ -31,7 +31,7 @@ export class OfflineQueueService {
     if (typeof window === "undefined") return null; // Prevent SSR issues
     
     if (!this.dbPromise) {
-      this.dbPromise = openDB<ScannerDB>("IdentifyScannerDB", 1, {
+      this.dbPromise = openDB<ScannerDB>("IdentityScannerDB", 1, {
         upgrade(db) {
           const store = db.createObjectStore("scans", { keyPath: "id" });
           store.createIndex("by-event", "eventId");

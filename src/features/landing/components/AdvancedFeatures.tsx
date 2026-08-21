@@ -120,7 +120,7 @@ export function AdvancedFeatures() {
                     <div className="w-3 h-3 rounded-full bg-zinc-500" />
                   </div>
                   <div className="px-3 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400">
-                    identify.live/preview
+                    identity.live/preview
                   </div>
                 </div>
                 

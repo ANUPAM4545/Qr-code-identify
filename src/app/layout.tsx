@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Identify - Enterprise Event Management Platform",
+  title: "Identity - Enterprise Event Management Platform",
   description: "Premium enterprise event management platform.",
 };
 

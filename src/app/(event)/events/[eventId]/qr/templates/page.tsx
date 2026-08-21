@@ -179,7 +179,7 @@ export default function QRTemplatesPage() {
               <div className="h-36 bg-muted/30 flex items-center justify-center border-b border-border/50 relative">
                 <div className="w-24 h-24 bg-background rounded-2xl border shadow-sm flex items-center justify-center p-2 transition-transform duration-300 group-hover:scale-105">
                   <QRCodeSVG 
-                    value="https://identify.app"
+                    value="https://identity.app"
                     size={80}
                     fgColor={template.design?.dotsOptions?.color || template.design?.cornersSquareOptions?.color || "#000000"}
                     bgColor={template.design?.backgroundOptions?.color === "transparent" ? "transparent" : (template.design?.backgroundOptions?.color || "#ffffff")}
@@ -242,7 +242,7 @@ export default function QRTemplatesPage() {
                 </CardDescription>
               </CardHeader>
 
-              <CardFooter className="p-4 pt-0">
+              <CardFooter className="p-5 pt-4 pb-5 border-t border-border/40 mt-auto">
                 <div className="flex items-center gap-2 w-full">
                   <Button 
                     className="flex-1 rounded-xl font-medium h-10" 

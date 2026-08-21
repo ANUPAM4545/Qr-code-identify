@@ -45,7 +45,7 @@ export const QRCanvas = memo(({ options, qrRef, refreshKey }: QRCanvasProps) => 
       width: 500, // higher resolution internal canvas
       height: 500,
       type: "svg",
-      data: options.data || "https://identify.com",
+      data: options.data || "https://identity.com",
       ...(options as Record<string, unknown>)
     };
 

@@ -36,7 +36,7 @@ export function Timeline() {
               <div className="space-y-3">
                 <div>
                   <div className="text-xs font-semibold text-zinc-500 mb-1">Event Name</div>
-                  <div className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-900 font-medium">Identify Annual Summit 2026</div>
+                  <div className="w-full bg-zinc-50 border border-zinc-200 rounded-lg p-2.5 text-sm text-zinc-900 font-medium">Identity Annual Summit 2026</div>
                 </div>
                 
                 <div className="flex gap-3">
@@ -190,7 +190,7 @@ export function Timeline() {
         >
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-6">A flawless workflow.</h2>
           <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-            Identify maps precisely to how elite event managers operate, fully automating the busywork so you can focus on the experience.
+            Identity maps precisely to how elite event managers operate, fully automating the busywork so you can focus on the experience.
           </p>
         </motion.div>
 

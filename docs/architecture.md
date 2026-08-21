@@ -1,9 +1,9 @@
-# Identify Platform Architecture & Phase 2 Foundation
+# Identity Platform Architecture & Phase 2 Foundation
 
 This document outlines the core architectural principles, workflows, and standards established during Phase 2. All future modules must adhere strictly to these foundations.
 
 ## 1. Authentication Flow
-Identify uses `next-auth` (v4) with a custom MongoDB adapter to handle authentication.
+Identity uses `next-auth` (v4) with a custom MongoDB adapter to handle authentication.
 - **Provider:** Google OAuth
 - **Session:** JWT strategy
 - **Enforcement:** `src/middleware.ts` protects all routes except `/login`, `/signup`, and public APIs.

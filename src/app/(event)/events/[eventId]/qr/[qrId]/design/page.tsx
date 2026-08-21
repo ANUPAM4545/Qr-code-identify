@@ -41,7 +41,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
 
   // Name and Destination
   const { state: name, set: setName, replace: replaceName } = useHistory(isNew ? "Untitled QR Code" : "Loading...");
-  const { state: destination, set: setDestination, replace: replaceDestination } = useHistory("https://identify.com");
+  const { state: destination, set: setDestination, replace: replaceDestination } = useHistory("https://identity.com");
   
   // Save Template States
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -90,7 +90,7 @@ export default function QRDesignStudio({ params }: { params: Promise<{ qrId: str
     if (existingQR) {
       // Initialize without adding to history stack
       replaceName(existingQR.name);
-      replaceDestination(existingQR.destinationUrl || existingQR.design.data || "https://identify.com");
+      replaceDestination(existingQR.destinationUrl || existingQR.design.data || "https://identity.com");
       replaceDesign(existingQR.design);
     } else if (isNew && templateId && templates) {
       const template = (templates as any[]).find((t: any) => t._id === templateId);

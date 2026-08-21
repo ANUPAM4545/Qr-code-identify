@@ -4,7 +4,7 @@ if (!process.env.MONGODB_URI) {
   console.warn('Missing environment variable: "MONGODB_URI"');
 }
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/identify_db";
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/identity_db";
 const options = {
   serverApi: {
     version: ServerApiVersion.v1,

@@ -137,14 +137,6 @@ export default function AnalyticsOverviewPage({ params }: { params: Promise<{ ev
                 <FileText className="w-4 h-4 mr-2 text-indigo-400" />
                 <span>Download PDF (.pdf)</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportPNG} className="cursor-pointer">
-                <ImageIcon className="w-4 h-4 mr-2 text-emerald-400" />
-                <span>Download PNG (.png)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportJPG} className="cursor-pointer">
-                <ImageIcon className="w-4 h-4 mr-2 text-amber-400" />
-                <span>Download JPG (.jpg)</span>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleExportCSV} className="cursor-pointer">
                 <Table className="w-4 h-4 mr-2 text-blue-400" />

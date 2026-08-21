@@ -47,7 +47,7 @@ export class WebhookService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Identify-Signature": signature
+            "X-Identity-Signature": signature
           },
           body: dataString
         });

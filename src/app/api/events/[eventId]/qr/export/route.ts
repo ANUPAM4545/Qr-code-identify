@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ even
       status: 200,
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="Identify_QRs_${event.name.replace(/[^a-z0-9]/gi, '_')}.csv"`,
+        "Content-Disposition": `attachment; filename="Identity_QRs_${event.name.replace(/[^a-z0-9]/gi, '_')}.csv"`,
       },
     });
   } catch (err: unknown) {

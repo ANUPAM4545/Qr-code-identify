@@ -224,7 +224,6 @@ export default function QROverviewPage() {
                   <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
                     Templates Gallery <ArrowRight className="w-3.5 h-3.5 opacity-60" />
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">{kpis?.templates || 1} pre-built designs</p>
                 </div>
               </Link>
 

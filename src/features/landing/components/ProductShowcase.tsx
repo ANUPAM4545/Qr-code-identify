@@ -12,7 +12,7 @@ const features = [
     preview: (
       <div className="w-full h-full bg-zinc-50 p-6 flex flex-col gap-4 border border-zinc-200 rounded-xl overflow-hidden shadow-sm transition-transform hover:scale-[1.02] duration-500">
         <div className="w-full h-8 flex justify-between items-center border-b border-zinc-200 pb-4">
-          <span className="text-sm font-semibold text-zinc-900">identify.com/dashboard</span>
+          <span className="text-sm font-semibold text-zinc-900">identity.com/dashboard</span>
           <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white font-bold text-xs">AC</div>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -127,7 +127,7 @@ export function ProductShowcase() {
         >
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-zinc-900">A complete ecosystem.</h2>
           <p className="text-lg text-zinc-500 max-w-2xl mx-auto">
-            From initial setup to post-event analytics, Identify provides every tool necessary for flawless execution.
+            From initial setup to post-event analytics, Identity provides every tool necessary for flawless execution.
           </p>
         </motion.div>
 

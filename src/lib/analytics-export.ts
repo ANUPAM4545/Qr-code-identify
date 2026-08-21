@@ -54,23 +54,23 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
       timeStyle: "short",
     });
 
-    // Helper to draw the header banner
+    // Helper to draw the header banner (Obsidian Dark Theme)
     const drawHeader = (isFirstPage: boolean = true) => {
-      pdf.setFillColor(15, 23, 42); // #0f172a
+      pdf.setFillColor(9, 9, 11); // #09090b
       pdf.rect(0, 0, pageWidth, isFirstPage ? 32 : 18, "F");
 
-      pdf.setFillColor(99, 102, 241); // #6366f1
-      pdf.rect(0, isFirstPage ? 31 : 17.2, pageWidth, 1, "F");
+      pdf.setFillColor(39, 39, 42); // #27272a
+      pdf.rect(0, isFirstPage ? 31.2 : 17.4, pageWidth, 0.8, "F");
 
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(isFirstPage ? 15 : 11);
+      pdf.setFontSize(isFirstPage ? 14 : 11);
       pdf.setTextColor(255, 255, 255);
-      pdf.text("IDENTIFY", margin, isFirstPage ? 13 : 11);
+      pdf.text("IDENTITY", margin, isFirstPage ? 13 : 11);
 
-      pdf.setFontSize(isFirstPage ? 9.5 : 8);
+      pdf.setFontSize(isFirstPage ? 9 : 8);
       pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(148, 163, 184);
-      pdf.text("EVENT ANALYTICS & ATTENDANCE REPORT", margin + (isFirstPage ? 26 : 20), isFirstPage ? 13 : 11);
+      pdf.setTextColor(161, 161, 170); // zinc-400
+      pdf.text("EVENT ANALYTICS & ATTENDANCE REPORT", margin + (isFirstPage ? 25 : 20), isFirstPage ? 13 : 11);
 
       if (isFirstPage) {
         pdf.setFont("helvetica", "bold");
@@ -81,7 +81,7 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
 
         pdf.setFont("helvetica", "normal");
         pdf.setFontSize(8);
-        pdf.setTextColor(203, 213, 225);
+        pdf.setTextColor(161, 161, 170);
         const metaRight = `Generated: ${timestamp}  |  ID: ${data.eventId.slice(0, 8)}...`;
         pdf.text(metaRight, pageWidth - margin, 24, { align: "right" });
       }
@@ -90,14 +90,14 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
     // Helper to draw the footer
     const drawFooter = (pageNum: number, totalPages: number = 1) => {
       const footerY = pageHeight - 10;
-      pdf.setDrawColor(226, 232, 240);
+      pdf.setDrawColor(228, 228, 231); // zinc-200
       pdf.setLineWidth(0.3);
       pdf.line(margin, footerY - 2, pageWidth - margin, footerY - 2);
 
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(7.5);
-      pdf.setTextColor(148, 163, 184);
-      pdf.text("Identify Event Management & Verification Platform • Executive Summary", margin, footerY + 3);
+      pdf.setTextColor(113, 113, 122); // zinc-500
+      pdf.text("Identity Event Management Platform • Executive Summary", margin, footerY + 3);
       pdf.text(`Page ${pageNum} of ${totalPages}`, pageWidth - margin, footerY + 3, { align: "right" });
     };
 
@@ -110,10 +110,10 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
     // ==========================================
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(11.5);
-    pdf.setTextColor(15, 23, 42);
+    pdf.setTextColor(9, 9, 11);
     pdf.text("Executive KPI Summary", margin, currentY);
 
-    currentY += 4.5;
+    currentY += 5;
 
     const cards = [
       { label: "Total Guests", value: totalGuests.toLocaleString(), sub: `${approvedGuests} Approved (${approvalRate}%)` },
@@ -135,36 +135,32 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
       const x = margin + col * (cardWidth + cardGap);
       const y = currentY + row * (cardHeight + cardGap);
 
-      // Card Background & Border
-      pdf.setFillColor(248, 250, 252); // #f8fafc
-      pdf.setDrawColor(226, 232, 240); // #e2e8f0
+      // Card Background & Border (Monochrome SaaS UI Theme)
+      pdf.setFillColor(250, 250, 250); // zinc-50
+      pdf.setDrawColor(228, 228, 231); // zinc-200
       pdf.setLineWidth(0.3);
       pdf.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "FD");
 
-      // Top colored accent for top row
-      if (idx === 0) pdf.setFillColor(99, 102, 241); // indigo
-      else if (idx === 1) pdf.setFillColor(16, 185, 129); // emerald
-      else if (idx === 2) pdf.setFillColor(168, 85, 247); // purple
-      else pdf.setFillColor(203, 213, 225); // slate
-
-      pdf.rect(x + 2, y, cardWidth - 4, 0.8, "F");
+      // Top Obsidian accent bar
+      pdf.setFillColor(24, 24, 27); // zinc-900
+      pdf.rect(x + 2, y, cardWidth - 4, 0.6, "F");
 
       // Label
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(7);
-      pdf.setTextColor(100, 116, 139);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(6.8);
+      pdf.setTextColor(113, 113, 122); // zinc-500
       pdf.text(card.label.toUpperCase(), x + 4, y + 5.8);
 
       // Value
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(12.5);
-      pdf.setTextColor(15, 23, 42);
+      pdf.setTextColor(9, 9, 11); // zinc-950
       pdf.text(card.value, x + 4, y + 13.5);
 
       // Subtitle
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(6.8);
-      pdf.setTextColor(148, 163, 184);
+      pdf.setTextColor(161, 161, 170); // zinc-400
       pdf.text(card.sub, x + 4, y + 18.5);
     });
 
@@ -178,9 +174,9 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(11.5);
-    pdf.setTextColor(15, 23, 42);
+    pdf.setTextColor(9, 9, 11);
     pdf.text("Visual Attendance & Performance Analytics", margin, currentY);
-    currentY += 4.5;
+    currentY += 5;
 
     if (hasTimelineActivity) {
       // 3A. Real Check-in Activity Chart
@@ -206,12 +202,11 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
 
           if (chartDataUrl && chartDataUrl.length > 100) {
             const imgProps = pdf.getImageProperties(chartDataUrl);
-            // Compute proportional height with max limit of 70mm to prevent stretching
             const naturalHeight = (imgProps.height * contentWidth) / imgProps.width;
             const targetHeight = Math.min(Math.max(naturalHeight, 40), 72);
 
             pdf.setFillColor(255, 255, 255);
-            pdf.setDrawColor(226, 232, 240);
+            pdf.setDrawColor(228, 228, 231);
             pdf.setLineWidth(0.3);
             pdf.roundedRect(margin, currentY, contentWidth, targetHeight, 2, 2, "FD");
 
@@ -223,29 +218,29 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
         }
       }
     } else {
-      // 3B. Crisp Native Vector Card when No Check-ins Have Occurred Yet
+      // 3B. Crisp Native Vector Card when No Check-ins Have Occurred Yet (Monochrome SaaS Theme)
       const statusBoxHeight = 36;
-      pdf.setFillColor(248, 250, 252);
-      pdf.setDrawColor(226, 232, 240);
+      pdf.setFillColor(250, 250, 250);
+      pdf.setDrawColor(228, 228, 231);
       pdf.setLineWidth(0.3);
       pdf.roundedRect(margin, currentY, contentWidth, statusBoxHeight, 2, 2, "FD");
 
       // Status indicator badge
-      pdf.setFillColor(241, 245, 249);
-      pdf.roundedRect(margin + 4, currentY + 4, 38, 5.5, 1, 1, "F");
+      pdf.setFillColor(24, 24, 27); // obsidian dark badge
+      pdf.roundedRect(margin + 4, currentY + 4, 42, 5.5, 1, 1, "F");
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(6.5);
-      pdf.setTextColor(16, 185, 129); // emerald green
-      pdf.text("● MONITORING READY", margin + 6, currentY + 7.8);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text("LIVE STREAM CONNECTED", margin + 6, currentY + 7.8);
 
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(10);
-      pdf.setTextColor(15, 23, 42);
-      pdf.text("Real-Time Check-In Stream Connected", margin + 4, currentY + 16);
+      pdf.setTextColor(9, 9, 11);
+      pdf.text("Real-Time Check-In Stream Provisioned", margin + 4, currentY + 16);
 
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(7.5);
-      pdf.setTextColor(100, 116, 139);
+      pdf.setTextColor(113, 113, 122);
       pdf.text(
         "Scanner terminals and guest QR codes are provisioned. Live arrival statistics will plot automatically upon first scan.",
         margin + 4,
@@ -263,13 +258,13 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
         const bx = margin + 4 + bi * 58;
         const by = currentY + 26;
         pdf.setFillColor(255, 255, 255);
-        pdf.setDrawColor(226, 232, 240);
+        pdf.setDrawColor(228, 228, 231);
         pdf.roundedRect(bx, by, 54, 7, 1, 1, "FD");
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(6.5);
-        pdf.setTextColor(71, 85, 105);
+        pdf.setTextColor(113, 113, 122);
         pdf.text(`${b.label}: `, bx + 3, by + 4.8);
-        pdf.setTextColor(15, 23, 42);
+        pdf.setTextColor(9, 9, 11);
         pdf.text(b.val, bx + 3 + pdf.getTextWidth(`${b.label}: `), by + 4.8);
       });
 
@@ -281,28 +276,28 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
     // ==========================================
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(11.5);
-    pdf.setTextColor(15, 23, 42);
+    pdf.setTextColor(9, 9, 11);
     pdf.text(hasTimelineActivity ? "Attendance Timeline Breakdown" : "Event Attendance & Registration Audit", margin, currentY);
-    currentY += 4.5;
+    currentY += 5;
 
-    // Table Header
+    // Table Header (Obsidian Dark Theme)
     const colWidths = [16, 76, 45, 45];
     const headers = ["#", "Category / Interval", "Metrics / Count", "Verification Status"];
 
-    pdf.setFillColor(241, 245, 249);
-    pdf.rect(margin, currentY, contentWidth, 6.5, "F");
+    pdf.setFillColor(24, 24, 27); // #18181b
+    pdf.rect(margin, currentY, contentWidth, 7, "F");
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7.5);
-    pdf.setTextColor(71, 85, 105);
+    pdf.setTextColor(255, 255, 255);
 
     let headerX = margin;
     headers.forEach((h, i) => {
-      pdf.text(h, headerX + 3, currentY + 4.4);
+      pdf.text(h, headerX + 3, currentY + 4.8);
       headerX += colWidths[i];
     });
 
-    currentY += 6.5;
+    currentY += 7;
 
     // Rows
     pdf.setFont("helvetica", "normal");
@@ -314,32 +309,32 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
         if (currentY > 275) return;
 
         if (i % 2 === 1) {
-          pdf.setFillColor(248, 250, 252);
-          pdf.rect(margin, currentY, contentWidth, 5.8, "F");
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margin, currentY, contentWidth, 6, "F");
         }
 
-        pdf.setTextColor(51, 65, 85);
+        pdf.setTextColor(24, 24, 27);
         let rowX = margin;
 
-        pdf.text(String(i + 1), rowX + 3, currentY + 4);
+        pdf.text(String(i + 1), rowX + 3, currentY + 4.2);
         rowX += colWidths[0];
 
-        pdf.text(row.name || "N/A", rowX + 3, currentY + 4);
+        pdf.text(row.name || "N/A", rowX + 3, currentY + 4.2);
         rowX += colWidths[1];
 
         pdf.setFont("helvetica", "bold");
-        pdf.text(`${row.value} check-in${row.value === 1 ? "" : "s"}`, rowX + 3, currentY + 4);
+        pdf.text(`${row.value} check-in${row.value === 1 ? "" : "s"}`, rowX + 3, currentY + 4.2);
         pdf.setFont("helvetica", "normal");
         rowX += colWidths[2];
 
-        pdf.setTextColor(16, 185, 129);
-        pdf.text("Verified Check-in", rowX + 3, currentY + 4);
+        pdf.setTextColor(24, 24, 27);
+        pdf.text("Verified Check-in", rowX + 3, currentY + 4.2);
 
-        pdf.setDrawColor(241, 245, 249);
+        pdf.setDrawColor(244, 244, 245);
         pdf.setLineWidth(0.2);
-        pdf.line(margin, currentY + 5.8, margin + contentWidth, currentY + 5.8);
+        pdf.line(margin, currentY + 6, margin + contentWidth, currentY + 6);
 
-        currentY += 5.8;
+        currentY += 6;
       });
     } else {
       // Default Audit Rows
@@ -356,32 +351,32 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
         if (currentY > 275) return;
 
         if (i % 2 === 1) {
-          pdf.setFillColor(248, 250, 252);
-          pdf.rect(margin, currentY, contentWidth, 5.8, "F");
+          pdf.setFillColor(250, 250, 250);
+          pdf.rect(margin, currentY, contentWidth, 6, "F");
         }
 
-        pdf.setTextColor(51, 65, 85);
+        pdf.setTextColor(24, 24, 27);
         let rowX = margin;
 
-        pdf.text(String(i + 1), rowX + 3, currentY + 4);
+        pdf.text(String(i + 1), rowX + 3, currentY + 4.2);
         rowX += colWidths[0];
 
-        pdf.text(row.label, rowX + 3, currentY + 4);
+        pdf.text(row.label, rowX + 3, currentY + 4.2);
         rowX += colWidths[1];
 
         pdf.setFont("helvetica", "bold");
-        pdf.text(row.metric, rowX + 3, currentY + 4);
+        pdf.text(row.metric, rowX + 3, currentY + 4.2);
         pdf.setFont("helvetica", "normal");
         rowX += colWidths[2];
 
-        pdf.setTextColor(16, 185, 129);
-        pdf.text(row.status, rowX + 3, currentY + 4);
+        pdf.setTextColor(39, 39, 42); // zinc-800
+        pdf.text(row.status, rowX + 3, currentY + 4.2);
 
-        pdf.setDrawColor(241, 245, 249);
+        pdf.setDrawColor(244, 244, 245);
         pdf.setLineWidth(0.2);
-        pdf.line(margin, currentY + 5.8, margin + contentWidth, currentY + 5.8);
+        pdf.line(margin, currentY + 6, margin + contentWidth, currentY + 6);
 
-        currentY += 5.8;
+        currentY += 6;
       });
     }
 
@@ -390,7 +385,7 @@ export async function exportAnalyticsToPDF(data: AnalyticsExportData) {
 
     // Save and download PDF
     const safeName = (data.eventName || "event").toLowerCase().replace(/[^a-z0-9]/g, "_");
-    pdf.save(`Identify_Analytics_Report_${safeName}_${Date.now()}.pdf`);
+    pdf.save(`Identity_Analytics_Report_${safeName}_${Date.now()}.pdf`);
 
     // Log Notification in background
     logExportNotification(data.eventId, "pdf", data.eventName);
@@ -468,7 +463,7 @@ export async function exportAnalyticsToImage(options: {
     const safeName = (eventName || "event").toLowerCase().replace(/[^a-z0-9]/g, "_");
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = `Identify_Analytics_${safeName}_${Date.now()}.${format === "jpeg" ? "jpg" : "png"}`;
+    link.download = `Identity_Analytics_${safeName}_${Date.now()}.${format === "jpeg" ? "jpg" : "png"}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -493,7 +488,7 @@ export function exportAnalyticsToCSV(data: AnalyticsExportData) {
     const lines: string[] = [];
 
     // Header Meta
-    lines.push(`"Identify Event Analytics Export"`);
+    lines.push(`"Identity Event Analytics Export"`);
     lines.push(`"Event Name","${(data.eventName || "Event").replace(/"/g, '""')}"`);
     lines.push(`"Event ID","${data.eventId}"`);
     lines.push(`"Export Timestamp","${new Date().toISOString()}"`);
@@ -522,7 +517,7 @@ export function exportAnalyticsToCSV(data: AnalyticsExportData) {
     const safeName = (data.eventName || "event").toLowerCase().replace(/[^a-z0-9]/g, "_");
     const link = document.createElement("a");
     link.href = csvContent;
-    link.download = `Identify_Analytics_Data_${safeName}_${Date.now()}.csv`;
+    link.download = `Identity_Analytics_Data_${safeName}_${Date.now()}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

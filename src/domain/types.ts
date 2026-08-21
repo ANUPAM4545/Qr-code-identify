@@ -561,6 +561,8 @@ export interface RegistrationForm {
     createGuest: boolean;
   };
   branding: {
+    title?: string;
+    description?: string;
     coverImage?: string | null;
     primaryColor: string;
     showEventDescription: boolean;

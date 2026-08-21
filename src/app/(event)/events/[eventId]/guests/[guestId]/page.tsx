@@ -208,7 +208,7 @@ export default function GuestOverviewPage({ params }: { params: Promise<{ eventI
           
           <div className="bg-white p-4 rounded-2xl border shadow-sm mb-6 relative z-10 group-hover:scale-105 transition-transform duration-300">
             <QRCodeSVG 
-              value={guest.qrCodeId ? `https://identify.app/q/${guest.qrCodeId}` : JSON.stringify({ g: guestId })} 
+              value={guest.qrCodeId ? `https://identity.app/q/${guest.qrCodeId}` : JSON.stringify({ g: guestId })} 
               size={150}
               level="H"
             />

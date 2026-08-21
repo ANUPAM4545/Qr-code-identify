@@ -345,7 +345,7 @@ export default function CreateEventPage() {
                     </Label>
                     <div className="flex rounded-xl overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all bg-background">
                       <span className="flex items-center px-4 bg-muted border-r border-input text-xs sm:text-sm text-muted-foreground font-medium whitespace-nowrap select-none">
-                        identify.com/r/
+                        identity.com/r/
                       </span>
                       <Input 
                         id="eventSlug"

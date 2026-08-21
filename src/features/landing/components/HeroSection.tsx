@@ -57,7 +57,7 @@ export function HeroSection() {
         >
           <motion.div variants={FADE_IN} className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 bg-white text-xs font-medium text-zinc-600 shadow-sm">
             <span className="flex h-2 w-2 rounded-full bg-zinc-900" />
-            Introducing Identify Enterprise 2.0
+            Introducing Identity Enterprise 2.0
           </motion.div>
           
           <div className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight text-zinc-900 perspective-1000">

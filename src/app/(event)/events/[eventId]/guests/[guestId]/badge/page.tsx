@@ -118,86 +118,86 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
 
   // The QR payload (can be URL or JSON)
   const qrData = guest.qrCodeId 
-    ? `https://identify.app/q/${guest.qrCodeId}` 
+    ? `https://identity.app/q/${guest.qrCodeId}` 
     : JSON.stringify({ g: guestId });
 
-  // Company-Level Professional Color Themes
+  // Real-Life Conference & Event Inspired Badge Color Themes
   const getThemeStyles = () => {
     switch (badgeTemplate) {
       case "VIP Access":
         return {
-          top: "bg-zinc-950 text-amber-300 border-b border-amber-500/30",
-          topTag: "text-amber-400/80",
-          bottom: "bg-zinc-950 text-amber-300 font-bold border-t border-amber-500/30",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-zinc-950 shadow-md",
+          topTag: "text-zinc-950/80 font-black",
+          bottom: "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-zinc-950 font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-amber-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-amber-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-amber-300/80 bg-white shadow-md ring-2 ring-amber-400/40",
+          accent: "text-amber-900 font-bold tracking-tight",
+          pattern: "bg-amber-50/30"
         };
       case "Speaker":
         return {
-          top: "bg-zinc-950 text-indigo-300 border-b border-indigo-500/30",
-          topTag: "text-indigo-400/80",
-          bottom: "bg-zinc-950 text-indigo-300 font-bold border-t border-indigo-500/30",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-violet-700 via-purple-600 to-indigo-800 text-white shadow-md",
+          topTag: "text-violet-200/90 font-black",
+          bottom: "bg-gradient-to-r from-violet-700 via-purple-600 to-indigo-800 text-white font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-violet-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-indigo-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-violet-200 bg-white shadow-md ring-2 ring-violet-500/30",
+          accent: "text-violet-900 font-bold tracking-tight",
+          pattern: "bg-violet-50/30"
         };
       case "Staff / Volunteer":
         return {
-          top: "bg-zinc-950 text-emerald-300 border-b border-emerald-500/30",
-          topTag: "text-emerald-400/80",
-          bottom: "bg-zinc-950 text-emerald-300 font-bold border-t border-emerald-500/30",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-700 text-white shadow-md",
+          topTag: "text-emerald-100/90 font-black",
+          bottom: "bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-700 text-white font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-emerald-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-emerald-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-emerald-200 bg-white shadow-md ring-2 ring-emerald-500/30",
+          accent: "text-emerald-900 font-bold tracking-tight",
+          pattern: "bg-emerald-50/30"
         };
       case "Press / Media":
         return {
-          top: "bg-zinc-950 text-sky-300 border-b border-sky-500/30",
-          topTag: "text-sky-400/80",
-          bottom: "bg-zinc-950 text-sky-300 font-bold border-t border-sky-500/30",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-md",
+          topTag: "text-red-100/90 font-black",
+          bottom: "bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-rose-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-sky-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-red-200 bg-white shadow-md ring-2 ring-red-500/30",
+          accent: "text-red-900 font-bold tracking-tight",
+          pattern: "bg-rose-50/30"
         };
       case "Exhibitor":
         return {
-          top: "bg-zinc-950 text-slate-200 border-b border-slate-700",
-          topTag: "text-slate-400",
-          bottom: "bg-zinc-950 text-slate-300 font-bold border-t border-slate-800",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white shadow-md",
+          topTag: "text-blue-100/90 font-black",
+          bottom: "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-blue-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-zinc-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-blue-200 bg-white shadow-md ring-2 ring-blue-500/30",
+          accent: "text-blue-900 font-bold tracking-tight",
+          pattern: "bg-blue-50/30"
         };
       case "Sponsor":
         return {
-          top: "bg-zinc-950 text-violet-300 border-b border-violet-500/30",
-          topTag: "text-violet-400/80",
-          bottom: "bg-zinc-950 text-violet-300 font-bold border-t border-violet-500/30",
-          bg: "bg-white",
+          top: "bg-gradient-to-r from-orange-600 via-amber-500 to-orange-700 text-white shadow-md",
+          topTag: "text-orange-100/90 font-black",
+          bottom: "bg-gradient-to-r from-orange-600 via-amber-500 to-orange-700 text-white font-black tracking-[0.2em] shadow-inner",
+          bg: "bg-orange-50/40",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-violet-500/20",
-          accent: "text-zinc-900 font-bold tracking-tight",
-          pattern: "bg-white"
+          qrBorder: "border-orange-200 bg-white shadow-md ring-2 ring-orange-500/30",
+          accent: "text-orange-900 font-bold tracking-tight",
+          pattern: "bg-orange-50/30"
         };
       default: // Standard Attendee (Sleek Corporate Obsidian)
         return {
-          top: "bg-zinc-950 text-white border-b border-zinc-800",
-          topTag: "text-zinc-400",
-          bottom: "bg-zinc-950 text-zinc-300 font-bold border-t border-zinc-800",
+          top: "bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-950 text-white shadow-md",
+          topTag: "text-zinc-400 font-black",
+          bottom: "bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-950 text-white font-black tracking-[0.2em] shadow-inner",
           bg: "bg-white",
           text: "text-zinc-950",
-          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-zinc-900/5",
+          qrBorder: "border-zinc-200 bg-white shadow-md ring-1 ring-zinc-900/10",
           accent: "text-zinc-900 font-bold tracking-tight",
           pattern: "bg-white"
         };
@@ -237,7 +237,6 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
             <label className="text-sm font-medium">Print Format</label>
             <select className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm cursor-pointer">
               <option>Single Badge (Thermal 4x3&quot;)</option>
-              <option>A4 Sheet (6 per page)</option>
             </select>
           </div>
 
@@ -253,9 +252,6 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
         </div>
 
         <div className="pt-6 border-t border-border space-y-3">
-          <Button className="w-full cursor-pointer" onClick={handlePrint}>
-            <Printer className="w-4 h-4 mr-2" /> Print Badge
-          </Button>
           <Button variant="outline" className="w-full cursor-pointer" onClick={handleDownloadPDF}>
             <Download className="w-4 h-4 mr-2" /> Download PDF
           </Button>
@@ -283,7 +279,7 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
               {/* Ambient light glow inside banner */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 blur-[40px] rounded-full pointer-events-none" />
               <div className="text-3xl font-black tracking-tighter uppercase flex flex-col items-center relative z-10">
-                <span className="drop-shadow-md">IDENTIFY</span>
+                <span className="drop-shadow-md">IDENTITY</span>
                 <span className={`text-[10px] font-bold tracking-[0.4em] opacity-90 mt-1 ${theme.topTag}`}>2026</span>
               </div>
             </div>
@@ -324,7 +320,7 @@ export default function BadgeStudioPage({ params }: { params: Promise<{ eventId:
 
             {/* Bottom Sleek Footer */}
             <div className={`h-12 w-full flex items-center justify-center px-8 text-[10px] font-black tracking-widest uppercase relative overflow-hidden ${theme.bottom}`}>
-              <span className="opacity-90">IDENTIFY.COM</span>
+              <span className="opacity-90">{badgeTemplate}</span>
             </div>
           </div>
         </motion.div>

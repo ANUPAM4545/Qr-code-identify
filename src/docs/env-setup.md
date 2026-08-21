@@ -1,10 +1,10 @@
 # Environment Setup
 
-To run Identify locally, ensure the following environment variables are set in your `.env` or `.env.local`:
+To run Identity locally, ensure the following environment variables are set in your `.env` or `.env.local`:
 
 ```env
 # Database
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/identify?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/identity?retryWrites=true&w=majority
 
 # Authentication (Auth.js)
 AUTH_SECRET=your-secure-auth-secret

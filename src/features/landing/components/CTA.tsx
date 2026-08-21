@@ -26,7 +26,7 @@ export function CTA() {
             variants={FADE_IN} 
             className="text-lg text-zinc-500 max-w-xl mx-auto"
           >
-            Join the world&apos;s most innovative organizations managing seamless, secure, and data-driven events on Identify.
+            Join the world&apos;s most innovative organizations managing seamless, secure, and data-driven events on Identity.
           </motion.p>
           
           <motion.div variants={SLIDE_UP} className="flex flex-col sm:flex-row items-center gap-4 mt-4">

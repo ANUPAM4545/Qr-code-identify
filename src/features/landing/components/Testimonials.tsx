@@ -6,7 +6,7 @@ import { STAGGER_CONTAINER, SLIDE_UP } from "../utils/animations";
 export function Testimonials() {
   const testimonials = [
     {
-      quote: "Identify completely transformed how we handle our global summits. The seamless check-in experience and offline scanner saved us during a massive network outage.",
+      quote: "Identity completely transformed how we handle our global summits. The seamless check-in experience and offline scanner saved us during a massive network outage.",
       author: "Sarah Jenkins",
       role: "VP of Events, GlobalBank",
       initial: "S"
@@ -18,7 +18,7 @@ export function Testimonials() {
       initial: "M"
     },
     {
-      quote: "Finally, an event management platform that doesn't look like it was built in 2010. Identify brings modern SaaS architecture to a legacy industry.",
+      quote: "Finally, an event management platform that doesn't look like it was built in 2010. Identity brings modern SaaS architecture to a legacy industry.",
       author: "Elena Rodriguez",
       role: "Founder, Pinnacle Events",
       initial: "E"

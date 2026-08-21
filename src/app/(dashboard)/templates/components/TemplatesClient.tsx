@@ -293,7 +293,7 @@ function EmptyState({ tab }: { tab: string }) {
         </div>
         <h2 className="text-xl font-semibold tracking-tight mb-2">Official Templates</h2>
         <p className="text-sm text-muted-foreground max-w-sm mb-6">
-          Enterprise blueprints curated by the Identify team.
+          Enterprise blueprints curated by the Identity team.
         </p>
         <Badge variant="secondary" className="px-3 py-1 font-medium bg-background border border-border/50">Coming Soon</Badge>
       </div>

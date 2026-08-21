@@ -153,7 +153,7 @@ export default function EventSettingsPage() {
               <Label htmlFor="slug" className="text-sm font-semibold text-foreground/80">Event Slug</Label>
               <div className="flex">
                 <span className="inline-flex items-center rounded-l-xl border border-r-0 border-border/50 bg-muted/30 px-4 text-sm text-muted-foreground h-12">
-                  identify.com/r/
+                  identity.com/r/
                 </span>
                 <Input 
                   id="slug" 

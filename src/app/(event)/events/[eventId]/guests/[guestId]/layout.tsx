@@ -157,11 +157,6 @@ export default function GuestProfileLayout({
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleCheckIn}>Check In</Button>
               <Button variant="outline" size="sm" onClick={handleGenerateQR} disabled={!!guest.qrCodeId}>Generate QR</Button>
-              <Link href={`/events/${eventId}/guests/${guestId}/badge`}>
-                <Button size="sm">
-                  Print Badge
-                </Button>
-              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger render={<Button variant="ghost" size="icon" />}>
                   <MoreHorizontal className="h-4 w-4" />

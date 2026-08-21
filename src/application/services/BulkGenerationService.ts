@@ -46,7 +46,7 @@ export class BulkGenerationService {
       const shortId = randomId.substring(0, 8); // Use first 8 characters as shortId for URL payload
       
       // CRITICAL: The QR payload MUST include the unique ID, otherwise all QRs in the batch will be optically identical!
-      const payloadUrl = destinationUrlBase ? `${destinationUrlBase}?id=${shortId}` : `${process.env.NEXT_PUBLIC_APP_URL || "https://identify.com"}/scan?id=${shortId}`;
+      const payloadUrl = destinationUrlBase ? `${destinationUrlBase}?id=${shortId}` : `${process.env.NEXT_PUBLIC_APP_URL || "https://identity.com"}/scan?id=${shortId}`;
 
       const qr = {
         workspaceId,

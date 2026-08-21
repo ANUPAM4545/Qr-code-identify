@@ -91,7 +91,7 @@ export default function OnboardingPage() {
               <div className="h-16 w-16 bg-foreground rounded-xl flex items-center justify-center mb-4">
                 <span className="text-background font-bold text-3xl leading-none">I</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">Welcome to Identify</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Welcome to Identity</h1>
               <p className="text-muted-foreground">
                 Let&apos;s set up your enterprise event management platform. We&apos;ll start by creating your workspace.
               </p>
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                   <Label htmlFor="ws-slug">Workspace Slug</Label>
                   <div className="flex">
                     <span className="inline-flex items-center rounded-l-md border border-r-0 border-border/50 bg-muted px-3 text-sm text-muted-foreground">
-                      identify.com/
+                      identity.com/
                     </span>
                     <Input 
                       id="ws-slug" 

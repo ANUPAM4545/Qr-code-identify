@@ -86,7 +86,7 @@ export function HeroPreview() {
             <div className="w-3 h-3 rounded-full bg-zinc-500" />
           </div>
           <div className="mx-auto flex h-7 w-1/3 items-center justify-center rounded-md bg-white border border-zinc-200 text-[11px] text-zinc-600 font-medium shadow-sm font-mono">
-            identify.com/dashboard
+            identity.com/dashboard
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export function HeroPreview() {
               <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white text-xs font-bold">I</span>
               </div>
-              <span className="text-base font-bold text-zinc-900">Identify</span>
+              <span className="text-base font-bold text-zinc-900">Identity</span>
             </div>
             {tabs.map((item, i) => (
               <div 

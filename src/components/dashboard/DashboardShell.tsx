@@ -53,7 +53,7 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
               <div className="h-6 w-6 shrink-0 bg-foreground rounded-md flex items-center justify-center">
                 <span className="text-background font-bold text-xs leading-none">I</span>
               </div>
-              <span className="">Identify</span>
+              <span className="">Identity</span>
             </Link>
           )}
           <Button variant="ghost" size="icon" className="shrink-0" onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}>
@@ -139,7 +139,7 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
                   <div className="h-6 w-6 bg-foreground rounded-md flex items-center justify-center">
                     <span className="text-background font-bold text-xs leading-none">I</span>
                   </div>
-                  <span>Identify</span>
+                  <span>Identity</span>
                 </Link>
                 {navigation.map((item) => (
                   <Link

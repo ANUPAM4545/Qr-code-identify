@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 async function run() {
-  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/qr-code-identify";
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/identity_db";
   const client = new MongoClient(uri);
   try {
     await client.connect();

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Identify — Enterprise Event Management Platform
+# Identity — Enterprise Event Management Platform
 
 **The complete attendee lifecycle platform. QR ticketing, live scanning, real-time analytics, and guest CRM in one production-grade SaaS.**
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-**Identify** is a commercial-grade, multi-tenant SaaS platform for enterprise event management. It handles the complete attendee lifecycle — from public registration and CRM sync to live QR scanning and real-time analytics dashboards.
+**Identity** is a commercial-grade, multi-tenant SaaS platform for enterprise event management. It handles the complete attendee lifecycle — from public registration and CRM sync to live QR scanning and real-time analytics dashboards.
 
 Built with a Clean Architecture pattern on Next.js 15 App Router, it is designed to scale from a 50-person private dinner to a 50,000-seat conference.
 
@@ -69,7 +69,7 @@ src/
 graph TD
     Client[Web Browser / Scanner App] -->|HTTPS| Next[Next.js App Router]
 
-    subgraph Identify Platform
+    subgraph Identity Platform
         Next --> Auth[Auth.js / NextAuth]
         Next --> API[API Routes]
         API --> AppLayer[Application Services]

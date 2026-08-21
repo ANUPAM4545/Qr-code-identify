@@ -58,7 +58,7 @@ export const BatchDownloadEngine = {
     
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Identify_QR_Batch_${new Date().getTime()}.zip`;
+    a.download = `Identity_QR_Batch_${new Date().getTime()}.zip`;
     a.click();
     
     URL.revokeObjectURL(url);
@@ -132,6 +132,6 @@ export const BatchDownloadEngine = {
       currentItem++;
     }
 
-    pdf.save(`Identify_QR_Batch_${new Date().getTime()}.pdf`);
+    pdf.save(`Identity_QR_Batch_${new Date().getTime()}.pdf`);
   }
 };

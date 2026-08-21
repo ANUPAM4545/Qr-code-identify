@@ -14,7 +14,15 @@ import {
   CheckCircle2,
   Box,
   User as UserIcon,
-  Layers
+  Layers,
+  QrCode,
+  Sparkles,
+  Ticket,
+  Code,
+  Calendar,
+  Trophy,
+  Globe,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -46,8 +54,81 @@ const MODULE_LABELS: Record<TemplateModule, string> = {
   badge_config: "Badges"
 };
 
+const PRESET_THEMES = [
+  {
+    gradient: "from-cyan-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-cyan-500/25",
+    icon: <Code className="w-4 h-4 text-cyan-400" />,
+    pattern: "bg-[radial-gradient(#22d3ee20_1px,transparent_1px)] bg-[size:14px_14px]"
+  },
+  {
+    gradient: "from-purple-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-purple-500/25",
+    icon: <Sparkles className="w-4 h-4 text-purple-400" />,
+    pattern: "bg-[linear-gradient(to_right,#a855f715_1px,transparent_1px),linear-gradient(to_bottom,#a855f715_1px,transparent_1px)] bg-[size:16px_16px]"
+  },
+  {
+    gradient: "from-amber-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-amber-500/25",
+    icon: <Trophy className="w-4 h-4 text-amber-400" />,
+    pattern: "bg-[radial-gradient(#f59e0b20_1px,transparent_1px)] bg-[size:12px_12px]"
+  },
+  {
+    gradient: "from-emerald-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-emerald-500/25",
+    icon: <Calendar className="w-4 h-4 text-emerald-400" />,
+    pattern: "bg-[linear-gradient(to_right,#10b98115_1px,transparent_1px),linear-gradient(to_bottom,#10b98115_1px,transparent_1px)] bg-[size:18px_18px]"
+  },
+  {
+    gradient: "from-indigo-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-indigo-500/25",
+    icon: <Ticket className="w-4 h-4 text-indigo-400" />,
+    pattern: "bg-[radial-gradient(#6366f120_1px,transparent_1px)] bg-[size:16px_16px]"
+  },
+  {
+    gradient: "from-rose-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-rose-500/25",
+    icon: <Globe className="w-4 h-4 text-rose-400" />,
+    pattern: "bg-[linear-gradient(to_right,#f43f5e15_1px,transparent_1px),linear-gradient(to_bottom,#f43f5e15_1px,transparent_1px)] bg-[size:14px_14px]"
+  },
+  {
+    gradient: "from-blue-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-blue-500/25",
+    icon: <Layers className="w-4 h-4 text-blue-400" />,
+    pattern: "bg-[radial-gradient(#3b82f620_1px,transparent_1px)] bg-[size:14px_14px]"
+  },
+  {
+    gradient: "from-orange-950/90 via-zinc-900 to-black",
+    accentGlow: "bg-orange-500/25",
+    icon: <Zap className="w-4 h-4 text-orange-400" />,
+    pattern: "bg-[linear-gradient(to_right,#f9731615_1px,transparent_1px),linear-gradient(to_bottom,#f9731615_1px,transparent_1px)] bg-[size:16px_16px]"
+  }
+];
+
+function stringToHash(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+const getCategoryGraphic = (category?: string, name?: string, id?: string) => {
+  const hashStr = `${id || ""}_${name || ""}_${category || ""}`;
+  const hash = stringToHash(hashStr);
+  const theme = PRESET_THEMES[hash % PRESET_THEMES.length];
+  const tagText = (category && category !== "custom" ? category : (name || "EVENT TEMPLATE")).toUpperCase();
+
+  return {
+    ...theme,
+    tag: tagText
+  };
+};
+
 export const TemplateCard = React.memo(function TemplateCard({ template, onAction, isActionPending }: TemplateCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const graphic = getCategoryGraphic(template.category, template.name, template._id as string);
 
   return (
     <motion.div 
@@ -67,9 +148,34 @@ export const TemplateCard = React.memo(function TemplateCard({ template, onActio
             className="object-cover transition-transform duration-500 group-hover:scale-105" 
           />
         ) : (
-          <div className="flex flex-col items-center justify-center text-muted-foreground opacity-50">
-            <ImageIcon className="h-10 w-10 mb-2" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">{template.category}</span>
+          <div className={`w-full h-full bg-gradient-to-br ${graphic.gradient} relative flex items-center justify-center p-4 overflow-hidden transition-transform duration-500 group-hover:scale-105 select-none`}>
+            {/* Ambient Background Glow & Grid */}
+            <div className={`absolute w-36 h-36 rounded-full ${graphic.accentGlow} blur-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none`} />
+            <div className={`absolute inset-0 ${graphic.pattern} pointer-events-none`} />
+
+            {/* Stylized Floating Event Card Graphic */}
+            <div className="w-full max-w-[220px] bg-zinc-900/90 backdrop-blur-md rounded-xl border border-white/15 p-3.5 shadow-xl flex flex-col gap-2 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-white/10 border border-white/10">
+                    {graphic.icon}
+                  </div>
+                  <span className="text-[9px] font-mono tracking-widest text-zinc-400 uppercase font-bold truncate max-w-[120px]">
+                    {graphic.tag}
+                  </span>
+                </div>
+                <QrCode className="w-3.5 h-3.5 text-zinc-500 opacity-60 shrink-0" />
+              </div>
+
+              <div className="pt-1.5 border-t border-white/10 flex items-center justify-between">
+                <span className="text-xs font-bold text-white tracking-tight line-clamp-1">
+                  {template.name}
+                </span>
+                <span className="text-[9px] font-mono text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/10 shrink-0">
+                  IDENTITY
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

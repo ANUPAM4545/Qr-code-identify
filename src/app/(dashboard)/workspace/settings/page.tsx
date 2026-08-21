@@ -59,7 +59,7 @@ export default async function WorkspaceSettingsPage() {
           <div className="flex flex-col">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">{activeWorkspace.name}</h1>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1.5">
-              <span>identify.com/{activeWorkspace.slug}</span>
+              <span>identity.com/{activeWorkspace.slug}</span>
               <span className="text-border/50">•</span>
               <span>Owned by {ownerUser?.name || "Unknown"}</span>
               <span className="text-border/50">•</span>

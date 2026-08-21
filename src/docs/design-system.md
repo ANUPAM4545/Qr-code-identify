@@ -1,6 +1,6 @@
 # Design System
 
-The Identify design system is characterized as **Monochrome Premium SaaS**.
+The Identity design system is characterized as **Monochrome Premium SaaS**.
 
 ## Core Tenets
 - **Colors**: Strictly Black, White, and Grays (`oklch` scale). Semantic colors are restricted solely to danger/success indicators.

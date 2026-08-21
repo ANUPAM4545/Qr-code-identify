@@ -4,7 +4,7 @@ async function start() {
   const mongod = await MongoMemoryServer.create({
     instance: {
       port: 27017,
-      dbName: 'identify_db'
+      dbName: 'identity_db'
     }
   });
   const uri = mongod.getUri();

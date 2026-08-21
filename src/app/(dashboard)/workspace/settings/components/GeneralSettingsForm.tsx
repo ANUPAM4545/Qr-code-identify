@@ -60,7 +60,7 @@ export function GeneralSettingsForm({ workspace }: GeneralSettingsFormProps) {
           <Label htmlFor="slug" className="text-sm font-medium text-foreground">Workspace Slug</Label>
           <div className="flex max-w-md rounded-lg overflow-hidden border border-zinc-200 focus-within:ring-1 focus-within:ring-zinc-900 focus-within:border-zinc-900 transition-all">
             <span className="flex items-center px-3 bg-zinc-50 border-r border-zinc-200 text-sm text-zinc-500 font-medium whitespace-nowrap">
-              https://identify.com/
+              https://identity.com/
             </span>
             <input 
               id="slug" 

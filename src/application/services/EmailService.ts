@@ -31,7 +31,7 @@ export class EmailService {
 
     try {
       await transporter.sendMail({
-        from: `"Identify Event System" <${process.env.SMTP_USER}>`,
+        from: `"Identity Event System" <${process.env.SMTP_USER}>`,
         to,
         subject,
         html,

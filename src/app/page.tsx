@@ -13,19 +13,19 @@ import { CTA } from "@/features/landing/components/CTA";
 import { SiteFooter } from "@/features/landing/components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Identify | Enterprise Event Management",
+  title: "Identity | Enterprise Event Management",
   description: "A premium SaaS platform for managing events, registrations, QR codes, guests, check-ins, scanners, and analytics.",
   openGraph: {
-    title: "Identify | Enterprise Event Management",
+    title: "Identity | Enterprise Event Management",
     description: "A premium SaaS platform for managing events, registrations, QR codes, guests, check-ins, scanners, and analytics.",
-    url: "https://identify.com",
-    siteName: "Identify",
+    url: "https://identity.com",
+    siteName: "Identity",
     images: [
       {
-        url: "https://identify.com/og-image.jpg",
+        url: "https://identity.com/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Identify Platform",
+        alt: "Identity Platform",
       },
     ],
     locale: "en_US",
@@ -33,12 +33,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Identify | Enterprise Event Management",
+    title: "Identity | Enterprise Event Management",
     description: "Premium enterprise event management platform.",
-    images: ["https://identify.com/og-image.jpg"],
+    images: ["https://identity.com/og-image.jpg"],
   },
   alternates: {
-    canonical: "https://identify.com",
+    canonical: "https://identity.com",
   },
 };
 
@@ -46,11 +46,11 @@ export default function LandingPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Identify",
+    "name": "Identity",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "description": "Premium enterprise event management platform.",
-    "url": "https://identify.com",
+    "url": "https://identity.com",
     "offers": {
       "@type": "Offer",
       "price": "0",

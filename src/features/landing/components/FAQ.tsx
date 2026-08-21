@@ -13,19 +13,19 @@ export function FAQ() {
   const faqs = [
     {
       question: "How does the White-label Branding work?",
-      answer: "You can fully customize the look and feel of event pages and guest tickets. Upload your custom logo, select your brand colors, and deliver a seamless, premium experience to your attendees without any Identify branding."
+      answer: "You can fully customize the look and feel of event pages and guest tickets. Upload your custom logo, select your brand colors, and deliver a seamless, premium experience to your attendees without any Identity branding."
     },
     {
       question: "Can I manage multiple events simultaneously?",
-      answer: "Yes. Identify is built on a multi-event architecture with strict Workspace Isolation, allowing agencies and teams to manage, track, and analyze dozens of events concurrently from a single unified workspace."
+      answer: "Yes. Identity is built on a multi-event architecture with strict Workspace Isolation, allowing agencies and teams to manage, track, and analyze dozens of events concurrently from a single unified workspace."
     },
     {
       question: "What level of access control is available?",
-      answer: "Identify supports strict Role-Based Access Control. You can assign specific roles (Owner, Manager, Viewer) to team members, ensuring they only have access to the specific event data and modules they need."
+      answer: "Identity supports strict Role-Based Access Control. You can assign specific roles (Owner, Manager, Viewer) to team members, ensuring they only have access to the specific event data and modules they need."
     },
     {
       question: "Are the generated QR codes dynamic or static?",
-      answer: "Identify uses a powerful Dynamic QR Engine. This means you can update the destination URL or ticket metadata even after the QR codes have been printed or distributed, without needing to generate new ones."
+      answer: "Identity uses a powerful Dynamic QR Engine. This means you can update the destination URL or ticket metadata even after the QR codes have been printed or distributed, without needing to generate new ones."
     },
     {
       question: "Is the analytics dashboard real-time?",
