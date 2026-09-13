@@ -19,7 +19,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "a_very_secret_key_12345",
-  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "dummy",
@@ -108,6 +107,13 @@ export const authOptions = {
         }
       }
       return true;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: any) {
+      if (user?.id) {
+        token.sub = user.id;
+      }
+      return token;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, token }: any) {
