@@ -10,7 +10,10 @@ export default withAuth(
       req.nextUrl.pathname.startsWith("/signup");
 
     if (isAuthPage) {
-      return null;
+      if (isAuth) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
+      return NextResponse.next();
     }
 
     if (!isAuth) {
@@ -20,6 +23,8 @@ export default withAuth(
       }
       return NextResponse.redirect(new URL(`/login?from=${encodeURIComponent(from)}`, req.url));
     }
+
+    return NextResponse.next();
   },
   {
     callbacks: {
@@ -34,7 +39,5 @@ export const config = {
     "/onboarding/:path*",
     "/workspace/:path*",
     "/profile/:path*",
-    "/login",
-    "/signup",
   ],
 };

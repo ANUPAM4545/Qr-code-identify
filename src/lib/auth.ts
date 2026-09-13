@@ -18,6 +18,7 @@ declare module "next-auth" {
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "a_very_secret_key_12345",
   adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
@@ -61,6 +62,53 @@ export const authOptions = {
     signIn: "/login",
   },
   callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async signIn({ user, account }: any) {
+      if (account?.provider === "google" && user?.email) {
+        try {
+          const client = await clientPromise;
+          const db = client.db();
+          const users = db.collection("users");
+          const accounts = db.collection("accounts");
+
+          let dbUser = await users.findOne({ email: user.email });
+          if (!dbUser) {
+            const res = await users.insertOne({
+              name: user.name || user.email.split("@")[0],
+              email: user.email,
+              image: user.image || null,
+              emailVerified: new Date(),
+            });
+            dbUser = await users.findOne({ _id: res.insertedId });
+          }
+
+          if (dbUser) {
+            user.id = dbUser._id.toString();
+            const existingAccount = await accounts.findOne({
+              provider: "google",
+              providerAccountId: account.providerAccountId,
+            });
+
+            if (!existingAccount) {
+              await accounts.insertOne({
+                userId: dbUser._id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token || null,
+                expires_at: account.expires_at || null,
+                token_type: account.token_type || null,
+                scope: account.scope || null,
+                id_token: account.id_token || null,
+              });
+            }
+          }
+        } catch (err) {
+          console.error("Error in Google signIn callback:", err);
+        }
+      }
+      return true;
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, token }: any) {
       if (session.user && token.sub) {
