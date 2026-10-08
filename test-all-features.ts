@@ -10,6 +10,7 @@ import { QRService } from "./src/application/services/QRService";
 import { ScannerService } from "./src/application/services/ScannerService";
 import { AnalyticsService } from "./src/application/services/AnalyticsService";
 import { getActiveWorkspaceData } from "./src/lib/workspace";
+import { FormField, Membership } from "./src/domain/types";
 
 async function main() {
   console.log("==================================================");
@@ -38,7 +39,6 @@ async function main() {
     const user = await userRepository.create({
       name: "Enterprise Admin",
       email: testEmail.toLowerCase(),
-      emailVerified: new Date(),
     });
     const userId = user._id as string;
     record("2. User Account Creation", !!userId, `User ID: ${userId}`);
@@ -56,7 +56,7 @@ async function main() {
 
     // Verify Owner Membership
     const memberships = await membershipRepository.findByUserId(userId);
-    const isOwner = memberships.some(m => m.workspaceId === workspaceId && m.role === "owner");
+    const isOwner = memberships.some((m: Membership) => m.workspaceId === workspaceId && m.role === "owner");
     record("4. Workspace RBAC Membership", isOwner, "Owner role assigned");
 
     // Verify Active Workspace Resolution (Cross-Device Sync Logic)
@@ -117,9 +117,9 @@ async function main() {
 
     // Simulate Public Registration Form Submission (POST /api/r/[slug])
     const answers: Record<string, unknown> = {};
-    const firstNameField = form.fields.find(f => f.label.toLowerCase().includes("first"));
-    const lastNameField = form.fields.find(f => f.label.toLowerCase().includes("last"));
-    const emailField = form.fields.find(f => f.label.toLowerCase().includes("email"));
+    const firstNameField = form.fields.find((f: FormField) => f.label.toLowerCase().includes("first"));
+    const lastNameField = form.fields.find((f: FormField) => f.label.toLowerCase().includes("last"));
+    const emailField = form.fields.find((f: FormField) => f.label.toLowerCase().includes("email"));
     
     if (firstNameField) answers[firstNameField.id] = "Alice";
     if (lastNameField) answers[lastNameField.id] = "Smith";
@@ -139,23 +139,26 @@ async function main() {
       firstName: "David",
       lastName: "Miller",
       email: "david.miller@acme.com",
-      status: "confirmed",
-      vipStatus: true,
-      ticketTier: "VIP All-Access"
+      status: "approved",
+      notes: "VIP All-Access"
     });
     const guestId = guest._id as string;
     record("13. Guest CRM Creation", !!guestId, `Guest: ${guest.firstName} ${guest.lastName}`);
 
     // Generate QR Code for Guest
-    const qrCode = await QRService.createQR(userId, workspaceId, eventId, `Badge: David Miller`, {
-      content: `https://identity.com/scan?guestId=${guestId}&eventId=${eventId}`,
-      type: "guest_badge",
-      design: {
-        fgColor: "#111827",
-        bgColor: "#ffffff",
-        style: "squares"
-      }
-    });
+    const qrPayload = `https://identity.com/scan?guestId=${guestId}&eventId=${eventId}`;
+    const qrCode = await QRService.createQR(
+      userId,
+      workspaceId,
+      eventId,
+      `Badge: David Miller`,
+      {
+        dotsOptions: { type: "square", color: "#111827" },
+        backgroundOptions: { color: "#ffffff" },
+      },
+      true,
+      qrPayload
+    );
     const qrId = qrCode._id as string;
     record("14. Enterprise QR Studio Generation", !!qrId, `QR Code ID: ${qrId}`);
 
@@ -169,7 +172,7 @@ async function main() {
       workspaceId,
       eventId,
       userId,
-      { guestId, qrData: qrCode.content },
+      { guestId, qrData: qrCode.destinationUrl },
       "in",
       "Main Entrance Gate A",
       "Mobile Terminal"
@@ -181,7 +184,7 @@ async function main() {
       workspaceId,
       eventId,
       userId,
-      { guestId, qrData: qrCode.content },
+      { guestId, qrData: qrCode.destinationUrl },
       "in",
       "Main Entrance Gate A",
       "Mobile Terminal"
