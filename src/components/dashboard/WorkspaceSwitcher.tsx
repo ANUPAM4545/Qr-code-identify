@@ -18,12 +18,23 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspace, isSidebarCollap
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const handleSelect = (workspaceId: string) => {
-    // Set a cookie to remember the active workspace
-    document.cookie = `active-workspace-id=${workspaceId}; path=/; max-age=31536000`; // 1 year
+  const handleSelect = async (workspaceId: string) => {
+    // Set cookie to remember the active workspace
+    document.cookie = `active-workspace-id=${workspaceId}; path=/; max-age=31536000; SameSite=Lax`;
     setOpen(false);
     
-    // Hard refresh to reload layout with new active workspace
+    // Also persist to backend so other devices (e.g. phone) stay synced with this workspace
+    try {
+      await fetch("/api/workspaces/active", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId }),
+      });
+    } catch (e) {
+      console.error("Failed to persist active workspace to backend:", e);
+    }
+    
+    // Reload dashboard with new active workspace
     window.location.href = "/dashboard";
   };
 

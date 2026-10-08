@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -31,6 +31,21 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Ensure active-workspace-id cookie is always synced across mobile and desktop
+  useEffect(() => {
+    if (workspace?._id) {
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(";").shift();
+        return null;
+      };
+      if (getCookie("active-workspace-id") !== workspace._id) {
+        document.cookie = `active-workspace-id=${workspace._id}; path=/; max-age=31536000; SameSite=Lax`;
+      }
+    }
+  }, [workspace]);
 
   const defaultNavigation = useMemo(() => [
     { name: "Overview", href: "/dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -132,33 +147,66 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle Menu</span>
             </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <nav className="grid gap-6 text-lg font-medium mt-6">
-                <Link href="/" className="flex items-center gap-2 font-semibold">
+            <SheetContent side="left" className="sm:max-w-xs flex flex-col justify-between">
+              <div>
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <div className="flex items-center gap-2 font-semibold pb-4 border-b border-border/50">
                   <div className="h-6 w-6 bg-foreground rounded-md flex items-center justify-center">
                     <span className="text-background font-bold text-xs leading-none">I</span>
                   </div>
                   <span>Identity</span>
-                </Link>
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-4 px-2.5 ${
-                      pathname === item.href ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <span className="[&>svg]:w-5 [&>svg]:h-5">{item.icon}</span>
-                    {item.name}
-                  </Link>
-                ))}
-              </nav>
+                </div>
+
+                {/* Mobile Workspace Switcher */}
+                <div className="py-4 border-b border-border/50">
+                  <WorkspaceSwitcher 
+                    workspaces={workspaces} 
+                    activeWorkspace={workspace} 
+                    isSidebarCollapsed={false} 
+                  />
+                </div>
+
+                <nav className="grid gap-2 text-sm font-medium mt-4">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        pathname === item.href ? "bg-muted text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <span className="[&>svg]:w-4 [&>svg]:h-4">{item.icon}</span>
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
+              <div className="pt-4 border-t border-border/50 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9 shrink-0 border border-border/50">
+                    <AvatarImage src={user.image || ""} />
+                    <AvatarFallback>{user.name?.substring(0, 1) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col truncate">
+                    <span className="text-sm font-medium truncate">{user.name}</span>
+                    <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+                  </div>
+                </div>
+                <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4 shrink-0" />
+                  Sign out
+                </Button>
+              </div>
             </SheetContent>
           </Sheet>
           
-          <div className="flex-1"></div>
+          <div className="flex-1 flex items-center min-w-0">
+            <span className="text-sm font-semibold truncate sm:hidden text-foreground">
+              {workspace.name}
+            </span>
+          </div>
 
           <div className="sm:hidden">
             <Avatar className="h-8 w-8">
