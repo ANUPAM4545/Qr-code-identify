@@ -35,12 +35,15 @@ export const authOptions = {
         if (!credentials?.email) return null;
         const client = await clientPromise;
         const users = client.db().collection("users");
+        const email = credentials.email.trim().toLowerCase();
         
-        let user = await users.findOne({ email: credentials.email });
+        let user = await users.findOne({ 
+          email: { $regex: new RegExp(`^${email}$`, "i") } 
+        });
         if (!user) {
           const res = await users.insertOne({ 
-            email: credentials.email, 
-            name: credentials.email.split('@')[0],
+            email: email, 
+            name: email.split('@')[0],
             emailVerified: new Date()
           });
           user = await users.findOne({ _id: res.insertedId });
@@ -69,12 +72,15 @@ export const authOptions = {
           const db = client.db();
           const users = db.collection("users");
           const accounts = db.collection("accounts");
+          const email = user.email.trim().toLowerCase();
 
-          let dbUser = await users.findOne({ email: user.email });
+          let dbUser = await users.findOne({ 
+            email: { $regex: new RegExp(`^${email}$`, "i") } 
+          });
           if (!dbUser) {
             const res = await users.insertOne({
-              name: user.name || user.email.split("@")[0],
-              email: user.email,
+              name: user.name || email.split("@")[0],
+              email: email,
               image: user.image || null,
               emailVerified: new Date(),
             });
@@ -109,8 +115,43 @@ export const authOptions = {
       return true;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: any) {
-      if (user?.id) {
+    async jwt({ token, user, account }: any) {
+      if (token?.email) {
+        try {
+          const client = await clientPromise;
+          const db = client.db();
+          const email = token.email.trim().toLowerCase();
+          
+          let dbUser = await db.collection("users").findOne({
+            email: { $regex: new RegExp(`^${email}$`, "i") }
+          });
+          
+          if (!dbUser && token.name) {
+            const res = await db.collection("users").insertOne({
+              name: token.name,
+              email: email,
+              image: token.picture || null,
+              emailVerified: new Date(),
+            });
+            dbUser = await db.collection("users").findOne({ _id: res.insertedId });
+          }
+
+          if (dbUser) {
+            const userIdStr = dbUser._id.toString();
+            token.sub = userIdStr;
+
+            // Link any legacy memberships previously saved with Google sub/providerAccountId
+            if (account?.providerAccountId) {
+              await db.collection("memberships").updateMany(
+                { userId: account.providerAccountId },
+                { $set: { userId: userIdStr } }
+              );
+            }
+          }
+        } catch (err) {
+          console.error("Error syncing user in jwt callback:", err);
+        }
+      } else if (user?.id) {
         token.sub = user.id;
       }
       return token;
