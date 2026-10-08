@@ -33,6 +33,18 @@ export class WorkspaceService {
       role: "owner",
     });
 
+    // Also update user's lastActiveWorkspaceId in database
+    try {
+      const client = await (await import("@/infrastructure/db")).default;
+      const { ObjectId } = await import("mongodb");
+      const userQuery: Record<string, unknown> = ObjectId.isValid(userId)
+        ? { $or: [{ _id: new ObjectId(userId) }, { _id: userId }] }
+        : { _id: userId };
+      await client.db().collection("users").updateOne(userQuery, {
+        $set: { lastActiveWorkspaceId: workspaceId }
+      });
+    } catch {}
+
     // 4. Provision Default Settings
     await workspaceSettingsRepository.create({
       workspaceId,
