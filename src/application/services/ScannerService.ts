@@ -113,6 +113,18 @@ export class ScannerService {
       };
     }
 
+    // Check for duplicate entry
+    if (direction === "in" && guest.status === "checked_in") {
+      const lastCheckIn = guest.checkIns?.slice().reverse().find(c => c.direction === "in");
+      const timeStr = lastCheckIn?.timestamp ? new Date(lastCheckIn.timestamp).toLocaleTimeString() : "earlier";
+      return {
+        success: false,
+        status: "duplicate",
+        reason: `Duplicate Scan: Attendee already checked in at ${timeStr}.`,
+        guest
+      };
+    }
+
     // Log metrics for analytics charts
     await ScannerService.logScanMetrics(guest.qrCodeId || finalGuestId, eventId, workspaceId, device);
 

@@ -85,6 +85,33 @@ export default function CreateEventPage() {
     }
   }, [eventName, form]);
 
+  const resolveWorkspaceId = async () => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    let workspaceId = getCookie("active-workspace-id");
+    if (!workspaceId) {
+      try {
+        const res = await fetch("/api/workspaces");
+        if (res.ok) {
+          const wsList = await res.json();
+          if (Array.isArray(wsList) && wsList.length > 0) {
+            workspaceId = wsList[0].id || wsList[0]._id;
+            if (workspaceId) {
+              document.cookie = `active-workspace-id=${workspaceId}; path=/; max-age=31536000; SameSite=Lax`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch fallback workspace:", e);
+      }
+    }
+    return workspaceId;
+  };
+
   const saveDraft = async (showToast = true) => {
     try {
       if (!values.name || !values.slug || !values.date || !values.endDate) {
@@ -93,13 +120,7 @@ export default function CreateEventPage() {
       }
 
       if (showToast) setIsSaving(true);
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-        return null;
-      };
-      const workspaceId = getCookie("active-workspace-id");
+      const workspaceId = await resolveWorkspaceId();
 
       if (!workspaceId) return null;
 
@@ -168,13 +189,7 @@ export default function CreateEventPage() {
     } else {
       // Final submission
       try {
-        const getCookie = (name: string) => {
-          const value = `; ${document.cookie}`;
-          const parts = value.split(`; ${name}=`);
-          if (parts.length === 2) return parts.pop()?.split(';').shift();
-          return null;
-        };
-        const workspaceId = getCookie("active-workspace-id");
+        const workspaceId = await resolveWorkspaceId();
 
         if (!workspaceId) {
           toast.error("Active workspace not found. Please refresh.");
