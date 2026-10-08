@@ -86,6 +86,18 @@ export default function CreateEventPage() {
   }, [eventName, form]);
 
   const resolveWorkspaceId = async () => {
+    try {
+      const res = await fetch("/api/workspaces/active");
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.data?.activeWorkspace?._id) {
+          const wsId = json.data.activeWorkspace._id.toString();
+          document.cookie = `active-workspace-id=${wsId}; path=/; max-age=31536000; SameSite=Lax`;
+          return wsId;
+        }
+      }
+    } catch {}
+
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);

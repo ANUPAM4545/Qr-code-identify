@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
 
-  const { activeWorkspace } = await getActiveWorkspaceData(session.user.id);
+  const { activeWorkspace, validWorkspaces } = await getActiveWorkspaceData(session.user.id);
   if (!activeWorkspace) return null;
 
   const eventsResult = await EventService.getEvents(session.user.id, activeWorkspace._id as string, { limit: 6 });
@@ -38,9 +38,19 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-        <p className="text-muted-foreground mt-1">Welcome back to {activeWorkspace.name}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
+          <p className="text-muted-foreground mt-1">
+            Welcome back to <span className="font-semibold text-foreground">{activeWorkspace.name}</span>
+          </p>
+        </div>
+        {validWorkspaces.length > 1 && (
+          <div className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-background border border-border/60 rounded-full px-3 py-1.5 shadow-xs w-fit">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Active Workspace: <strong className="text-foreground">{activeWorkspace.name}</strong></span>
+          </div>
+        )}
       </div>
 
       {events.length === 0 ? (

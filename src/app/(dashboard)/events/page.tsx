@@ -15,7 +15,9 @@ export default async function EventsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Events</h1>
-          <p className="text-muted-foreground mt-1">Manage and track your operational events.</p>
+          <p className="text-muted-foreground mt-1">
+            Manage and track operational events in <span className="font-semibold text-foreground">{activeWorkspace.name}</span>.
+          </p>
         </div>
       </div>
       

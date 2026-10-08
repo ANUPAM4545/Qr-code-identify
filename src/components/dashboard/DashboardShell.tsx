@@ -202,10 +202,13 @@ export function DashboardShell({ children, user, workspace, workspaces = [], nav
             </SheetContent>
           </Sheet>
           
-          <div className="flex-1 flex items-center min-w-0">
-            <span className="text-sm font-semibold truncate sm:hidden text-foreground">
-              {workspace.name}
-            </span>
+          <div className="flex-1 flex items-center min-w-0 sm:hidden">
+            <WorkspaceSwitcher 
+              workspaces={workspaces} 
+              activeWorkspace={workspace} 
+              isSidebarCollapsed={false}
+              className="h-9 w-full max-w-[210px] text-xs font-medium justify-between px-2.5 bg-background/50 hover:bg-background border-border/60"
+            />
           </div>
 
           <div className="sm:hidden">

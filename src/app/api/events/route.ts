@@ -88,7 +88,25 @@ export async function POST(req: NextRequest) {
       validated.category
     );
 
-    return NextResponse.json(successResponse(event, "Event created successfully"), { status: 201 });
+    // Update user's lastActiveWorkspaceId so creating an event syncs the active workspace across all devices
+    try {
+      const client = await (await import("@/infrastructure/db")).default;
+      const { ObjectId } = await import("mongodb");
+      const userQuery = ObjectId.isValid(session.user.id)
+        ? { $or: [{ _id: new ObjectId(session.user.id) }, { _id: session.user.id }] }
+        : { _id: session.user.id };
+      await client.db().collection("users").updateOne(userQuery, {
+        $set: { lastActiveWorkspaceId: validated.workspaceId, updatedAt: new Date() }
+      });
+    } catch {}
+
+    const response = NextResponse.json(successResponse(event, "Event created successfully"), { status: 201 });
+    response.cookies.set("active-workspace-id", validated.workspaceId, {
+      path: "/",
+      maxAge: 31536000,
+      sameSite: "lax",
+    });
+    return response;
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(errorResponse("Validation Error", error.errors), { status: 400 });

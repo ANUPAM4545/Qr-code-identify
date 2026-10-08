@@ -11,19 +11,20 @@ import { Workspace } from "@/domain/types";
 interface WorkspaceSwitcherProps {
   workspaces: Workspace[];
   activeWorkspace: Workspace;
-  isSidebarCollapsed: boolean;
+  isSidebarCollapsed?: boolean;
+  className?: string;
 }
 
-export function WorkspaceSwitcher({ workspaces, activeWorkspace, isSidebarCollapsed }: WorkspaceSwitcherProps) {
+export function WorkspaceSwitcher({ workspaces, activeWorkspace, isSidebarCollapsed = false, className }: WorkspaceSwitcherProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const handleSelect = async (workspaceId: string) => {
-    // Set cookie to remember the active workspace
+    // Set cookie to remember the active workspace immediately
     document.cookie = `active-workspace-id=${workspaceId}; path=/; max-age=31536000; SameSite=Lax`;
     setOpen(false);
     
-    // Also persist to backend so other devices (e.g. phone) stay synced with this workspace
+    // Persist to backend MongoDB so phone and laptop stay 100% in sync
     try {
       await fetch("/api/workspaces/active", {
         method: "POST",
@@ -34,8 +35,12 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspace, isSidebarCollap
       console.error("Failed to persist active workspace to backend:", e);
     }
     
-    // Reload dashboard with new active workspace
-    window.location.href = "/dashboard";
+    // Refresh view
+    if (window.location.pathname.startsWith("/events/") && window.location.pathname !== "/events/create") {
+      window.location.href = "/events";
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
@@ -44,7 +49,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspace, isSidebarCollap
         <Button 
           variant="outline" 
           role="combobox" 
-          className={`w-full h-10 font-normal ${isSidebarCollapsed ? "px-0 justify-center" : "justify-between px-3"}`}
+          className={className || `w-full h-10 font-normal ${isSidebarCollapsed ? "px-0 justify-center" : "justify-between px-3"}`}
         />
       }>
         <div className="flex items-center gap-2 truncate">

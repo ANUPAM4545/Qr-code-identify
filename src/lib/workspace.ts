@@ -16,6 +16,23 @@ export async function getActiveWorkspaceData(userId: string): Promise<{
     return { memberships: [], activeMembership: null, activeWorkspace: null, validWorkspaces: [] };
   }
 
+  // 1. Check database for canonical lastActiveWorkspaceId (cross-device source of truth)
+  let dbLastActiveWorkspaceId: string | undefined;
+  try {
+    const client = await clientPromise;
+    let userQuery: Record<string, unknown> = { _id: userId };
+    if (ObjectId.isValid(userId)) {
+      userQuery = { $or: [{ _id: new ObjectId(userId) }, { _id: userId }] };
+    }
+    const dbUser = await client.db().collection("users").findOne(userQuery);
+    if (dbUser?.lastActiveWorkspaceId) {
+      dbLastActiveWorkspaceId = dbUser.lastActiveWorkspaceId.toString();
+    }
+  } catch (e) {
+    console.error("Error retrieving user lastActiveWorkspaceId:", e);
+  }
+
+  // 2. Check cookie (fallback for offline or if DB does not have lastActiveWorkspaceId yet)
   let savedWorkspaceId: string | undefined;
   try {
     const cookieStore = await cookies();
@@ -24,30 +41,30 @@ export async function getActiveWorkspaceData(userId: string): Promise<{
     // Outside Next.js request scope
   }
 
+  // Database lastActiveWorkspaceId takes precedence to keep phone and laptop in perfect sync!
+  // If not found in DB, fallback to cookie savedWorkspaceId, then the first membership.
+  const targetWorkspaceId = dbLastActiveWorkspaceId || savedWorkspaceId;
   let activeMembership = memberships[0];
-  if (savedWorkspaceId) {
-    const found = memberships.find(m => m.workspaceId === savedWorkspaceId);
+
+  if (targetWorkspaceId) {
+    const found = memberships.find(m => m.workspaceId.toString() === targetWorkspaceId);
     if (found) {
       activeMembership = found;
     }
-  } else {
-    // Check if user has a lastActiveWorkspaceId saved in the database
+  }
+
+  // If DB didn't have lastActiveWorkspaceId recorded, persist it now for seamless multi-device sync
+  if (!dbLastActiveWorkspaceId && activeMembership) {
     try {
       const client = await clientPromise;
       let userQuery: Record<string, unknown> = { _id: userId };
       if (ObjectId.isValid(userId)) {
         userQuery = { $or: [{ _id: new ObjectId(userId) }, { _id: userId }] };
       }
-      const dbUser = await client.db().collection("users").findOne(userQuery);
-      if (dbUser?.lastActiveWorkspaceId) {
-        const found = memberships.find(m => m.workspaceId === dbUser.lastActiveWorkspaceId);
-        if (found) {
-          activeMembership = found;
-        }
-      }
-    } catch (e) {
-      console.error("Error retrieving user lastActiveWorkspaceId:", e);
-    }
+      await client.db().collection("users").updateOne(userQuery, {
+        $set: { lastActiveWorkspaceId: activeMembership.workspaceId.toString(), updatedAt: new Date() }
+      });
+    } catch {}
   }
 
   const allWorkspaces = await Promise.all(

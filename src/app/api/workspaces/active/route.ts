@@ -6,6 +6,23 @@ import { membershipRepository } from "@/infrastructure/repositories/MembershipRe
 import { ObjectId } from "mongodb";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
+export const dynamic = "force-dynamic";
+
+export async function GET(_req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(errorResponse("Unauthorized"), { status: 401 });
+    }
+
+    const { getActiveWorkspaceData } = await import("@/lib/workspace");
+    const data = await getActiveWorkspaceData(session.user.id);
+    return NextResponse.json(successResponse(data));
+  } catch (error: unknown) {
+    return NextResponse.json(errorResponse((error as Error).message || "Internal server error"), { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
